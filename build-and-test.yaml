@@ -1,0 +1,79 @@
+name: PR CI (Build & Tests)
+
+on:
+  pull_request:
+    branches: [main, dev]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: pr-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: OCaml Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up OCaml
+        uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: "5.2"        # Change to your target version if needed
+          dune-cache: true
+
+      - name: Cache opam downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.opam/download-cache
+          key: opam-${{ hashFiles('*.opam', 'dune-project') }}
+
+      - name: Install dependencies
+        run: opam install . --deps-only --with-test -y
+
+      - name: Build
+        run: |
+          set -o pipefail
+          opam exec -- dune build 2>&1 | tee build.log
+
+      - name: Run tests
+        run: |
+          set -o pipefail
+          opam exec -- dune test 2>&1 | tee test.log
+
+      - name: Post failure comment on PR
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let buildLog = '';
+            let testLog  = '';
+
+            try { buildLog = fs.readFileSync('build.log', 'utf8').slice(-3000); } catch {}
+            try { testLog  = fs.readFileSync('test.log',  'utf8').slice(-3000); } catch {}
+
+            const body = [
+              '## ❌ CI failed — merge is blocked',
+              '',
+              buildLog ? '### Build output\n```\n' + buildLog + '\n```' : '',
+              testLog  ? '### Test output\n```\n' + testLog  + '\n```' : '',
+              '',
+              '_Fix the errors above, push again, and CI will re-run automatically._',
+            ].filter(Boolean).join('\n');
+
+            await github.rest.issues.createComment({
+              owner:    context.repo.owner,
+              repo:     context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "### CI Result" >> $GITHUB_STEP_SUMMARY
+          echo "OCaml build and tests completed." >> $GITHUB_STEP_SUMMARY
