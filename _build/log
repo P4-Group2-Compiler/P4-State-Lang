@@ -1,6 +1,0 @@
-# dune init project P4
-# OCAMLPARAM: unset
-# Shared cache: enabled-except-user-rules
-# Shared cache location: /home/rutti/.cache/dune/db
-# Workspace root: /home/rutti/ocaml-projects/P4/P4
-# Auto-detected concurrency: 14
