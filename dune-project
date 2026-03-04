@@ -5,22 +5,21 @@
 (generate_opam_files true)
 
 (source
- (github username/reponame))
+ (github P4-Group2-Compiler/P4-State-Lang))
 
-(authors "Author Name <author@example.com>")
+(authors "P4 Group 2")
+(maintainers "P4 Group 2")
 
-(maintainers "Maintainer Name <maintainer@example.com>")
+(license MIT)
 
-(license LICENSE)
-
-(documentation https://url/to/documentation)
+(documentation https://github.com/P4-Group2-Compiler/P4-State-Lang)
 
 (package
  (name P4)
- (synopsis "A short synopsis")
- (description "A longer description")
- (depends ocaml)
- (tags
-  ("add topics" "to describe" your project)))
-
+ (synopsis "State-based DSL compiler")
+ (description "A small compiler/interpreter for a state-based DSL.")
+ (depends
+  (ocaml (>= 4.14))
+  dune)
+ (tags ("compiler" "dsl" "state-machine")))
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/reference/dune-project/index.html
