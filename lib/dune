@@ -1,2 +1,3 @@
 (library
- (name P4))
+ (name P4)
+ (modules test_lexer))

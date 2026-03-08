@@ -20,6 +20,7 @@
  (description "A small compiler/interpreter for a state-based DSL.")
  (depends
   (ocaml (>= 4.14))
-  dune)
+  dune
+  alcotest)
  (tags ("compiler" "dsl" "state-machine")))
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/reference/dune-project/index.html
