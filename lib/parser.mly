@@ -6,8 +6,9 @@
 
 %token EOF
 
+// Remember IDENTIFIER type string (in this case)
 %token STATE
-%token IDENTIFIER
+%token <string> IDENTIFIER
 
 // Grammatical starting point
 %start prog
@@ -18,14 +19,10 @@
 %%
 
 prog:
-state expr EOF
-    { { state = $1; identifier = $2 } }
+state EOF
+    { $1; }
 ;
 
 state:
- | STATE expr       {State $2}
-;
-
-expr:
- | IDENTIFIER       {Identifier}
+ | STATE IDENTIFIER {State $2}
 ;
