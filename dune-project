@@ -1,5 +1,5 @@
 (lang dune 3.21)
-
+(using menhir 3.0)
 (name P4)
 
 (generate_opam_files true)
@@ -21,6 +21,7 @@
  (depends
   (ocaml (>= 4.14))
   dune
-  alcotest)
+  alcotest
+  menhir)
  (tags ("compiler" "dsl" "state-machine")))
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/reference/dune-project/index.html

@@ -11,4 +11,10 @@ type stmt =
 
 
 type expr =
+  | Identifier of string
   | Transition of state * stmt * state (* (State, Event -> State') *)
+
+type program = {
+  state : state;
+  identifier : expr;
+}
