@@ -27,16 +27,16 @@ type expr =
   | Identifier of string
   | Transition of state * stmt * state (* (State, Event -> State') *) *)
 type event =
- | Event of string
+  | Event of string
 
 
 type transition =
- | Transition of event * string
-
+  | Transition of event * string
+  | Tblock of transition list
 
 type state = {
     name : string; (*state B {}*) (*= State of string*)
-    transitions : transition list; (*state B{ON open GO A}*)
+    transitions : transition; (*state B{ON open GO A}*)
 }
 
 type program = {

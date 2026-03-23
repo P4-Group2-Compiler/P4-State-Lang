@@ -28,14 +28,18 @@ prog:
 state EOF
     { $1; }
 ;
-transition:
-| ON event GO string { Transition $2 $4 }
+
+
+
 
 transitions:
-| {[]}
+  {[]}
 | transitions transition { $1 @ [$2] }
 ;
 
+transition:
+| ON IDENTIFIER GO IDENTIFIER { Transition ($2, $4) }
+;
 
 state:
   | STATE IDENTIFIER LEFTTUBORG TRANSITIONS RIGHTTUBORG {{ name : $2; transitions : $4 }}
