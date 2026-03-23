@@ -9,7 +9,12 @@
 // Remember IDENTIFIER type string (in this case)
 %token STATE
 %token <string> IDENTIFIER
-%token BINSTATE
+%token TRANSITIONS
+%token ON
+%token GO
+
+// Punctuators
+%token LEFTTUBORG RIGHTTUBORG (* '{' and '}' *)
 
 // Grammatical starting point
 %start prog
@@ -23,7 +28,15 @@ prog:
 state EOF
     { $1; }
 ;
+transition:
+| ON event GO string { Transition $2 $4 }
+
+transitions:
+| {[]}
+| transitions transition { $1 @ [$2] }
+;
+
 
 state:
-  | STATE BINSTATE IDENTIFIER { State $2 $3 }
+  | STATE IDENTIFIER LEFTTUBORG TRANSITIONS RIGHTTUBORG {{ name : $2; transitions : $4 }}
 ;

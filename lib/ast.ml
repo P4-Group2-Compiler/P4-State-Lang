@@ -39,11 +39,6 @@ type state = {
     transitions : transition list; (*state B{ON open GO A}*)
 }
 
-
-
-
-
-
 type program = {
   states : state list;
 }
