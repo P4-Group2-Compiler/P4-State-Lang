@@ -9,6 +9,7 @@
 // Remember IDENTIFIER type string (in this case)
 %token STATE
 %token <string> IDENTIFIER
+%token BINSTATE
 
 // Grammatical starting point
 %start prog
@@ -24,5 +25,5 @@ state EOF
 ;
 
 state:
- | STATE IDENTIFIER {State $2}
+  | STATE BINSTATE IDENTIFIER { State $2 $3 }
 ;
