@@ -14,6 +14,7 @@ rule token = parse
     | [' ' '\t' '\n']                       { token lexbuf }
 
     (* Keywords *)
+    | "Statemachine"                        { STATEMACHINE }
     | "State"                               { STATE }
     | "ON"                                  { ON }
     | "GO"                                  { GO }

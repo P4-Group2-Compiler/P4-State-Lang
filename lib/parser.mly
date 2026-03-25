@@ -12,12 +12,10 @@
 %token <string> IDENTIFIER
 
 // Keywords
+%token STATEMACHINE
 %token STATE
 %token ON
 %token GO
-
-// Transitions
-%token TRANSITIONS
 
 // Punctuators
 %token LEFTTUBORG RIGHTTUBORG (* '{' and '}' *)
@@ -33,20 +31,23 @@
 // Grammar Rules
 
 prog:
-state EOF
-    { $1; }
+| STATEMACHINE IDENTIFIER LEFTTUBORG states RIGHTTUBORG EOF  { {machine_name = $2; states = $4} }
 ;
 
-
-transitions:
-  {[]}
-| transitions transition { $1 @ [$2] }
-;
-
-transition:
-| ON IDENTIFIER GO IDENTIFIER { Transition ($2, $4) }
+states:
+| { [] }
+| state states  { $1 :: $2 }
 ;
 
 state:
-  | STATE IDENTIFIER LEFTTUBORG TRANSITIONS RIGHTTUBORG {{ name : $2; transitions : $4 }}
+| STATE IDENTIFIER LEFTTUBORG transitions RIGHTTUBORG        {{ name = State $2; transitions = $4 }}
+;
+
+transitions:
+  {[]}
+| transition transitions    { $1 :: $2 }
+;
+
+transition:
+| ON IDENTIFIER GO IDENTIFIER   { Transition (Event $2, State $4) }
 ;
