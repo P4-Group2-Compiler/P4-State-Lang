@@ -26,6 +26,9 @@ type stmt =
 type expr =
   | Identifier of string
   | Transition of state * stmt * state (* (State, Event -> State') *) *)
+type silke =
+  | Silke of string
+
 type event =
   | Event of string
 
