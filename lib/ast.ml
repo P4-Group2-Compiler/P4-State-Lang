@@ -28,10 +28,10 @@ type expr =
   | Transition of state * stmt * state (* (State, Event -> State') *) *)
 
 type event =
-  | Event of string
+  | Event of string (* Might be better to have simply 'type event = string' *)
 
 type state =
-  | State of string
+  | State of string (* Might be better to have simply 'type state = string' *)
 
 
 type transition =
