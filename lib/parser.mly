@@ -4,14 +4,20 @@
     open Ast
 %}
 
+// Token Decleration
+
 %token EOF
 
 // Remember IDENTIFIER type string (in this case)
-%token STATE
 %token <string> IDENTIFIER
-%token TRANSITIONS
+
+// Keywords
+%token STATE
 %token ON
 %token GO
+
+// Transitions
+%token TRANSITIONS
 
 // Punctuators
 %token LEFTTUBORG RIGHTTUBORG (* '{' and '}' *)
@@ -24,12 +30,12 @@
 
 %%
 
+// Grammar Rules
+
 prog:
 state EOF
     { $1; }
 ;
-
-
 
 
 transitions:
