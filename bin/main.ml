@@ -17,7 +17,7 @@ let print_transition = function
         (string_of_state target)
 
 let print_state st =
-  Printf.printf "  State: %s\n" (string_of_state st.name);
+  Printf.printf "   State Type: %s State: %s\n" st.state_type (string_of_state st.name);
   List.iter print_transition st.transitions
 
 let print_program p =

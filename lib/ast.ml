@@ -38,6 +38,7 @@ type transition =
   | Transition of event * state
 
 type state_decl = {
+  state_type : string;
   name : state;                     (*state B {}*) (*= State of string*)
   transitions : transition list;    (*state B{ON open GO A}*)
 }

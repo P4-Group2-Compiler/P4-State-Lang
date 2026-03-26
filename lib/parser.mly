@@ -14,6 +14,8 @@
 // Keywords
 %token STATEMACHINE
 %token STATE
+%token <string> START 
+%token <string> FINAL
 %token ON
 %token GO
 
@@ -40,7 +42,9 @@ states:
 ;
 
 state:
-| STATE IDENTIFIER LEFTTUBORG transitions RIGHTTUBORG        {{ name = State $2; transitions = $4 }}
+| START STATE IDENTIFIER LEFTTUBORG transitions RIGHTTUBORG  {{ state_type = $1; name = State $3; transitions = $5 }}
+| FINAL STATE IDENTIFIER LEFTTUBORG transitions RIGHTTUBORG  {{ state_type = $1; name = State $3; transitions = $5 }}
+| STATE IDENTIFIER LEFTTUBORG transitions RIGHTTUBORG        {{ state_type = ""; name = State $2; transitions = $4 }}
 ;
 
 transitions:

@@ -1,9 +1,9 @@
 Statemachine M {
-   State A {
+   Start State A {
     ON Push GO Closed
    }
 
-   State B {
+   Final State B {
     ON Pull GO Open
     ON TEST GO SOMETHING
    }
