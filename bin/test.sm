@@ -1,0 +1,10 @@
+Statemachine M {
+   State A {
+    ON Push GO Closed
+   }
+
+   State B {
+    ON Pull GO Open
+    ON TEST GO SOMETHING
+   }
+}

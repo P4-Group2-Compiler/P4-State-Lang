@@ -4,11 +4,21 @@
     open Ast
 %}
 
+// Token Decleration
+
 %token EOF
 
 // Remember IDENTIFIER type string (in this case)
-%token STATE
 %token <string> IDENTIFIER
+
+// Keywords
+%token STATEMACHINE
+%token STATE
+%token ON
+%token GO
+
+// Punctuators
+%token LEFTTUBORG RIGHTTUBORG (* '{' and '}' *)
 
 // Grammatical starting point
 %start prog
@@ -18,11 +28,26 @@
 
 %%
 
+// Grammar Rules
+
 prog:
-state EOF
-    { $1; }
+| STATEMACHINE IDENTIFIER LEFTTUBORG states RIGHTTUBORG EOF  { {machine_name = $2; states = $4} }
+;
+
+states:
+| { [] }
+| state states  { $1 :: $2 }
 ;
 
 state:
- | STATE IDENTIFIER {State $2}
+| STATE IDENTIFIER LEFTTUBORG transitions RIGHTTUBORG        {{ name = State $2; transitions = $4 }}
+;
+
+transitions:
+  {[]}
+| transition transitions    { $1 :: $2 }
+;
+
+transition:
+| ON IDENTIFIER GO IDENTIFIER   { Transition (Event $2, State $4) }
 ;
