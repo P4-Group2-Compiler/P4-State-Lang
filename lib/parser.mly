@@ -4,12 +4,18 @@
     open Ast
 %}
 
+// Token Decleration
+
 %token EOF
 
 // Remember IDENTIFIER type string (in this case)
-%token STATE
 %token <string> IDENTIFIER
-%token TRANSITIONS
+
+// Keywords
+%token STATEMACHINE
+%token STATE
+%token <string> START 
+%token <string> FINAL
 %token ON
 %token GO
 
@@ -24,23 +30,28 @@
 
 %%
 
+// Grammar Rules
+
 prog:
-state EOF
-    { $1; }
+| STATEMACHINE IDENTIFIER LEFTTUBORG states RIGHTTUBORG EOF  { {machine_name = $2; states = $4} }
 ;
 
-
-
-
-transitions:
-  {[]}
-| transitions transition { $1 @ [$2] }
-;
-
-transition:
-| ON IDENTIFIER GO IDENTIFIER { Transition ($2, $4) }
+states:
+| { [] }
+| state states  { $1 :: $2 }
 ;
 
 state:
-  | STATE IDENTIFIER LEFTTUBORG TRANSITIONS RIGHTTUBORG {{ name : $2; transitions : $4 }}
+| START STATE IDENTIFIER LEFTTUBORG transitions RIGHTTUBORG  {{ state_type = $1; name = State $3; transitions = $5 }}
+| FINAL STATE IDENTIFIER LEFTTUBORG transitions RIGHTTUBORG  {{ state_type = $1; name = State $3; transitions = $5 }}
+| STATE IDENTIFIER LEFTTUBORG transitions RIGHTTUBORG        {{ state_type = ""; name = State $2; transitions = $4 }}
+;
+
+transitions:
+  {[]}
+| transition transitions    { $1 :: $2 }
+;
+
+transition:
+| ON IDENTIFIER GO IDENTIFIER   { Transition (Event $2, State $4) }
 ;

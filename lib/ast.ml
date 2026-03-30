@@ -26,22 +26,24 @@ type stmt =
 type expr =
   | Identifier of string
   | Transition of state * stmt * state (* (State, Event -> State') *) *)
-type silke =
-  | Silke of string
 
 type event =
-  | Event of string
+  | Event of string (* Might be better to have simply 'type event = string' *)
+
+type state =
+  | State of string (* Might be better to have simply 'type state = string' *)
 
 
 type transition =
-  | Transition of event * string
-  | Tblock of transition list
+  | Transition of event * state
 
-type state = {
-    name : string; (*state B {}*) (*= State of string*)
-    transitions : transition; (*state B{ON open GO A}*)
+type state_decl = {
+  state_type : string;
+  name : state;                     (*state B {}*) (*= State of string*)
+  transitions : transition list;    (*state B{ON open GO A}*)
 }
 
 type program = {
-  states : state list;
+  machine_name : string;
+  states : state_decl list;
 }

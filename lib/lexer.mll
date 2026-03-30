@@ -10,12 +10,28 @@ let IdentifierChars = ['a'-'z' 'A'-'Z' '0'-'9' '_']
 
 (* All the tokenization rules. When lexer hits any of the below, what token should be created *)
 rule token = parse
-    | "State" { STATE }
-    | "ON" { ON }
-    | "GO" { GO }
-    | (Letter IdentifierChars*) as id { IDENTIFIER id }
-    | [' ' '\t' '\n'] { token lexbuf } (* Whitespace, tab and newline defined *)
-    | '{' { LEFTTUBORG }
-    | '}' { RIGHTTUBORG }
-    |eof { EOF } (* end of file; eof from Lexing *)
-    | _ as c {raise (Lexing_error (Printf.sprintf "Unexpected character: %c" c))} (* Error when hitting anything else not covered *)
+    (* Whitespace, tab and newline defined *)
+    | [' ' '\t' '\n']                       { token lexbuf }
+
+    (* Keywords *)
+    | "Statemachine"                        { STATEMACHINE }
+    | "Start" as id                         { START id }
+    | "Final" as id                         { FINAL id}
+    | "State"                               { STATE }
+    | "ON"                                  { ON }
+    | "GO"                                  { GO }
+
+    (* Seperators *)
+    | '{'                                   { LEFTTUBORG }
+    | '}'                                   { RIGHTTUBORG }
+
+    (* Identifiers *)
+    | (Letter IdentifierChars*) as id       { IDENTIFIER id }
+
+    (* End of file; eof from Lexing *)
+    |eof                                    { EOF }
+
+    (* Unexpected Character - Error when hitting anything else not covered *)
+    | _ as c {
+        raise (Lexing_error (Printf.sprintf "Unexpected character: %c" c))
+        }
