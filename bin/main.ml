@@ -10,6 +10,11 @@ let string_of_state = function
 let string_of_event = function
   | Event e -> e
 
+let string_of_state_kind = function
+  | Normal -> "Normal"
+  | Start -> "Start"
+  | Final -> "Final"
+
 let print_transition = function
   | Transition (event, target) ->
       Printf.printf "    ON %s GO %s\n"
@@ -17,7 +22,7 @@ let print_transition = function
         (string_of_state target)
 
 let print_state st =
-  Printf.printf "   State Type: %s State: %s\n" st.state_type (string_of_state st.name);
+  Printf.printf "   State Type: %s State: %s\n" (string_of_state_kind st.kind) (string_of_state st.name);
   List.iter print_transition st.transitions
 
 let print_program p =
