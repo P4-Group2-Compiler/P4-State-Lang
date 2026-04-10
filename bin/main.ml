@@ -3,6 +3,7 @@ open Parsing
 open P4
 
 open Ast
+open Semantic
 
 let string_of_state = function
   | State s -> s
@@ -50,4 +51,7 @@ let () =
   in
 
   close_in chan;
-  print_program ast
+  print_program ast;
+
+let transitions = Semantic.collect_transitions ast in
+  Semantic.print_iter_trans transitions
