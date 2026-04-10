@@ -37,8 +37,13 @@ type state =
 type transition =
   | Transition of event * state
 
+type state_kind =
+  | Normal
+  | Start
+  | Final
+
 type state_decl = {
-  state_type : string;
+  kind : state_kind;
   name : state;                     (*state B {}*) (*= State of string*)
   transitions : transition list;    (*state B{ON open GO A}*)
 }
