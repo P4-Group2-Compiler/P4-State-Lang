@@ -13,7 +13,8 @@ let collect_states (p : program) : state list =
   List.map (fun state_decl -> state_decl.name) p.states
 
 
-let get_start_sate (p: program) : state option =
+(* TODO: Fix the if statement in the end of this function, might mess up later development *)
+let get_start_sates (p: program) : state option =
   let start_states = 
     List.fold_left (fun list state_decl -> 
       match state_decl.kind with
