@@ -12,6 +12,18 @@ let event_to_string = function
 let collect_states (p : program) : state list =
   List.map (fun state_decl -> state_decl.name) p.states
 
+
+let get_start_sate (p: program) : state option =
+  let start_states = 
+    List.fold_left (fun list state_decl -> 
+      match state_decl.kind with
+      | Start -> state_decl.name :: list
+      | Normal | Final -> list)
+      []
+      p.states
+    in
+    if List.length start_states > 1 then error "Multiple Start states declared" else None
+
 (* Function for adding the source state with the states: (event, state) -> (state, event, state) *)
 let add_source_state (st_decl : state_decl) : (state * event * state) list = 
   let src = st_decl.name in

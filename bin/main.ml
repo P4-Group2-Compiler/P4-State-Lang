@@ -53,5 +53,11 @@ let () =
   close_in chan;
   print_program ast;
 
-let transitions = Semantic.collect_transitions ast in
-  Semantic.print_iter_trans transitions
+  (* Debuggin print statement - TODO remove later *)
+let check_start_state = Semantic.get_start_sate ast in
+  match check_start_state with
+  | _ -> Printf.printf "This code is running"
+
+(* let transitions = Semantic.collect_transitions ast in
+  Semantic.print_iter_trans transitions; *)
+
