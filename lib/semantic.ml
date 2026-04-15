@@ -52,6 +52,6 @@ let print_iter_trans (t: (state * event * state) list) =
   List.iter print_transition t;
 
 
-let rec lstColTrans f = function (*Not in use for now. Map for applying the collect_transitions*)
+(* let rec lstColTrans f = function (*Not in use for now. Map for applying the collect_transitions*)
 | [] -> []
-| h :: t -> f h :: lstColTrans f t
+| h :: t -> f h :: lstColTrans f t *)
