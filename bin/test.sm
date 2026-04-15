@@ -3,7 +3,7 @@ Statemachine M {
     ON Push GO Closed
    }
 
-   Final State B {
+   Start State B {
     ON Pull GO Open
     ON TEST GO SOMETHING
    }

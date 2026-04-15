@@ -3,6 +3,7 @@ open Parsing
 open P4
 open Dottest
 open Ast
+open Semantic
 
 let string_of_state = function
   | State s -> s
@@ -60,4 +61,13 @@ let () =
     Dottest.printer transition;
 
   close_in chan;
-  print_program ast
+  print_program ast;
+
+  (* Debuggin print statement - TODO remove later *)
+let check_start_state = Semantic.get_start_sates ast in
+  match check_start_state with
+  | _ -> Printf.printf "This code is running"
+
+(* let transitions = Semantic.collect_transitions ast in
+  Semantic.print_iter_trans transitions; *)
+
