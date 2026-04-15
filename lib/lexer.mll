@@ -15,6 +15,8 @@ rule token = parse
 
     (* Keywords *)
     | "Statemachine"                        { STATEMACHINE }
+    | "Start" as id                         { START id }
+    | "Final" as id                         { FINAL id}
     | "State"                               { STATE }
     | "ON"                                  { ON }
     | "GO"                                  { GO }

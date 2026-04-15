@@ -14,6 +14,8 @@
 // Keywords
 %token STATEMACHINE
 %token STATE
+%token <string> START 
+%token <string> FINAL
 %token ON
 %token GO
 
@@ -40,8 +42,14 @@ states:
 ;
 
 state:
-| STATE IDENTIFIER LEFTTUBORG transitions RIGHTTUBORG        {{ name = State $2; transitions = $4 }}
+| state_kind STATE IDENTIFIER LEFTTUBORG transitions RIGHTTUBORG  {{ kind = $1; name = State $3; transitions = $5 }}
+
 ;
+
+state_kind:
+| START { Start }
+| FINAL { Final }
+|       { Normal } // Empty means that there is no State Kind
 
 transitions:
   {[]}

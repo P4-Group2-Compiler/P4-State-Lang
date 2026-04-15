@@ -3,12 +3,18 @@ open Parsing
 open P4
 
 open Ast
+open Semantic
 
 let string_of_state = function
   | State s -> s
 
 let string_of_event = function
   | Event e -> e
+
+let string_of_state_kind = function
+  | Normal -> "Normal"
+  | Start -> "Start"
+  | Final -> "Final"
 
 let print_transition = function
   | Transition (event, target) ->
@@ -17,7 +23,7 @@ let print_transition = function
         (string_of_state target)
 
 let print_state st =
-  Printf.printf "  State: %s\n" (string_of_state st.name);
+  Printf.printf "   State Type: %s State: %s\n" (string_of_state_kind st.kind) (string_of_state st.name);
   List.iter print_transition st.transitions
 
 let print_program p =
@@ -45,4 +51,13 @@ let () =
   in
 
   close_in chan;
-  print_program ast
+  print_program ast;
+
+  (* Debuggin print statement - TODO remove later *)
+let check_start_state = Semantic.get_start_sates ast in
+  match check_start_state with
+  | _ -> Printf.printf "This code is running"
+
+(* let transitions = Semantic.collect_transitions ast in
+  Semantic.print_iter_trans transitions; *)
+
