@@ -1,3 +1,0 @@
-(test
- (name test_copy_to_file)
- (libraries copy_to_file))

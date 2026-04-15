@@ -26,8 +26,7 @@ let collect_transitions (p : program) : transition list =
 
 (*---------------------------------------------------------------------------------------------------------------------------*)
 
-(*Map for applying the collect_transitions*)
-let rec lstColTrans f = function
+let rec lstColTrans f = function (*Not in use for now. Map for applying the collect_transitions*)
 | [] -> []
 | h :: t -> f h :: lstColTrans f t
 

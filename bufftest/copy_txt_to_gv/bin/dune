@@ -1,4 +1,0 @@
-(executable
- (public_name txt_to_gv)
- (name main)
- (libraries txt_to_gv))

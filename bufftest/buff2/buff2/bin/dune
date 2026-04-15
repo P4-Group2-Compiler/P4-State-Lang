@@ -1,4 +1,0 @@
-(executable
- (public_name buff2)
- (name main)
- (libraries buff2))

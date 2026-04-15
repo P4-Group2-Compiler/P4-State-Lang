@@ -1,4 +1,0 @@
-(executable
- (public_name copy_to_file)
- (name main)
- (libraries copy_to_file))

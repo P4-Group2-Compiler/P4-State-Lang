@@ -1,3 +1,0 @@
-(test
- (name test_txt_to_gv)
- (libraries txt_to_gv))

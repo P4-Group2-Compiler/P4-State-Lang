@@ -1,3 +1,0 @@
-(test
- (name test_buff2)
- (libraries buff2))
