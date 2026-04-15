@@ -55,6 +55,3 @@ let print_iter_trans (t: (state * event * state) list) =
 let rec lstColTrans f = function (*Not in use for now. Map for applying the collect_transitions*)
 | [] -> []
 | h :: t -> f h :: lstColTrans f t
-
-(*Creating the list of transitions, WITH the source states (list of lists)*)
-let transList lst = lstColTrans (collect_transitions) lst
