@@ -16,6 +16,6 @@ let rec stringify f = function (*Not in use for now*)
 | [] -> []
 | h :: t -> f h :: stringify f t
 
-let transList lst = stringify (transition_to_string) lst (*Not in use for now*)
+(* let transList lst = stringify (transition_to_string) lst (*Not in use for now*)
 let result = Semantic.transList (*Not in use for now. Just storing the list of collected transitions here, for now.*)
-let stuff = Semantic.collect_transitions (*Not in use for now. Same as above*)
+let stuff = Semantic.collect_transitions (*Not in use for now. Same as above*) *)
