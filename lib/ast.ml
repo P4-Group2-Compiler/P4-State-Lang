@@ -33,7 +33,6 @@ type event =
 type state =
   | State of string (* Might be better to have simply 'type state = string' *)
 
-
 type transition =
   | Transition of event * state
 
