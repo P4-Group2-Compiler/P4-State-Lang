@@ -2,9 +2,7 @@ open Lexing
 open Parsing
 open P4
 open Dottest
-
 open Ast
-
 
 let string_of_state = function
   | State s -> s
@@ -57,7 +55,7 @@ let () =
         exit 1
   in 
 
-  let transition = Semantic.collect_transitions ast in
+  let transition = Semantic.collect_transitions ast in  (*Printing out what will be transitions in DOT*)
 
     Dottest.printer transition;
 
