@@ -9,6 +9,9 @@ let state_to_string = function
 let event_to_string = function
   | Event e -> e
 
+let event_to_string (Event e) = e (*Base printer for event*)
+let state_to_string (State s) = s (*Base printer for state*)
+
 let collect_states (p : program) : state list =
   List.map (fun state_decl -> state_decl.name) p.states
 
@@ -37,6 +40,7 @@ let add_source_state (st_decl : state_decl) : (state * event * state) list =
 let collect_transitions (p : program) : (state * event * state) list = 
   List.concat (List.map add_source_state p.states)
 
+(*---------------------------------------------------------------------------------------------------------------------------*)
 (* Printing the transitions - used for debugging and checking if it is correct *)
 let print_transition (src, event, dest) =
   Printf.printf "%s --%s--> %s\n" 
@@ -48,4 +52,6 @@ let print_iter_trans (t: (state * event * state) list) =
   List.iter print_transition t;
 
 
-
+(* let rec lstColTrans f = function (*Not in use for now. Map for applying the collect_transitions*)
+| [] -> []
+| h :: t -> f h :: lstColTrans f t *)
