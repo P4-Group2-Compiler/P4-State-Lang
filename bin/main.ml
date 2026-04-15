@@ -45,4 +45,5 @@ let () =
   in
 
   close_in chan;
-  print_program ast
+  (*print_program ast;*)
+  Codegen.generate_c_code ast;

@@ -10,33 +10,35 @@ En simpel alarm clock state machine — skrevet i vores syntaks — brugt som ek
     StateMachine M {
 
         Start State IDLE {
-            ON [ALARM_BTN_PRESS] GO ALARM_ARMED;
+            ON ALARM_BTN_PRESS GO ALARM_ARMED;
         }
 
         State ALARM_ARMED {
-            ON [ALARM_BTN_PRESS] GO IDLE;
-            ON [ALARM_TIMER_EXPIRED] GO ALARM_RINGING;
+            ON ALARM_BTN_PRESS GO IDLE;
+            ON ALARM_TIMER_EXPIRED GO ALARM_RINGING;
         }
 
         State ALARM_RINGING {
-            ON [ALARM_BTN_PRESS] GO IDLE;
-            ON [SNOOZE_BTN_PRESS] GO SNOOZE;
+            ON ALARM_BTN_PRESS GO IDLE;
+            ON SNOOZE_BTN_PRESS GO SNOOZE;
         }
 
         State SNOOZE {
-            ON [SNOOZE_TIME_EXPIRED] GO ALARM_RINGING;
-            ON [ALARM_BTN_PRESS] GO IDLE;
+            ON SNOOZE_TIME_EXPIRED GO ALARM_RINGING;
+            ON ALARM_BTN_PRESS GO IDLE;
         }
             
     }
 
 --------------------------------------------------------------------------------
 */
+
 typedef enum STATE_IDENTIFIERS {
     IDLE,
     ALARM_ARMED,
     ALARM_RINGING,
     SNOOZE,
+
     STATE_ID_COUNT,
 } STATE_IDENTIFIERS;
 
@@ -46,6 +48,7 @@ typedef enum EVENT_IDENTIFIERS {
     ALARM_TIMER_EXPIRED,
     SNOOZE_BTN_PRESS,
     SNOOZE_TIME_EXPIRED,
+
     EVENT_ID_COUNT,
 } EVENT_IDENTIFIERS;
 
@@ -105,7 +108,7 @@ int main(void) {
             },
     };
 
-    // -------------------------------------------------------------
+// -------------------------------------------------------------
 #define STATE_MACHINE_RUNNING     1
 #define STATE_MACHINE_NOT_RUNNING 0
 
@@ -131,7 +134,7 @@ int main(void) {
             state_machine_step(&M, event_input);
             break;
         default:
-            printf("INVALID EVENT!\n");
+            printf("\nINVALID EVENT!\n");
             break;
         }
     }
@@ -140,4 +143,5 @@ int main(void) {
     return 0;
 }
 
-// Terminal command til at køre eksemplet: gcc main.c state_machine.c -o alarm; ./alarm
+// Terminal command til at køre eksemplet: (Husk at cd til /out/c)
+// gcc main.c state_machine.c -o alarm; ./alarm
