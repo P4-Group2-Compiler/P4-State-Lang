@@ -6,7 +6,7 @@ Statemachine M {
 
    Final State B {
    (* This is a block comment 
-   With two lines *)
+   With two lines. *)
     ON Pull GO Open
     ON TEST GO SOMETHING
    }
