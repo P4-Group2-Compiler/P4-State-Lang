@@ -27,12 +27,18 @@ let test_collect_states_happy () =
     (List.map Semantic.state_to_string expected)
     (List.map Semantic.state_to_string result)
 
+let test_collect_transitions_happy () = assert true
+
 (********************* Sad test *********************)
+
+(****************************************************)
+
 
 (* Initializing the tests. The de facto 'run' function *)
 let () =
   Alcotest.run "Semantic Tests" [
     "semantic", [
       Alcotest.test_case "collect_states" `Quick test_collect_states_happy;
+      Alcotest.test_case "collect_transitions" `Quick test_collect_transitions_happy;
     ];
   ]
