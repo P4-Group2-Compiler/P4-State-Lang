@@ -1,8 +1,12 @@
 open Ast
 
+(*------------------------------(* ERROR HANDLING CREATION *)-----------------------------*)
 exception Semantic_error of string
 
 let error msg = raise (Semantic_error msg)
+
+
+(*------------------------(* DEFINING TYPE AND HELPER FUNCTIONS *)------------------------*)
 
 type statemachine = 
 {
@@ -47,7 +51,6 @@ let get_final_states (p: program) : state list =
     []
     p.states
 
-
 (* Function for adding the source state with the states: (event, state) -> (state, event, state) *)
 let add_source_state (st_decl : state_decl) : (state * event * state) list = 
   let src = st_decl.name in
@@ -60,7 +63,9 @@ let add_source_state (st_decl : state_decl) : (state * event * state) list =
 let collect_transitions (p : program) : (state * event * state) list = 
   List.concat (List.map add_source_state p.states)
 
-(*---------------------------------------------------------------------------------------------------------------------------*)
+
+(*----------------(* CREATING THE STATEMACHIN WITH THE HELPER FUNCTIONS *)----------------*)
+
 (* Function to create the mathmatical StateMachine *)
 let create_state_machine (p: program) : statemachine =
   {
@@ -71,8 +76,10 @@ let create_state_machine (p: program) : statemachine =
     transitions = collect_transitions p;
   }
 
-(*--------------------------------------------------------------------------------------------------------------------------*)
-(* Validating the statemachine *)
+
+(*----------------------------(* VALIDATING THE STATEMACHINE *)---------------------------*)
+
+(* Recursive function to check if state names are repeated *)
 let check_duplicate_state_names (statemachine: statemachine) : unit =
   let rec checker seen = function
     | [] -> ()
@@ -86,8 +93,8 @@ let check_duplicate_state_names (statemachine: statemachine) : unit =
 
 
 
-(*--------------------------------------------------------------------------------------------------------------------------*)
-(* Printing the transitions - used for debugging and checking if it is correct *)
+(*---------------------------(* PRINT FUNCTIONS FOR DEBUGGIN *)---------------------------*)
+
 let print_transition (src, event, dest) =
   Printf.printf "%s --%s--> %s\n" 
   (state_to_string src)
