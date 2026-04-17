@@ -26,7 +26,7 @@ let collect_states (p : program) : state list =
 
 
 (* TODO: Fix the if statement in the end of this function, might mess up later development *)
-let get_start_sates (p: program) : state option =
+let get_start_states (p: program) : state option =
   let start_states = 
     List.fold_left (fun list state_decl -> 
       match state_decl.kind with
@@ -51,16 +51,17 @@ let collect_transitions (p : program) : (state * event * state) list =
 
 (*---------------------------------------------------------------------------------------------------------------------------*)
 (* Creating the mathmatical StateMachine *)
-let create_state_machine (p: program) statemachine =
+let create_state_machine (p: program) : statemachine =
   {
     statemachine_name = p.machine_name;
     states = collect_states p;
-    start_state = get_start_sates p;
-    final_state = get_start_sates p;
+    start_state = get_start_states p;
+    final_state = get_start_states p;
     transitions = collect_transitions p;
   }
 
-(*---------------------------------------------------------------------------------------------------------------------------*)
+
+(*--------------------------------------------------------------------------------------------------------------------------*)
 (* Printing the transitions - used for debugging and checking if it is correct *)
 let print_transition (src, event, dest) =
   Printf.printf "%s --%s--> %s\n" 
