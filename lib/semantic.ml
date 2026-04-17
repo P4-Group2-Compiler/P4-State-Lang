@@ -4,11 +4,14 @@ exception Semantic_error of string
 
 let error msg = raise (Semantic_error msg)
 
+(*
 let state_to_string = function
   | State s -> s
 let event_to_string = function
   | Event e -> e
+*)
 
+(*Silke - "Mine funktioner i ./dottest bruger de to nederste og ikke de øverste, ved ikke med jer andre."*)
 let event_to_string (Event e) = e (*Base printer for event*)
 let state_to_string (State s) = s (*Base printer for state*)
 
@@ -39,19 +42,3 @@ let add_source_state (st_decl : state_decl) : (state * event * state) list =
 (* Collecting all the transitions using the add_source_state function: List of all (state, event, state)*)
 let collect_transitions (p : program) : (state * event * state) list = 
   List.concat (List.map add_source_state p.states)
-
-(*---------------------------------------------------------------------------------------------------------------------------*)
-(* Printing the transitions - used for debugging and checking if it is correct *)
-let print_transition (src, event, dest) =
-  Printf.printf "%s --%s--> %s\n" 
-  (state_to_string src)
-  (event_to_string event)
-  (state_to_string dest)
-
-let print_iter_trans (t: (state * event * state) list) = 
-  List.iter print_transition t;
-
-
-(* let rec lstColTrans f = function (*Not in use for now. Map for applying the collect_transitions*)
-| [] -> []
-| h :: t -> f h :: lstColTrans f t *)

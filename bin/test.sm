@@ -4,10 +4,11 @@ Statemachine M {
     ON Push GO Closed
    }
 
-   Final State B {
+   Final State Closed {
    (* This is a block comment 
    With two lines. *)
     ON Pull GO Open
-    ON TEST GO SOMETHING
+    ON Pull GO Closed
+    ON WOOOOOOOOOOOAAAAAAAAG GO Party
    }
 }

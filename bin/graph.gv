@@ -1,0 +1,1 @@
+digraph { rankdir = LR; node [shape = circle;]; null [shape = point;];A -> Closed [label="Push"];Closed -> Open [label="Pull"];Closed -> Closed [label="Pull"];Closed -> Party [label="WOOOOOOOOOOOAAAAAAAAG"];}

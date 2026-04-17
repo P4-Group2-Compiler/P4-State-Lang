@@ -32,10 +32,6 @@ let print_program p =
   Printf.printf "Machine: %s\n" p.machine_name;
   List.iter print_state p.states
 
-(***)
-
-(***)
-
 let () =
   if Array.length Sys.argv <> 2 then begin
     Printf.printf "Usage: %s <file>\n" Sys.argv.(0);
@@ -56,12 +52,31 @@ let () =
         exit 1
   in 
 
-  let transition = Semantic.collect_transitions ast in  (*Printing out what will be transitions in DOT*)
+  (*For checking DOT*)
+  (*************************************************************************************************)
 
-    Dottest.printer transition;
+  (*Collects all transitions in a single (state * event *state) list from the AST*)
+  let transition = Semantic.collect_transitions ast in 
+  (*Printing out what will be transitions in DOT*)
+  (*Dottest.printer transition;*)
+
+  (*Stores transitions and creates actual strings of them*)
+  let stored = Dottest.trans_string_list transition in
+  Dottest.string_list_printer stored;
+
+  Dottest.dot_syntax_buffer Dottest.dot_topSyntax Dottest.dot_bottomSyntax stored;
+
+  (*Checks if the string list of transitions is empty*)
+  if List.is_empty stored then
+    print_endline "\nList of transitions as strings is empty!"
+  else
+    print_endline "\nList of transitions as strings is not empty!";
+  (**************************************************************************************************)
 
   close_in chan;
-  print_program ast;
+  (*print_program ast;*)
+
+  (*dune exec ./main.exe -- test.sm*)
 
   (*
   (* Debuggin print statement - TODO remove later *)
