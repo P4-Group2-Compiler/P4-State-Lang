@@ -61,7 +61,7 @@ let collect_transitions (p : program) : (state * event * state) list =
   List.concat (List.map add_source_state p.states)
 
 (*---------------------------------------------------------------------------------------------------------------------------*)
-(* Creating the mathmatical StateMachine *)
+(* Function to create the mathmatical StateMachine *)
 let create_state_machine (p: program) : statemachine =
   {
     statemachine_name = p.machine_name;
@@ -70,6 +70,21 @@ let create_state_machine (p: program) : statemachine =
     final_state = get_final_states p;
     transitions = collect_transitions p;
   }
+
+(*--------------------------------------------------------------------------------------------------------------------------*)
+(* Validating the statemachine *)
+let check_duplicate_state_names (statemachine: statemachine) : unit =
+  let rec checker seen = function
+    | [] -> ()
+    | head :: tail ->
+      let name = state_to_string head in
+      if List.mem name seen then
+        error ("Duplicate state names declared") 
+      else
+        checker (name :: seen) tail
+  in checker [] statemachine.states
+
+
 
 (*--------------------------------------------------------------------------------------------------------------------------*)
 (* Printing the transitions - used for debugging and checking if it is correct *)
