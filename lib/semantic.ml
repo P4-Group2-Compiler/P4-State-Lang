@@ -4,6 +4,15 @@ exception Semantic_error of string
 
 let error msg = raise (Semantic_error msg)
 
+type statemachine = 
+{
+  statemachine_name : string;
+  states : state list;
+  start_state : state option;
+  final_state : state option;
+  transitions : (state * event * state) list;
+}
+
 let state_to_string = function
   | State s -> s
 let event_to_string = function
@@ -39,6 +48,17 @@ let add_source_state (st_decl : state_decl) : (state * event * state) list =
 (* Collecting all the transitions using the add_source_state function: List of all (state, event, state)*)
 let collect_transitions (p : program) : (state * event * state) list = 
   List.concat (List.map add_source_state p.states)
+
+(*---------------------------------------------------------------------------------------------------------------------------*)
+(* Creating the mathmatical StateMachine *)
+let create_state_machine (p: program) statemachine =
+  {
+    statemachine_name = p.machine_name;
+    states = collect_states p;
+    start_state = get_start_sates p;
+    final_state = get_start_sates p;
+    transitions = collect_transitions p;
+  }
 
 (*---------------------------------------------------------------------------------------------------------------------------*)
 (* Printing the transitions - used for debugging and checking if it is correct *)
