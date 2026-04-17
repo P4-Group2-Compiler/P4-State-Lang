@@ -63,8 +63,8 @@ let () =
   close_in chan;
   print_program ast;
 
-  (* Debuggin print statement - TODO remove later *)
-let check_start_state = Semantic.get_start_sates ast in
+  (* Debugging print statement - TODO remove later *)
+  let check_start_state = Semantic.get_start_states ast in
   match check_start_state with
   | _ -> Printf.printf "This code is running"
 

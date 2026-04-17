@@ -9,7 +9,7 @@ type statemachine =
   statemachine_name : string;
   states : state list;
   start_state : state option;
-  final_state : state option;
+  final_state : state list;
   transitions : (state * event * state) list;
 }
 
@@ -25,6 +25,7 @@ let collect_states (p : program) : state list =
   List.map (fun state_decl -> state_decl.name) p.states
 
 
+(* Get a list of all start states then checks the list to see if there is more than one *)
 (* TODO: Fix the if statement in the end of this function, might mess up later development *)
 let get_start_states (p: program) : state option =
   let start_states = 
@@ -36,6 +37,16 @@ let get_start_states (p: program) : state option =
       p.states
     in
     if List.length start_states > 1 then error "Multiple Start states declared" else None
+
+(* Get a list of all Finals states in the program *)
+let get_final_states (p: program) : state list = 
+  List.fold_left (fun list state_decl ->
+    match state_decl.kind with
+    |Final -> state_decl.name :: list
+    | Normal | Start -> list)
+    []
+    p.states
+
 
 (* Function for adding the source state with the states: (event, state) -> (state, event, state) *)
 let add_source_state (st_decl : state_decl) : (state * event * state) list = 
@@ -56,10 +67,9 @@ let create_state_machine (p: program) : statemachine =
     statemachine_name = p.machine_name;
     states = collect_states p;
     start_state = get_start_states p;
-    final_state = get_start_states p;
+    final_state = get_final_states p;
     transitions = collect_transitions p;
   }
-
 
 (*--------------------------------------------------------------------------------------------------------------------------*)
 (* Printing the transitions - used for debugging and checking if it is correct *)
@@ -71,8 +81,3 @@ let print_transition (src, event, dest) =
 
 let print_iter_trans (t: (state * event * state) list) = 
   List.iter print_transition t;
-
-
-(* let rec lstColTrans f = function (*Not in use for now. Map for applying the collect_transitions*)
-| [] -> []
-| h :: t -> f h :: lstColTrans f t *)
