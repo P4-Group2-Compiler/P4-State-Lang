@@ -86,11 +86,20 @@ let check_duplicate_state_names (statemachine: statemachine) : unit =
     | head :: tail ->
       let name = state_to_string head in
       if List.mem name seen then
-        error ("Duplicate state names declared") 
+        error "Duplicate state names declared" 
       else
         checker (name :: seen) tail
   in checker [] statemachine.states
 
+let check_duplicate_transistions (statemachine : statemachine) : unit =
+  let rec checker seen = function
+    | [] -> ()
+    | head :: tail ->
+      if List.mem head seen then
+        error "Dulicate transition declared"
+      else
+        checker (head :: seen) tail
+  in checker [] statemachine.transitions
 
 
 (*---------------------------(* PRINT FUNCTIONS FOR DEBUGGIN *)---------------------------*)
