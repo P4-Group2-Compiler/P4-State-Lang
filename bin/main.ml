@@ -64,6 +64,10 @@ let () =
   let stored = Dottest.trans_string_list transition in
   Dottest.string_list_printer stored;
 
+   (*let kinds = Dottest.state_kind_string_list state_kinds in*)
+ 
+
+  (*Buffs state machine into DOT syntax and creates .gv file*)
   Dottest.dot_syntax_buffer Dottest.dot_topSyntax Dottest.dot_bottomSyntax stored;
 
   (*Checks if the string list of transitions is empty*)

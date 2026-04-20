@@ -20,7 +20,25 @@ let string_list_printer (t : (string) list) =
   List.iter print_endline t
 
 (**************************************************************************************************************************************************)
+(*WIP*)
+(*Stolen from .main, am not allowed to call it from the main module for some reason*)
+let string_of_state_kind = function
+  | Normal -> "Normal"
+  | Start -> "Start"
+  | Final -> "Final"
+
+(*Creates strings of a state kind*)
+let state_kind_to_string (state_kind) =
+  let st_k = string_of_state_kind state_kind in
+  Printf.sprintf "%s" st_k
+
+(*Creates list of state kind*)
+let state_kind_string_list (stk : (state_kind) list) =
+  List.map state_kind_to_string stk
+
+(**************************************************************************************************************************************************)
 (*IN USE! Printer, transitions as they are - not strings*)
+(*Not immediately useful right now, but keep just in case*)
 
 (*Prints (state, event, state) in DOT syntax. NB! Does NOT return transitions as strings!*)
 let transition_to_string (s1, e, s2) =    
