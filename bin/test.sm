@@ -9,6 +9,14 @@ Statemachine M {
    With two lines. *)
     ON Pull GO Open
     ON Pull GO Closed
-    ON WOOOOOOOOOOOAAAAAAAAG GO Party
+    ON Beer GO Party
+    ON Whiskey GO Wrecked
+   }
+
+      Final State  Wrecked{
+   (* This is a block comment 
+   With two lines. *)
+    ON Tequila GO Broke
+    ON Wine GO Smashed
    }
 }

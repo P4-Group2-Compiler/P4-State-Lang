@@ -12,7 +12,7 @@ type statemachine =
 {
   statemachine_name : string;
   states : state list;
-  start_state : state option;
+  start_state : state list;
   final_state : state list;
   transitions : (state * event * state) list;
 }
@@ -32,23 +32,20 @@ let collect_states (p : program) : state list =
 
 (* Get a list of all start states then checks the list to see if there is more than one *)
 (* TODO: Fix the if statement in the end of this function, might mess up later development *)
-let get_start_states (p: program) : state option =
-  let start_states = 
+let get_start_states (p: program) : state list =
     List.fold_left (fun list state_decl -> 
       match state_decl.kind with
       | Start -> state_decl.name :: list
       | Normal | Final -> list)
       []
       p.states
-    in
-    if List.length start_states > 1 then error "Multiple Start states declared"
-      else if List.length start_states = 0 then error "Missing Start state decleration" else None 
+    
 
 (* Get a list of all Finals states in the program *)
 let get_final_states (p: program) : state list = 
   List.fold_left (fun list state_decl ->
     match state_decl.kind with
-    |Final -> state_decl.name :: list
+    | Final -> state_decl.name :: list
     | Normal | Start -> list)
     []
     p.states
@@ -65,7 +62,6 @@ let add_source_state (st_decl : state_decl) : (state * event * state) list =
 let collect_transitions (p : program) : (state * event * state) list = 
   List.concat (List.map add_source_state p.states)
 
-
 (*----------------(* CREATING THE STATEMACHIN WITH THE HELPER FUNCTIONS *)----------------*)
 
 (* Function to create the mathmatical StateMachine *)
@@ -77,7 +73,6 @@ let create_state_machine (p: program) : statemachine =
     final_state = get_final_states p;
     transitions = collect_transitions p;
   }
-
 
 (*----------------------------(* VALIDATING THE STATEMACHINE *)---------------------------*)
 

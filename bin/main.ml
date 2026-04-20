@@ -54,27 +54,40 @@ let () =
 
   (*For checking DOT*)
   (*************************************************************************************************)
-
   (*Collects all transitions in a single (state * event *state) list from the AST*)
-  let transition = Semantic.collect_transitions ast in 
+  let transition = Semantic.collect_transitions ast in
+
+  let starts = Semantic.get_start_states ast in
+  
+  (*Collects the final states in a single list*)
+  let finals = Semantic.get_final_states ast in
+
   (*Printing out what will be transitions in DOT*)
   (*Dottest.printer transition;*)
 
-  (*Stores transitions and creates actual strings of them*)
-  let stored = Dottest.trans_string_list transition in
-  Dottest.string_list_printer stored;
+  (*Stores transitions in a list and creates actual strings of them*)
+  let storedTransStrings = Dottest.trans_string_list transition in
+  Dottest.string_list_printer storedTransStrings;
 
-   (*let kinds = Dottest.state_kind_string_list state_kinds in*)
- 
+  (*Stores start state(s), adds null start pointer*)
+  let storedStartStrings = Dottest.start_string_list starts in
+  Dottest.string_list_printer storedStartStrings;
 
+  (*Stores final states, adds their double circle*)
+  let storedFinalStrings = Dottest.final_string_list finals in
+  Dottest.string_list_printer storedFinalStrings;
+
+  (*GRAPHVIZ FILE*)
   (*Buffs state machine into DOT syntax and creates .gv file*)
-  Dottest.dot_syntax_buffer Dottest.dot_topSyntax Dottest.dot_bottomSyntax stored;
+  Dottest.dot_syntax_buffer Dottest.dot_topSyntax Dottest.dot_bottomSyntax storedStartStrings storedFinalStrings storedTransStrings;
 
   (*Checks if the string list of transitions is empty*)
-  if List.is_empty stored then
+  (*
+  if List.is_empty storedTransStrings then
     print_endline "\nList of transitions as strings is empty!"
   else
     print_endline "\nList of transitions as strings is not empty!";
+    *)
   (**************************************************************************************************)
 
   close_in chan;

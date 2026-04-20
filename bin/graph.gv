@@ -1,1 +1,1 @@
-digraph { rankdir = LR; node [shape = circle;]; null [shape = point;];A -> Closed [label="Push"];Closed -> Open [label="Pull"];Closed -> Closed [label="Pull"];Closed -> Party [label="WOOOOOOOOOOOAAAAAAAAG"];}
+digraph { rankdir = LR; node [shape = circle;]; null [shape = point;];null -> A;Wrecked [shape = doublecircle;];Closed [shape = doublecircle;];A -> Closed [label="Push"];Closed -> Open [label="Pull"];Closed -> Closed [label="Pull"];Closed -> Party [label="Beer_"];Closed -> Wrecked [label="Whiskey"];Wrecked -> Broke [label="Tequila"];Wrecked -> Smashed [label="Wine"];}
