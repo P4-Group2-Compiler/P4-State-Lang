@@ -30,7 +30,7 @@ type expr =
   | Ecst of constant                   (* constant *)
   | Eunop of unop * expr               (* unary operation *)
   | Ebinop of binop * expr * expr      (* binary operation *)
-  | Eident of ident                    (* variable *)
+  | Eident of ident                    (* variable *)                  
 
 (* Statements. *)
 type stmt =
@@ -47,7 +47,8 @@ type state =
   | State of string (* Might be better to have simply 'type state = string' *)
 
 type transition =
-  | Transition of event * state
+  | Transition of event * expr option * state
+  (*| GuardTrans of event * expr * state *)
 
 type state_kind =
   | Normal

@@ -6,11 +6,20 @@
 
 // Token Decleration
 
+// WHILE lang tokens
+
+%token ELSE PRINT WHILE AND OR NOT
+%token COLON BEGIN END NEWLINE
+%token PLUS MINUS TIMES DIV MOD
+
+// WHILE lang tokens end
+
 %token EOF
 
 (* Identifiers and integers *)
 %token <string> IDENTIFIER
 %token <string> INT
+%token <string> IDENT
 
 (* Keywords *)
 %token STATEMACHINE
@@ -26,6 +35,9 @@
 
 // Punctuators
 %token LEFTTUBORG RIGHTTUBORG (* '{' and '}' *)
+%token LP RP COMMA EQUAL (* "("     ")"     ","     "="  *)
+
+%nonassoc LT
 
 // Grammatical starting point
 %start prog
@@ -57,34 +69,45 @@ state_kind:
 | FINAL { Final }
 |       { Normal } // Empty means that there is no State Kind
 
+expr:
+  | IDENTIFIER
+      { let dummy_loc = (Lexing.dummy_pos, Lexing.dummy_pos) in
+        Eident { loc = dummy_loc; id = $1 } }
+  | INT
+      { Ecst (Cint (int_of_string $1)) }
+  | e1 = expr o = binop e2 = expr
+      { Ebinop (o, e1, e2) }
+  | LP e = expr RP
+      { e }
+;
+
 transitions:
   {[]}
 | transition transitions    { $1 :: $2 }
 ;
 
 transition:
-| ON IDENTIFIER GO IDENTIFIER   { Transition (Event $2, State $4) }
+| ON IDENTIFIER GO IDENTIFIER
+    { Transition (Event $2, None, State $4) }
 | ON IDENTIFIER IF expr GO IDENTIFIER
-      { 
-        Transition (Event $2, Expr $4 State $6)
-      }
+    { Transition (Event $2, Some $4, State $6) }
 ;
 
-expr:
-  | IDENTIFIER
-      { 
-        (* for now, ignore locations and just fake them *)
-        let dummy_loc = (Lexing.dummy_pos, Lexing.dummy_pos) in
-        Eident { loc = dummy_loc; id = $1 }
-      }
-  | INT
-      {
-        Ecst (Cint (int_of_string $1))
-      }
-  | expr LT expr
-      {
-        Ebinop (Blt, $1, $3)
-      }
+
+
+simple_stmt:
+| id = ident EQUAL e = expr
+    { Sassign (id, e) }
+
+%inline binop:
+| PLUS  { Badd }
+| MINUS { Bsub }
+| TIMES { Bmul }
+| DIV   { Bdiv }
+| MOD   { Bmod }
+| LT    { Blt }
+| AND   { Band }
+| OR    { Bor  }
 ;
 
 ident:

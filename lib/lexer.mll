@@ -29,27 +29,27 @@ rule token = parse
 | "GO"                                  { GO }
 | "IF"                                  { IF }
 
-(* Operators *)
-| "<"                                   { LT }
+(* Identifiers *)
+| (Letter IdentifierChars*) as id       { IDENTIFIER id }
 
 (* Numbers *)
 | ['0'-'9']+ as n                       { INT n }
 
-(* Identifiers *)
-| (Letter IdentifierChars*) as id       { IDENTIFIER id }
-
-    (* Numbers *)
-    | ['0'-'9']+ as n                       { INT n }
-
-    (* Less than operator *)
-    | "<"                                   { LT }
+(* Less than operator *)
+| "<"                                   { LT }
     
-    |eof                                    { EOF }
+(* Seperators *)
+| '{'                                   { LEFTTUBORG }
+| '}'                                   { RIGHTTUBORG }
+| '('                                   { LP }  
+| ')'                                   { RP }
 
-    (* Unexpected Character *)
-    | _ as c {
-        raise (Lexing_error (Printf.sprintf "Unexpected character: %c" c))
-      }
+|eof                                    { EOF }
+
+(* Unexpected Character *)
+| _ as c {
+    raise (Lexing_error (Printf.sprintf "Unexpected character: %c" c))
+}
 
 (* Rule for block comments *)
 and block_comment = parse
