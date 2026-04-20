@@ -102,6 +102,22 @@ let check_duplicate_transistions (statemachine : statemachine) : unit =
   in checker [] statemachine.transitions
 
 
+(* Function to run through all of the validation checks - add all new checks into this function *)
+let validate_state_machine (statemachine : statemachine) : unit =
+  check_duplicate_state_names statemachine;
+  check_duplicate_transistions statemachine
+
+
+(*---------------------------(* ANALYSE THE STATEMACHINE *)---------------------------*)
+
+(* This function is the one called by other files. It build the statemachine and runs through all the
+   checks. The statemachine that is returned is the one used for codegen *)
+let analyse (p : program) : statemachine =
+  let machine = create_state_machine p in
+      validate_state_machine machine;
+      machine
+
+
 (*---------------------------(* PRINT FUNCTIONS FOR DEBUGGIN *)---------------------------*)
 
 let print_transition (src, event, dest) =
