@@ -21,20 +21,29 @@ rule token = parse
     | "(*"                                  { block_comment lexbuf }
 
     (* Keywords *)
-    | "Statemachine"                        { STATEMACHINE }
-    | "Start" as id                         { START id }
-    | "Final" as id                         { FINAL id }
-    | "State"                               { STATE }
-    | "ON"                                  { ON }
-    | "GO"                                  { GO }
+| "Statemachine"                        { STATEMACHINE }
+| "Start"                               { START }
+| "Final"                               { FINAL }
+| "State"                               { STATE }
+| "ON"                                  { ON }
+| "GO"                                  { GO }
+| "IF"                                  { IF }
 
-    (* Seperators *)
-    | '{'                                   { LEFTTUBORG }
-    | '}'                                   { RIGHTTUBORG }
+(* Operators *)
+| "<"                                   { LT }
 
-    (* Identifiers *)
-    | (Letter IdentifierChars*) as id       { IDENTIFIER id }
+(* Numbers *)
+| ['0'-'9']+ as n                       { INT n }
 
+(* Identifiers *)
+| (Letter IdentifierChars*) as id       { IDENTIFIER id }
+
+    (* Numbers *)
+    | ['0'-'9']+ as n                       { INT n }
+
+    (* Less than operator *)
+    | "<"                                   { LT }
+    
     (* End of file; eof from Lexing *)
     |eof                                    { EOF }
 

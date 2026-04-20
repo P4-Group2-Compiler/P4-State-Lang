@@ -8,16 +8,21 @@
 
 %token EOF
 
-// Remember IDENTIFIER type string (in this case)
+(* Identifiers and integers *)
 %token <string> IDENTIFIER
+%token <string> INT
 
-// Keywords
+(* Keywords *)
 %token STATEMACHINE
 %token STATE
-%token <string> START 
-%token <string> FINAL
+%token START
+%token FINAL
 %token ON
 %token GO
+%token IF
+
+(* Operators *)
+%token LT
 
 // Punctuators
 %token LEFTTUBORG RIGHTTUBORG (* '{' and '}' *)
@@ -27,6 +32,7 @@
 
 // Types returned by the AST
 %type <Ast.program> prog
+%type <Ast.expr> expr
 
 %%
 
@@ -58,4 +64,27 @@ transitions:
 
 transition:
 | ON IDENTIFIER GO IDENTIFIER   { Transition (Event $2, State $4) }
+| ON IDENTIFIER IF expr GO IDENTIFIER
+      { 
+        (* later you might extend Transition to carry an expr option *)
+        (* For now, just print or store it somehow *)
+        Transition (Event $2, State $6)  (* we’ll refine this later *)
+      }
+;
+
+expr:
+  | IDENTIFIER
+      { 
+        (* for now, ignore locations and just fake them *)
+        let dummy_loc = (Lexing.dummy_pos, Lexing.dummy_pos) in
+        Eident { loc = dummy_loc; id = $1 }
+      }
+  | INT
+      {
+        Ecst (Cint (int_of_string $1))
+      }
+  | expr LT expr
+      {
+        Ebinop (Blt, $1, $3)
+      }
 ;
