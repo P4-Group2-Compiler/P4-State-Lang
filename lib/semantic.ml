@@ -4,13 +4,38 @@ exception Semantic_error of string
 
 let error msg = raise (Semantic_error msg)
 
+type statemachine = 
+{
+  statemachine_name : string;
+  states : state list;
+  start_state : state option;
+  final_state : state option;
+  transitions : (state * event * state) list;
+}
+
 let state_to_string = function
   | State s -> s
 let event_to_string = function
   | Event e -> e
 
+let event_to_string (Event e) = e (*Base printer for event*)
+let state_to_string (State s) = s (*Base printer for state*)
+
 let collect_states (p : program) : state list =
   List.map (fun state_decl -> state_decl.name) p.states
+
+
+(* TODO: Fix the if statement in the end of this function, might mess up later development *)
+let get_start_sates (p: program) : state option =
+  let start_states = 
+    List.fold_left (fun list state_decl -> 
+      match state_decl.kind with
+      | Start -> state_decl.name :: list
+      | Normal | Final -> list)
+      []
+      p.states
+    in
+    if List.length start_states > 1 then error "Multiple Start states declared" else None
 
 (* Function for adding the source state with the states: (event, state) -> (state, event, state) *)
 let add_source_state (st_decl : state_decl) : (state * event * state) list = 
@@ -24,6 +49,18 @@ let add_source_state (st_decl : state_decl) : (state * event * state) list =
 let collect_transitions (p : program) : (state * event * state) list = 
   List.concat (List.map add_source_state p.states)
 
+(*---------------------------------------------------------------------------------------------------------------------------*)
+(* Creating the mathmatical StateMachine *)
+let create_state_machine (p: program) statemachine =
+  {
+    statemachine_name = p.machine_name;
+    states = collect_states p;
+    start_state = get_start_sates p;
+    final_state = get_start_sates p;
+    transitions = collect_transitions p;
+  }
+
+(*---------------------------------------------------------------------------------------------------------------------------*)
 (* Printing the transitions - used for debugging and checking if it is correct *)
 let print_transition (src, event, dest) =
   Printf.printf "%s --%s--> %s\n" 
@@ -35,4 +72,6 @@ let print_iter_trans (t: (state * event * state) list) =
   List.iter print_transition t;
 
 
-
+(* let rec lstColTrans f = function (*Not in use for now. Map for applying the collect_transitions*)
+| [] -> []
+| h :: t -> f h :: lstColTrans f t *)

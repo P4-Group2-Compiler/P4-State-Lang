@@ -1,9 +1,12 @@
 Statemachine M {
+   // This is a single line comment
    Start State A {
     ON Push GO Closed
    }
 
    Final State B {
+   (* This is a block comment 
+   With two lines. *)
     ON Pull GO Open
     ON TEST GO SOMETHING
    }

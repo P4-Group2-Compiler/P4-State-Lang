@@ -4,6 +4,7 @@
 
     exception Lexing_error of string
 }
+
 (* Define chars for the identifier (name of state) *)
 let Letter = ['a'-'z' 'A'-'Z']
 let IdentifierChars = ['a'-'z' 'A'-'Z' '0'-'9' '_']
@@ -11,12 +12,18 @@ let IdentifierChars = ['a'-'z' 'A'-'Z' '0'-'9' '_']
 (* All the tokenization rules. When lexer hits any of the below, what token should be created *)
 rule token = parse
     (* Whitespace, tab and newline defined *)
-    | [' ' '\t' '\n']                       { token lexbuf }
+    | [' ' '\t' '\n' '\r']                  { token lexbuf }
+
+    (* Single-line comments *)
+    | "//" [^ '\n' '\r']*                   { token lexbuf }
+
+    (* Block comments *)
+    | "(*"                                  { block_comment lexbuf }
 
     (* Keywords *)
     | "Statemachine"                        { STATEMACHINE }
     | "Start" as id                         { START id }
-    | "Final" as id                         { FINAL id}
+    | "Final" as id                         { FINAL id }
     | "State"                               { STATE }
     | "ON"                                  { ON }
     | "GO"                                  { GO }
@@ -31,7 +38,15 @@ rule token = parse
     (* End of file; eof from Lexing *)
     |eof                                    { EOF }
 
-    (* Unexpected Character - Error when hitting anything else not covered *)
+    (* Unexpected Character *)
     | _ as c {
         raise (Lexing_error (Printf.sprintf "Unexpected character: %c" c))
-        }
+      }
+
+(* Rule for block comments *)
+and block_comment = parse
+    | "*)"                                { token lexbuf }
+    | eof {
+        raise (Lexing_error "Unterminated block comment")
+      }
+    | _                                   { block_comment lexbuf }
