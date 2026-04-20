@@ -120,11 +120,13 @@ let analyse (p : program) : statemachine =
 
 (*---------------------------(* PRINT FUNCTIONS FOR DEBUGGIN *)---------------------------*)
 
-let print_transition (src, event, dest) =
+(* Un-comment those that you need when testing *)
+
+(* let print_transition (src, event, dest) =
   Printf.printf "%s --%s--> %s\n" 
   (state_to_string src)
   (event_to_string event)
   (state_to_string dest)
 
 let print_iter_trans (t: (state * event * state) list) = 
-  List.iter print_transition t;
+  List.iter print_transition t; *)
