@@ -35,6 +35,10 @@ type expr =
 (* Statements. *)
 type stmt =
   | Sif of expr * stmt * stmt       (* conditional *)
+  | Sassign of ident * expr         (* modifying a variable *)
+  | Sblock of stmt list             (* a sequence of statements *)
+  | Sprint of expr list             (* printing a list of expressions *)
+  | Swhile of expr * stmt           (* while loop *)
   
 type event =
   | Event of string (* Might be better to have simply 'type event = string' *)

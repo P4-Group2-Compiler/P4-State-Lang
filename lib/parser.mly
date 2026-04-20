@@ -66,9 +66,7 @@ transition:
 | ON IDENTIFIER GO IDENTIFIER   { Transition (Event $2, State $4) }
 | ON IDENTIFIER IF expr GO IDENTIFIER
       { 
-        (* later you might extend Transition to carry an expr option *)
-        (* For now, just print or store it somehow *)
-        Transition (Event $2, State $6)  (* we’ll refine this later *)
+        Transition (Event $2, Expr $4 State $6)
       }
 ;
 
@@ -87,4 +85,8 @@ expr:
       {
         Ebinop (Blt, $1, $3)
       }
+;
+
+ident:
+  id = IDENT { { loc = ($startpos, $endpos); id } }
 ;

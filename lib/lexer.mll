@@ -44,7 +44,6 @@ rule token = parse
     (* Less than operator *)
     | "<"                                   { LT }
     
-    (* End of file; eof from Lexing *)
     |eof                                    { EOF }
 
     (* Unexpected Character *)

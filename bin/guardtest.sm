@@ -1,0 +1,13 @@
+Statemachine M {
+   // This is a single line comment
+   Start State Open {
+    ON Push IF (3 < 4) GO Closed
+   }
+
+   Final State Closed {
+   (* This is a block comment 
+   With two lines. *)
+    ON Pull GO Open
+    ON TEST GO SOMETHING
+   }
+}
