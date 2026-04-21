@@ -33,12 +33,16 @@ type event =
 type state =
   | State of string (* Might be better to have simply 'type state = string' *)
 
-
 type transition =
   | Transition of event * state
 
+type state_kind =
+  | Normal
+  | Start
+  | Final
+
 type state_decl = {
-  state_type : string;
+  kind : state_kind;
   name : state;                     (*state B {}*) (*= State of string*)
   transitions : transition list;    (*state B{ON open GO A}*)
 }

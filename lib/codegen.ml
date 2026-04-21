@@ -1,4 +1,5 @@
 open Ast
+open Semantic
 
 let state_string_identifier = function
   | Ast.State state_string -> state_string
@@ -6,71 +7,75 @@ let state_string_identifier = function
 let event_string_identifier = function
   | Ast.Event event_string -> event_string
 
-(* Collects events by looping over all events contained in each transition, in each state *)
-let collect_events program_ast =
-  (* Hashtable to avoid collecting duplicate events contained in multiple states: *)
-  let seen_events = Hashtbl.create 32 in (* Hashtbl limited to 32 events *)
-  let event_list = ref [] in
+(*======================================================================================*)
+let generate_c_code ir =
+
+  let start_state_name = state_string_identifier ir.start_state in
+
+  let c_file = "output/c/generated_state_machine.c" in
+  let c_out_channel = open_out c_file in
+(*-------------------------------------------------------------------------------------*)
+  (* Includes: *)
+  Printf.fprintf c_out_channel "#include \"state_machine.h\"\n";
+  Printf.fprintf c_out_channel "#include <stdio.h>\n\n";
+(*-------------------------------------------------------------------------------------*)
+  (* The StateID ENUM: *)
+  Printf.fprintf c_out_channel "typedef enum {\n    ";
+  List.iter (fun state -> 
+    Printf.fprintf c_out_channel "%s,\n    " (state_string_identifier state)
+  ) ir.states;
+  Printf.fprintf c_out_channel "\n    STATE_COUNT\n} StateID;\n\n";
+(*-------------------------------------------------------------------------------------*)
+  (* main() + StateMachine struct init + loop that populates the states[] array: *)
+  Printf.fprintf c_out_channel "int main(void) {\n";
+  Printf.fprintf c_out_channel "    StateMachine %s = {0};\n" ir.statemachine_name;
   List.iter (fun state ->
-    (* '_' to ignore the state *)
-    List.iter (fun (Ast.Transition (event, _)) ->
-      let current_event_name = event_string_identifier event in
-      if not (Hashtbl.mem seen_events current_event_name) then begin
-        Hashtbl.add seen_events current_event_name ();
-        event_list := current_event_name :: !event_list
-      end
-    ) state.transitions
-    
-  ) program_ast.states;
+    let current_state_name = state_string_identifier state in
+    Printf.fprintf c_out_channel "    %s.states[%s] = (State){.name = \"%s\"};\n"
+      ir.statemachine_name current_state_name current_state_name
+  ) ir.states;
+  Printf.fprintf c_out_channel "    %s.state_count = STATE_COUNT;\n" ir.statemachine_name;
 
-  !event_list
+  Printf.fprintf c_out_channel "\n";
+(*-------------------------------------------------------------------------------------*)
+  (* .start_state + .current_state + .final_states[]: *)
+  Printf.fprintf c_out_channel "    %s.start_state = %s.states[%s];\n" ir.statemachine_name ir.statemachine_name start_state_name;
+  Printf.fprintf c_out_channel "    %s.current_state = %s.start_state;\n" ir.statemachine_name ir.statemachine_name;
+  List.iteri (fun i state ->
+    let current_state_name = state_string_identifier state in
+    Printf.fprintf c_out_channel "    %s.final_states[%d] = %s.states[%s];\n"
+      ir.statemachine_name i ir.statemachine_name current_state_name
+  ) ir.final_state;
 
-let generate_c_code ast =
-  let events = collect_events ast in
-  (* Looping through the states for a match between "state_type" and "Start" to find the start state *)
-  let start_name =
-    match List.find_opt (fun state -> state.state_type = "Start") ast.states with
-    | Some state -> state_string_identifier state.name
-    | None -> state_string_identifier (List.hd ast.states).name
-  in
+  Printf.fprintf c_out_channel "\n";
+(*-------------------------------------------------------------------------------------*)
+  (* Loop that populates the .transitions[] array: *)
+  List.iteri (fun i (src_state, event, dst_state) ->
+    Printf.fprintf c_out_channel "    %s.transitions[%d] = (Transition){\n" ir.statemachine_name i;
+    Printf.fprintf c_out_channel "        .src_state = %s.states[%s],\n" ir.statemachine_name (state_string_identifier src_state);
+    Printf.fprintf c_out_channel "        .event     = (Event){.name = \"%s\"},\n" (event_string_identifier event);
+    Printf.fprintf c_out_channel "        .dst_state = %s.states[%s]\n" ir.statemachine_name (state_string_identifier dst_state);
+    Printf.fprintf c_out_channel "    };\n";
+  ) ir.transitions;
+  Printf.fprintf c_out_channel "    %s.transition_count = %d;\n" ir.statemachine_name (List.length ir.transitions);
+(*-------------------------------------------------------------------------------------*)
+  (* The state machine's main-loop that reads user input + call to state_machine_step(...): *)
+  Printf.fprintf c_out_channel "    \n#define STATE_MACHINE_RUNNING true\n\n";
+  Printf.fprintf c_out_channel "    while (STATE_MACHINE_RUNNING) {\n";
+  Printf.fprintf c_out_channel "        printf(\"\\nCurrent state: %%s\\n\", %s.current_state.name);\n" ir.statemachine_name;
+  Printf.fprintf c_out_channel "        printf(\"Enter event: \");\n";
+  Printf.fprintf c_out_channel "        char entered_event_name[256];\n";
+  Printf.fprintf c_out_channel "        while (scanf(\"%%s255\", &entered_event_name) != true) {\n";
+  Printf.fprintf c_out_channel "            printf(\"\\nInvalid Input!\\n\");\n";
+  Printf.fprintf c_out_channel "            while (getchar() != '\\n');\n";
+  Printf.fprintf c_out_channel "        };\n";
+  Printf.fprintf c_out_channel "        Event entered_event = (Event){.name = entered_event_name};\n";
+  Printf.fprintf c_out_channel "        state_machine_step(&%s, entered_event);\n" ir.statemachine_name;
+  Printf.fprintf c_out_channel "    }\n\n";
+  Printf.fprintf c_out_channel "    return 0;\n";
+  Printf.fprintf c_out_channel "}";
+(*-------------------------------------------------------------------------------------*)
+  close_out c_out_channel;
 
-  Printf.printf "#include <stdio.h>\n";
-  Printf.printf "#include \"state_machine.h\"\n\n";
-
-  Printf.printf "typedef enum {\n    ";
-  List.iter (fun state -> Printf.printf "%s,\n    " (state_string_identifier state.name)) ast.states;
-  Printf.printf "\n    STATE_COUNT\n} StateID_t;\n\n";
-
-  Printf.printf "typedef enum {\n    ";
-  List.iter (fun event -> Printf.printf "%s,\n    " event) events;
-  Printf.printf "\n    EVENT_COUNT\n} EventID_t;\n\n";
-
-  Printf.printf "int main(void) {\n";
-  Printf.printf "    StateMachine %s = {0};\n" ast.machine_name;
-  Printf.printf "    %s.state_count   = STATE_COUNT;\n" ast.machine_name;
-  Printf.printf "    %s.start_state   = %s;\n" ast.machine_name start_name;
-  Printf.printf "    %s.current_state = %s.start_state;\n\n" ast.machine_name ast.machine_name;
-
-  List.iter (fun state ->
-    let current_state_name = state_string_identifier state.name in
-    let is_start = if state.state_type = "Start" then "true" else "false" in
-    Printf.printf "    %s.states[%s] = (State){\n" ast.machine_name current_state_name;
-    Printf.printf "        .identifier       = %s,\n" current_state_name;
-    Printf.printf "        .is_start         = %s,\n" is_start;
-    Printf.printf "        .transition_count = %d,\n" (List.length state.transitions);
-    Printf.printf "        .transitions = {\n";
-    List.iter (fun (Ast.Transition (event, target)) ->
-      Printf.printf "            { %s, %s },\n" (event_string_identifier event) (state_string_identifier target)
-    ) state.transitions;
-    Printf.printf "        },\n";
-    Printf.printf "    };\n\n"
-  ) ast.states;
-
-  Printf.printf "    while (1) {\n";
-  Printf.printf "        printf(\"Current state: %%d\\n\", %s.current_state);\n" ast.machine_name;
-  Printf.printf "        printf(\"Enter event: \");\n";
-  Printf.printf "        int e; scanf(\"%%d\", &e);\n";
-  Printf.printf "        state_machine_step(&%s, e);\n" ast.machine_name;
-  Printf.printf "    }\n";
-  Printf.printf "    return 0;\n";
-  Printf.printf "}"
+  (* Debug message to terminal, not for the .C file: *)
+  Printf.printf "\n\nCreated C output file at: %s\n\n" c_file

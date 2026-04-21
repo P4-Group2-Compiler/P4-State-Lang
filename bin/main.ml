@@ -1,14 +1,20 @@
 open Lexing
 open Parsing
 open P4
-
+open Dottest
 open Ast
+open Semantic
 
 let string_of_state = function
   | State s -> s
 
 let string_of_event = function
   | Event e -> e
+
+let string_of_state_kind = function
+  | Normal -> "Normal"
+  | Start -> "Start"
+  | Final -> "Final"
 
 let print_transition = function
   | Transition (event, target) ->
@@ -17,12 +23,18 @@ let print_transition = function
         (string_of_state target)
 
 let print_state st =
-  Printf.printf "   State Type: %s State: %s\n" st.state_type (string_of_state st.name);
+  Printf.printf "   State Type: %s State: %s\n" 
+  (string_of_state_kind st.kind) 
+  (string_of_state st.name);
   List.iter print_transition st.transitions
 
 let print_program p =
   Printf.printf "Machine: %s\n" p.machine_name;
   List.iter print_state p.states
+
+(***)
+
+(***)
 
 let () =
   if Array.length Sys.argv <> 2 then begin
@@ -42,8 +54,21 @@ let () =
         Printf.printf "Parse error\n";
         close_in chan;
         exit 1
-  in
+  in 
+
+  let transition = Semantic.collect_transitions ast in  (*Printing out what will be transitions in DOT*)
+
+    Dottest.printer transition;
 
   close_in chan;
   (*print_program ast;*)
-  Codegen.generate_c_code ast;
+
+  (* Debugging print statement - TODO remove later *)
+let statemachine = Semantic.analyse ast in
+  Printf.printf "--> StateMachine Analysed! <--\n--> Machine name = %s <--" statemachine.statemachine_name;
+
+  Codegen.generate_c_code statemachine;
+
+(* let transitions = Semantic.collect_transitions ast in
+  Semantic.print_iter_trans transitions; *)
+

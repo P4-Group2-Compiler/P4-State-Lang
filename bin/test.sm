@@ -1,10 +1,18 @@
-Statemachine M {
-   Start State A {
-    ON Push GO Closed
-   }
+Statemachine Door { // This is a single line comment 1234!?&$*_-//||\\☺↑↓→←
+	Start State Closed {
+		ON push GO Open
+      ON lock GO Locked
+	}
 
-   Final State B {
-    ON Pull GO Open
-    ON TEST GO SOMETHING
-   }
+	State Open {
+      ON pull GO Closed
+	}
+
+	Final State Locked {
+      ON unlock GO Closed
+      
+      (* This is a block comment...
+      ...on multiple lines!
+      *)
+	}
 }

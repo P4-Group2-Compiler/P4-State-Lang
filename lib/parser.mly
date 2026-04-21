@@ -42,10 +42,14 @@ states:
 ;
 
 state:
-| START STATE IDENTIFIER LEFTTUBORG transitions RIGHTTUBORG  {{ state_type = $1; name = State $3; transitions = $5 }}
-| FINAL STATE IDENTIFIER LEFTTUBORG transitions RIGHTTUBORG  {{ state_type = $1; name = State $3; transitions = $5 }}
-| STATE IDENTIFIER LEFTTUBORG transitions RIGHTTUBORG        {{ state_type = ""; name = State $2; transitions = $4 }}
+| state_kind STATE IDENTIFIER LEFTTUBORG transitions RIGHTTUBORG  {{ kind = $1; name = State $3; transitions = $5 }}
+
 ;
+
+state_kind:
+| START { Start }
+| FINAL { Final }
+|       { Normal } // Empty means that there is no State Kind
 
 transitions:
   {[]}

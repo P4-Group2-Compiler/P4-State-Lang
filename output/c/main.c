@@ -6,55 +6,53 @@
 En simpel alarm clock state machine — skrevet i vores syntaks — brugt som eksempel:
     - (Den samme som der er i "alarm_clock_example.txt")
 ------------------------------------------------------------------------------------------
-
-    StateMachine M {
-
+    StateMachine AlarmClock {
         Start State IDLE {
-            ON ALARM_BTN_PRESS GO ALARM_ARMED;
+            ON ALARM_BTN_PRESS GO ALARM_ARMED
         }
 
         State ALARM_ARMED {
-            ON ALARM_BTN_PRESS GO IDLE;
-            ON ALARM_TIMER_EXPIRED GO ALARM_RINGING;
+            ON ALARM_BTN_PRESS GO IDLE
+            ON ALARM_TIMER_EXPIRED GO ALARM_RINGING
         }
 
         State ALARM_RINGING {
-            ON ALARM_BTN_PRESS GO IDLE;
-            ON SNOOZE_BTN_PRESS GO SNOOZE;
+            ON ALARM_BTN_PRESS GO IDLE
+            ON SNOOZE_BTN_PRESS GO SNOOZE
         }
 
         State SNOOZE {
-            ON SNOOZE_TIME_EXPIRED GO ALARM_RINGING;
-            ON ALARM_BTN_PRESS GO IDLE;
+            ON SNOOZE_TIME_EXPIRED GO ALARM_RINGING
+            ON ALARM_BTN_PRESS GO IDLE
         }
-            
     }
-
---------------------------------------------------------------------------------
 */
-
-typedef enum STATE_IDENTIFIERS {
+// ---------------------------------------------------------------------------------------
+typedef enum StateID {
     IDLE,
     ALARM_ARMED,
     ALARM_RINGING,
     SNOOZE,
 
     STATE_ID_COUNT,
-} STATE_IDENTIFIERS;
+} StateID;
 
 // ---------------------------------------------------------------------------------------
-typedef enum EVENT_IDENTIFIERS {
+typedef enum EventID {
     ALARM_BTN_PRESS,
     ALARM_TIMER_EXPIRED,
     SNOOZE_BTN_PRESS,
     SNOOZE_TIME_EXPIRED,
 
     EVENT_ID_COUNT,
-} EVENT_IDENTIFIERS;
+} EventID;
 
 // =======================================================================================
-
+// ORIGINAL EXAMPLE; NO LONGER VALID AFTER SEMANTIC ANALYSIS AND IR CHANGES:
+/*
 int main(void) {
+
+    printf("\n(EKSEMPEL-StateMachine-skabelonen fra output/c/main.c)\n");
 
     StateMachine M  = {0};
     M.state_count   = STATE_ID_COUNT;
@@ -142,6 +140,8 @@ int main(void) {
     // -------------------------------------------------------------
     return 0;
 }
+*/
 
-// Terminal command til at køre eksemplet: (Husk at cd til /out/c)
+
+// Terminal command til at køre eksemplet: (Husk at cd til /output/c)
 // gcc main.c state_machine.c -o alarm; ./alarm

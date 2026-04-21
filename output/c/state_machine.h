@@ -3,64 +3,42 @@
 
 #include <stdbool.h>
 
-#define MAX_TRANSITIONS 10
-#define MAX_STATES      10
-
-// =======================================================================================
-/* (Skabelon/eksempel):
-typedef enum STATE_IDENTIFIERS {
-    A,
-    B,
-    C,
-} STATE_IDENTIFIERS;
-*/
-// =======================================================================================
-/* (Skabelon/eksempel):
-typedef enum EVENT_IDENTIFIERS {
-    a,
-    b,
-    c,
-} EVENT_IDENTIFIERS;
-*/
-// =======================================================================================
-typedef int EventID;
-typedef int StateID;
-
-// =======================================================================================
-typedef struct Transition {
-    EventID event;
-    StateID next_state;
-} Transition;
+#define MAX_TRANSITIONS 256
+#define MAX_STATES      256
 
 // =======================================================================================
 typedef struct State {
-    bool is_start;
-
-    StateID    identifier;
-    int        transition_count;
-    Transition transitions[MAX_TRANSITIONS];
-    //State*   state_pointers[MAX_TRANSITIONS];
+    char* name;
 } State;
 
 // =======================================================================================
+typedef struct Event {
+    char* name;
+} Event;
+
+// =======================================================================================
+typedef struct Transition {
+    State src_state;
+    Event event;
+    State dst_state;
+} Transition;
+
+// =======================================================================================
 typedef struct StateMachine {
-    State   states[MAX_STATES];
-    int     state_count;
-    StateID start_state;
-    StateID current_state;
+    char*      name;
+    State      states[MAX_STATES];
+    State      start_state;
+    State      final_states[MAX_STATES];
+    State      current_state;
+    int        state_count;
+    Transition transitions[MAX_TRANSITIONS];
+    int        transition_count;
 } StateMachine;
 
 // =======================================================================================
-// void init_state_machine(StateMachine* state_machine); (Ikke brugt alligevel)
-StateID state_machine_step(StateMachine* state_machine, EventID event);
+bool state_machine_step(StateMachine* state_machine, Event event);
 
 // =======================================================================================
 
-/*
-NOTER:
-    - Linked lists???
-        https://www.geeksforgeeks.org/c/c-program-to-implement-singly-linked-list/
-
-*/
 
 #endif // STATE_MACHINE_H

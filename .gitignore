@@ -1,4 +1,7 @@
 _build/
 build-and-test.yaml
-output/c/alarm.exe
+output/c/*.exe
 output/c/.clang-format
+output/c/generated_state_machine.c
+.DS_Store
+bufftest
