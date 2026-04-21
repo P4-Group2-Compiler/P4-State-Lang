@@ -12,6 +12,8 @@ bug-reports: "https://github.com/P4-Group2-Compiler/P4-State-Lang/issues"
 depends: [
   "ocaml" {>= "4.14"}
   "dune" {>= "3.21"}
+  "alcotest"
+  "menhir"
   "odoc" {with-doc}
 ]
 build: [

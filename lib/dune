@@ -1,2 +1,8 @@
 (library
- (name P4))
+ (name P4)
+ (modules test_lexer ast lexer parser semantic dottest))
+
+(ocamllex lexer)
+
+(menhir
+ (modules parser))

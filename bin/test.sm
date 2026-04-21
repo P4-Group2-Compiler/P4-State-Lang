@@ -1,0 +1,18 @@
+Statemachine M {
+   Start State Silke {
+    ON Push GO Closed
+   }
+
+   State Closed {
+      ON Kick GO Broken
+   }
+
+   State Broken {
+      ON Hammer GO Destroyed
+   }
+
+   Final State Destroyed {
+    ON Pull GO Open
+    ON TEST GO SOMETHING
+   }
+}
