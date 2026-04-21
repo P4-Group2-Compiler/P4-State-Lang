@@ -1,12 +1,17 @@
 Statemachine M {
-   // This is a single line comment
-   Start State A {
+   Start State Silke {
     ON Push GO Closed
    }
 
-   Final State B {
-   (* This is a block comment 
-   With two lines. *)
+   State Closed {
+      ON Kick GO Broken
+   }
+
+   State Broken {
+      ON Hammer GO Destroyed
+   }
+
+   Final State Destroyed {
     ON Pull GO Open
     ON TEST GO SOMETHING
    }

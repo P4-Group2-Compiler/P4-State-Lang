@@ -63,10 +63,9 @@ let () =
   close_in chan;
   print_program ast;
 
-  (* Debuggin print statement - TODO remove later *)
-let check_start_state = Semantic.get_start_sates ast in
-  match check_start_state with
-  | _ -> Printf.printf "This code is running"
+  (* Debugging print statement - TODO remove later *)
+let statemachine = Semantic.analyse ast in
+  Printf.printf "--> StateMachine Analysed! <--\n--> Machine name = %s <--" statemachine.statemachine_name
 
 (* let transitions = Semantic.collect_transitions ast in
   Semantic.print_iter_trans transitions; *)
