@@ -1,0 +1,4 @@
+Statemachine M {
+  State A {
+  }
+}
