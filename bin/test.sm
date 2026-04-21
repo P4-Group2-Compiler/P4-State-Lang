@@ -1,5 +1,5 @@
 Statemachine M {
-   Start State Normal {
+   Start State Silke {
     ON Push GO Closed
    }
 

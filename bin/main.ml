@@ -64,8 +64,8 @@ let () =
   print_program ast;
 
   (* Debugging print statement - TODO remove later *)
-let sm = Semantic.analyse ast in
-  Printf.printf "--> StateMachine Analysed! <--\n--> Machine name = %s <--" sm.statemachine_name
+let statemachine = Semantic.analyse ast in
+  Printf.printf "--> StateMachine Analysed! <--\n--> Machine name = %s <--" statemachine.statemachine_name
 
 (* let transitions = Semantic.collect_transitions ast in
   Semantic.print_iter_trans transitions; *)

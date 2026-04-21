@@ -12,7 +12,7 @@ type statemachine =
 {
   statemachine_name : string;
   states : state list;
-  start_state : state option;
+  start_state : state;
   final_state : state list;
   transitions : (state * event * state) list;
 }
@@ -31,7 +31,7 @@ let collect_states (p : program) : state list =
 
 (* Get a list of all start states then checks the list to see if there is more than one *)
 (* TODO: Fix the if statement in the end of this function, might mess up later development *)
-let get_start_states (p: program) : state option =
+let get_start_states (p: program) : state =
   let start_states = 
     List.fold_left (fun list state_decl -> 
       match state_decl.kind with
@@ -41,7 +41,8 @@ let get_start_states (p: program) : state option =
       p.states
     in
     if List.length start_states > 1 then error "Multiple Start states declared"
-      else if List.length start_states = 0 then error "Missing Start state decleration" else Some (List.hd start_states) 
+      else if List.length start_states = 0 then error "Missing Start state decleration"
+      else List.hd start_states
 
 (* Get a list of all Finals states in the program *)
 let get_final_states (p: program) : state list = 
@@ -120,10 +121,8 @@ let rec can_reach_final_state (statemachine : statemachine) (visited : state lis
 
 (* We check if the Start state has a path to the Final state *)
 let check_start_reaches_final (statemachine : statemachine) : unit =
-  match statemachine.start_state with
-  | None -> () (* No start state, skip check *)
-  | Some start ->
-    if not (can_reach_final_state statemachine [] start) then
+  let start = statemachine.start_state in  
+  if not (can_reach_final_state statemachine [] start) then
       error ("{Start State " ^ state_to_string start ^ "} cannot reach a Final State")
 
 (* Returns a list of states that cannot reach Final state (dead-ends) might use for warnings later? *)
