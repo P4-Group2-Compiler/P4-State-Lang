@@ -41,7 +41,7 @@ let get_start_states (p: program) : state option =
       p.states
     in
     if List.length start_states > 1 then error "Multiple Start states declared"
-      else if List.length start_states = 0 then error "Missing Start state decleration" else None 
+      else if List.length start_states = 0 then error "Missing Start state decleration" else Some (List.hd start_states) 
 
 (* Get a list of all Finals states in the program *)
 let get_final_states (p: program) : state list = 
@@ -92,6 +92,7 @@ let check_duplicate_state_names (statemachine: statemachine) : unit =
         checker (name :: seen) tail
   in checker [] statemachine.states
 
+  (* Recursive function that checks if the same transition has been declared more than once *)
 let check_duplicate_transistions (statemachine : statemachine) : unit =
   let rec checker seen = function
     | [] -> ()
@@ -102,12 +103,42 @@ let check_duplicate_transistions (statemachine : statemachine) : unit =
         checker (head :: seen) tail
   in checker [] statemachine.transitions
 
+(* Helper function for checking if start can reach final. It returns a list of destination states connected
+   with transitions from the passed state *)
+let successors (statemachine : statemachine) (state : state) : state list =
+  List.fold_left (fun acc (src, _, dest) ->
+    if src = state then dest :: acc else acc)
+  [] statemachine.transitions
+
+(* Helper function for the check_start_reaches_final *)
+let rec can_reach_final_state (statemachine : statemachine) (visited : state list) (state : state) : bool =
+  if List.mem state statemachine.final_state then true
+  else if List.mem state visited then false
+  else
+    let next_states = successors statemachine state in
+    List.exists (fun next -> can_reach_final_state statemachine (state :: visited) next) next_states
+
+(* We check if the Start state has a path to the Final state *)
+let check_start_reaches_final (statemachine : statemachine) : unit =
+  match statemachine.start_state with
+  | None -> () (* No start state, skip check *)
+  | Some start ->
+    if not (can_reach_final_state statemachine [] start) then
+      error ("{Start State " ^ state_to_string start ^ "} cannot reach a Final State")
+
+(* Returns a list of states that cannot reach Final state (dead-ends) might use for warnings later? *)
+let get_unreachable_states (statemachine : statemachine) : state list =
+  List.filter
+    (fun state ->
+      not (List.mem state statemachine.final_state) &&
+      not (can_reach_final_state statemachine [] state))
+    statemachine.states
 
 (* Function to run through all of the validation checks - add all new checks into this function *)
 let validate_state_machine (statemachine : statemachine) : unit =
   check_duplicate_state_names statemachine;
-  check_duplicate_transistions statemachine
-
+  check_duplicate_transistions statemachine;
+  check_start_reaches_final statemachine
 
 (*---------------------------(* ANALYSE THE STATEMACHINE *)---------------------------*)
 
