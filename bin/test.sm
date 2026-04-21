@@ -1,19 +1,29 @@
-Statemachine Bobby {
-   // This is a single line comment
-   Start State A {
+Statemachine M {
+   Start State Silke {
     ON Push GO Closed
    }
 
-   Final State Closed {
-   (* This is a block comment 
-   With two lines. *)
+   State Closed {
+      ON Kick GO Broken
+      ON Fight GO Hospital
+   }
+
+   State Broken {
+      ON Hammer GO Destroyed
+   }
+
+   Final State Destroyed {
     ON Pull GO Open
     ON Pull GO Closed
     ON Beer GO Party
     ON Whiskey GO Wrecked
    }
 
-      Final State  Wrecked{
+   Final State Hospital {
+      ON Recovery GO Hospital
+   }
+
+   Final State  Wrecked{
    (* This is a block comment 
    With two lines. *)
     ON Tequila GO Broke

@@ -52,23 +52,6 @@ let () =
         exit 1
   in 
 
-  (*************************************************************************************************)
-  (*For checking DOT*)
-
-  (*Collects transitions, start and final from the statemachine*)
-  let transition = Semantic.collect_transitions ast in
-  let starts = Semantic.get_start_states ast in
-  let finals = Semantic.get_final_states ast in
-
-  (*Stores transitions, start and final states as strings*)
-  let storedTransStrings = Dottest.trans_string_list transition in
-  let storedStartStrings = Dottest.start_string_list starts in
-  let storedFinalStrings = Dottest.final_string_list finals in
-
-  (*GRAPHVIZ FILE*)
-  (*Buffs state machine into DOT syntax and creates .gv file*)
-  Dottest.dot_syntax_buffer Dottest.dot_topSyntax Dottest.dot_bottomSyntax storedStartStrings storedFinalStrings storedTransStrings;
-
   (**************************************************************************************************)
   (*Collect functions in a functions, to use on the statemachine*)
   let statemachine = Semantic.analyse ast in
@@ -77,14 +60,12 @@ let () =
   close_in chan;
   (*print_program ast;*)
 
-  (*dune exec ./main.exe -- test.sm*)
+  (* Debugging print statement - TODO remove later *)
+  let statemachine = Semantic.analyse ast in
+  (*Printf.printf "--> StateMachine Analysed! <--\n--> Machine name = %s <--" statemachine.statemachine_name*)
 
-  (*
-  (* Debuggin print statement - TODO remove later *)
-  let check_start_state = Semantic.get_start_sates ast in
-  match check_start_state with
-  | _ -> Printf.printf "This code is running"
-  *)
+  (*Creating the .gv file from statemachine*)
+  Dottest.graphFromStatemachine statemachine
 
   (* let transitions = Semantic.collect_transitions ast in
   Semantic.print_iter_trans transitions; *)
