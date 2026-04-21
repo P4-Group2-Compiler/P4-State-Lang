@@ -1,32 +1,24 @@
-Statemachine M {
-   Start State Silke {
-    ON Push GO Closed
+Statemachine Jonathan {
+
+   Start State Sober {
+      ON Tequila GO Party
    }
 
-   State Closed {
-      ON Kick GO Broken
-      ON Fight GO Hospital
+   State Party {
+      ON Dance GO Wrecked
    }
 
-   State Broken {
-      ON Hammer GO Destroyed
+   State Wrecked {
+      ON Shots GO Wasted
+      ON Water GO Home
+      ON Taxi GO Home
    }
 
-   Final State Destroyed {
-    ON Pull GO Open
-    ON Pull GO Closed
-    ON Beer GO Party
-    ON Whiskey GO Wrecked
+   Final State Home {
+      ON Bed GO Home
    }
-
-   Final State Hospital {
-      ON Recovery GO Hospital
-   }
-
-   Final State  Wrecked{
-   (* This is a block comment 
-   With two lines. *)
-    ON Tequila GO Broke
-    ON Wine GO Smashed
+   
+   Final State Wasted {
+      ON Shots GO Wasted
    }
 }

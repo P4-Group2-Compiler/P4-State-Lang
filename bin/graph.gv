@@ -1,1 +1,8 @@
-digraph M { rankdir = LR; node [shape = circle;]; null [shape = point;];Silke -> Closed [label="Push"];Closed -> Broken [label="Kick"];Closed -> Hospital [label="Fight"];Broken -> Destroyed [label="Hammer"];Destroyed -> Open [label="Pull"];Destroyed -> Closed [label="Pull"];Destroyed -> Party [label="Beer"];Destroyed -> Wrecked [label="Whiskey"];Hospital -> Hospital [label="Recovery"];Wrecked -> Broke [label="Tequila"];Wrecked -> Smashed [label="Wine"];null -> Silke;Wrecked [shape = doublecircle;];Hospital [shape = doublecircle;];Destroyed [shape = doublecircle;];}
+digraph Jonathan { labelloc= t;
+   label=<<B>Jonathan</B>>; 
+   rankdir = LR; 
+   fontname="Arial";
+   fontsize=20;
+   node [shape = circle; fontname="Arial"];
+   edge [fontname="Arial";];
+   null [shape = point; style=invis;];Sober -> Party [label="Tequila"];Party -> Wrecked [label="Dance"];Wrecked -> Wasted [label="Shots"];Wrecked -> Home [label="Water"];Wrecked -> Home [label="Taxi"];Home -> Home [label="Bed"];Wasted -> Wasted [label="Shots"];null -> Sober [penwidth=4.0; lhead= Sober;];Wasted [shape = doublecircle;];Home [shape = doublecircle;];}
