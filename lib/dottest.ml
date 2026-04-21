@@ -2,9 +2,8 @@ open Semantic
 open Ast
 
 (**************************************************************************************************************************************************)
-(*IN USE! Strings of transitions*)
+(*Strings of transitions*)
 
-(*Creates actual strings from transitions of type (state, event, state) in DOT transition format*)
 let stringify_trans (s1, e, s2) =
  let s1_str = state_to_string s1 in
  let e_str = event_to_string e in
@@ -12,6 +11,7 @@ let stringify_trans (s1, e, s2) =
  Printf.sprintf "%s -> %s [label=\"%s\"];" s1_str s2_str e_str 
 
 (*Outputs a list of DOT transition as strings, using above function*)
+
 let trans_string_list (t : (state * event * state) list) =
   List.map stringify_trans t
 
@@ -20,9 +20,8 @@ let string_list_printer (t : (string) list) =
   List.iter print_endline t
 
 (**************************************************************************************************************************************************)
-(*WIP* Strings of start states. 
-NB! I fiddled with the semantics' statecmachine and get_start_states. 
-Everything's a state list*)
+(*Strings of start states*)
+
 let stringify_start s =
   let start_s = state_to_string s in
   Printf.sprintf "null -> %s;" start_s
@@ -31,7 +30,8 @@ let start_string_list (t : (state) list) =
   List.map stringify_start t
 
 (**************************************************************************************************************************************************)
-(*WIP* Strings of final states*)
+(*Strings of final states*)
+
 let stringify_final s =
   let final_s = state_to_string s in
   Printf.sprintf "%s [shape = doublecircle;];" final_s
@@ -40,27 +40,22 @@ let final_string_list (t : (state) list) =
   List.map stringify_final t
 
 (**************************************************************************************************************************************************)
-(*IN USE! Printer, transitions as they are - not strings*)
-(*Not immediately useful right now, but keep just in case*)
+(*WIP! Function that takes the entire statemachine*)
+(*Strings + buffer? We'll see. Whatever's part of the dotsyntax currently created in the main should be done here, if possible*)
 
-(*Prints (state, event, state) in DOT syntax. NB! Does NOT return transitions as strings!*)
-let transition_to_string (s1, e, s2) =    
-  Printf.printf "%s -> %s [label=\"%s\";];"
-  (state_to_string s1)
-  (state_to_string s2)
-  (event_to_string e)
+(*
+let graphFromStatemachine (sm : (statemachine)) =
+  sm.start_state;
+  sm.final_state;
+  sm.transitions;
 
-(*Prints all transitions, as modified by transition_to_string. NB! Does NOT return transitions as strings!*)
-let printer (t : (state * event * state) list) = 
-  List.iter transition_to_string t
+  
+*)
 
 (**************************************************************************************************************************************************)
-(*IN USE! String buffer*)
-(*The idea is:
-dot_topSyntax + transitions + dot_bottomSyntax = full dot syntax for the .gv file*)
+(*String buffer*)
+(*The idea is: dot_topSyntax + transitions + dot_bottomSyntax = full dot syntax for the .gv file*)
 
-(*Need to add the  [null transition] to the top.*)
-(*Need to add [doublecircles to the final states in the bottom.*)
 let dot_topSyntax = "digraph { rankdir = LR; node [shape = circle;]; null [shape = point;];"
 let dot_bottomSyntax = "}"
 
@@ -93,7 +88,22 @@ let dot_syntax_buffer str1 str2 (strlist : (string) list) (strlist2 : (string) l
   close_out oc;
 ;
 
+(**************************************************************************************************************************************************)
 (*TRASHPILE:
+
+(*NOT IN USE! Printer, transitions as they are - not strings*)
+(*Not immediately useful right now, but keep just in case*)
+
+(*Prints (state, event, state) in DOT syntax. NB! Does NOT return transitions as strings!*)
+let transition_to_string (s1, e, s2) =    
+  Printf.printf "%s -> %s [label=\"%s\";];"
+  (state_to_string s1)
+  (state_to_string s2)
+  (event_to_string e)
+
+(*Prints all transitions, as modified by transition_to_string. NB! Does NOT return transitions as strings!*)
+let printer (t : (state * event * state) list) = 
+  List.iter transition_to_string t 
 
 (*Stolen from .main, am not allowed to call it from the main module for some reason*)
 let string_of_state_kind = function

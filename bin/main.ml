@@ -52,44 +52,28 @@ let () =
         exit 1
   in 
 
-  (*For checking DOT*)
   (*************************************************************************************************)
-  (*Collects all transitions in a single (state * event *state) list from the AST*)
-  let transition = Semantic.collect_transitions ast in
+  (*For checking DOT*)
 
+  (*Collects transitions, start and final from the statemachine*)
+  let transition = Semantic.collect_transitions ast in
   let starts = Semantic.get_start_states ast in
-  
-  (*Collects the final states in a single list*)
   let finals = Semantic.get_final_states ast in
 
-  (*Printing out what will be transitions in DOT*)
-  (*Dottest.printer transition;*)
-
-  (*Stores transitions in a list and creates actual strings of them*)
+  (*Stores transitions, start and final states as strings*)
   let storedTransStrings = Dottest.trans_string_list transition in
-  Dottest.string_list_printer storedTransStrings;
-
-  (*Stores start state(s), adds null start pointer*)
   let storedStartStrings = Dottest.start_string_list starts in
-  Dottest.string_list_printer storedStartStrings;
-
-  (*Stores final states, adds their double circle*)
   let storedFinalStrings = Dottest.final_string_list finals in
-  Dottest.string_list_printer storedFinalStrings;
 
   (*GRAPHVIZ FILE*)
   (*Buffs state machine into DOT syntax and creates .gv file*)
   Dottest.dot_syntax_buffer Dottest.dot_topSyntax Dottest.dot_bottomSyntax storedStartStrings storedFinalStrings storedTransStrings;
 
-  (*Checks if the string list of transitions is empty*)
-  (*
-  if List.is_empty storedTransStrings then
-    print_endline "\nList of transitions as strings is empty!"
-  else
-    print_endline "\nList of transitions as strings is not empty!";
-    *)
   (**************************************************************************************************)
-
+  (*Collect functions in a functions, to use on the statemachine*)
+  let statemachine = Semantic.analyse ast in
+    Printf.printf "This is statemachine ---> %s <---!\n" statemachine.statemachine_name;
+  
   close_in chan;
   (*print_program ast;*)
 
@@ -97,10 +81,10 @@ let () =
 
   (*
   (* Debuggin print statement - TODO remove later *)
-let check_start_state = Semantic.get_start_sates ast in
+  let check_start_state = Semantic.get_start_sates ast in
   match check_start_state with
   | _ -> Printf.printf "This code is running"
   *)
 
-(* let transitions = Semantic.collect_transitions ast in
+  (* let transitions = Semantic.collect_transitions ast in
   Semantic.print_iter_trans transitions; *)

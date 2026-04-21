@@ -1,4 +1,4 @@
-Statemachine M {
+Statemachine Bobby {
    // This is a single line comment
    Start State A {
     ON Push GO Closed
