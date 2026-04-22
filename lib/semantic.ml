@@ -5,6 +5,10 @@ exception Semantic_error of string
 
 let error msg = raise (Semantic_error msg)
 
+(*-------------------------------------(* WARNINGS *)-------------------------------------*)
+type warning = 
+  | DuplicateTransitions of string
+
 
 (*------------------------(* DEFINING TYPE AND HELPER FUNCTIONS *)------------------------*)
 
