@@ -22,6 +22,7 @@ let state_to_string = function
 let event_to_string = function
   | Event e -> e
 
+(*Silke - "Mine funktioner i ./dottest bruger de to nederste og ikke de øverste, ved ikke med jer andre."*)
 let event_to_string (Event e) = e (*Base printer for event*)
 let state_to_string (State s) = s (*Base printer for state*)
 
@@ -48,7 +49,7 @@ let get_start_states (p: program) : state =
 let get_final_states (p: program) : state list = 
   List.fold_left (fun list state_decl ->
     match state_decl.kind with
-    |Final -> state_decl.name :: list
+    | Final -> state_decl.name :: list
     | Normal | Start -> list)
     []
     p.states
@@ -65,7 +66,6 @@ let add_source_state (st_decl : state_decl) : (state * event * state) list =
 let collect_transitions (p : program) : (state * event * state) list = 
   List.concat (List.map add_source_state p.states)
 
-
 (*----------------(* CREATING THE STATEMACHIN WITH THE HELPER FUNCTIONS *)----------------*)
 
 (* Function to create the mathmatical StateMachine *)
@@ -77,7 +77,6 @@ let create_state_machine (p: program) : statemachine =
     final_state = get_final_states p;
     transitions = collect_transitions p;
   }
-
 
 (*----------------------------(* VALIDATING THE STATEMACHINE *)---------------------------*)
 
@@ -147,7 +146,6 @@ let analyse (p : program) : statemachine =
   let machine = create_state_machine p in
       validate_state_machine machine;
       machine
-
 
 (*---------------------------(* PRINT FUNCTIONS FOR DEBUGGIN *)---------------------------*)
 

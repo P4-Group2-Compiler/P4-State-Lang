@@ -32,10 +32,6 @@ let print_program p =
   Printf.printf "Machine: %s\n" p.machine_name;
   List.iter print_state p.states
 
-(***)
-
-(***)
-
 let () =
   if Array.length Sys.argv <> 2 then begin
     Printf.printf "Usage: %s <file>\n" Sys.argv.(0);
@@ -56,19 +52,22 @@ let () =
         exit 1
   in 
 
-  let transition = Semantic.collect_transitions ast in  (*Printing out what will be transitions in DOT*)
-
-    Dottest.printer transition;
-
+  (**************************************************************************************************)
+  (*Collect functions in a functions, to use on the statemachine*)
+  let statemachine = Semantic.analyse ast in
+    Printf.printf "This is statemachine ---> %s <---!\n" statemachine.statemachine_name;
+  
   close_in chan;
   (*print_program ast;*)
 
   (* Debugging print statement - TODO remove later *)
-let statemachine = Semantic.analyse ast in
-  Printf.printf "--> StateMachine Analysed! <--\n--> Machine name = %s <--" statemachine.statemachine_name;
+  let statemachine = Semantic.analyse ast in
+  (*Printf.printf "--> StateMachine Analysed! <--\n--> Machine name = %s <--" statemachine.statemachine_name*)
+
+  (*Creating the .gv file from statemachine*)
+  Dottest.graphFromStatemachine statemachine;
 
   Codegen.generate_c_code statemachine;
 
-(* let transitions = Semantic.collect_transitions ast in
+  (* let transitions = Semantic.collect_transitions ast in
   Semantic.print_iter_trans transitions; *)
-

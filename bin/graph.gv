@@ -1,0 +1,8 @@
+digraph Silke { labelloc= t;
+   label=<<B>Silke</B>>; 
+   rankdir = LR; 
+   fontname="Arial";
+   fontsize=20;
+   node [shape = circle; fontname="Arial"];
+   edge [fontname="Arial";];
+   null [shape = point; style=invis;];Sober -> Party [label="Tequila"];Party -> Wasted [label="Dance"];Home -> Sleep [label="Bed"];Wasted -> Wasted [label="Shots"];Wasted -> Home [label="Water"];null -> Sober [penwidth=4.0; lhead= Sober;];Wasted [shape = doublecircle;];}
