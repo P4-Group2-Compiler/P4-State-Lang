@@ -1,24 +1,19 @@
-Statemachine Jonathan {
+Statemachine Silke {
 
    Start State Sober {
       ON Tequila GO Party
    }
 
    State Party {
-      ON Dance GO Wrecked
+      ON Dance GO Wasted
    }
 
-   State Wrecked {
-      ON Shots GO Wasted
-      ON Water GO Home
-      ON Taxi GO Home
-   }
-
-   Final State Home {
-      ON Bed GO Home
+   State Home {
+      ON Bed GO Sleep
    }
    
    Final State Wasted {
       ON Shots GO Wasted
+      ON Water GO Home
    }
 }
