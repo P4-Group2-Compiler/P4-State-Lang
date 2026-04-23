@@ -46,15 +46,19 @@ let () =
   let chan = open_in filename in
   let lexbuf = Lexing.from_channel chan in
 
-  let ast =
-    try
-      Parser.prog Lexer.token lexbuf
-    with
-    | _ ->
-        Printf.printf "Parse error\n";
-        close_in chan;
-        exit 1
-  in 
+let ast =
+  try
+    Parser.prog Lexer.token lexbuf
+  with
+  | Lexer.Lexing_error msg ->
+      Printf.printf "Lexing error: %s\n" msg;
+      close_in chan;
+      exit 1
+  | Parser.Error ->
+      Printf.printf "Parse error\n";
+      close_in chan;
+      exit 1
+in
 
   let transition = Semantic.collect_transitions ast in  (*Printing out what will be transitions in DOT*)
 
