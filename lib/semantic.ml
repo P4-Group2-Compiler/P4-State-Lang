@@ -7,7 +7,7 @@ let error msg = raise (Semantic_error msg)
 
 (*-------------------------------------(* WARNINGS *)-------------------------------------*)
 type warning = 
-  | DuplicateTransitions of string
+  | DuplicateTransitions of state * event * state
 
 
 (*------------------------(* DEFINING TYPE AND HELPER FUNCTIONS *)------------------------*)
@@ -98,15 +98,16 @@ let check_duplicate_state_names (statemachine: statemachine) : unit =
   in checker [] statemachine.states
 
   (* Recursive function that checks if the same transition has been declared more than once *)
-let check_duplicate_transistions (statemachine : statemachine) : unit =
-  let rec checker seen = function
-    | [] -> ()
+let check_duplicate_transistions (statemachine : statemachine) : warning list =
+  let rec checker seen warnings = function
+    | [] -> warnings
     | head :: tail ->
+      let (src, event, dest) = head in
       if List.mem head seen then
-        error "Dulicate transition declared"
+        checker seen (DuplicateTransitions (src, event, dest) :: warnings) tail
       else
-        checker (head :: seen) tail
-  in checker [] statemachine.transitions
+        checker (head :: seen) warnings tail
+  in checker [] [] statemachine.transitions
 
 (* Helper function for checking if start can reach final. It returns a list of destination states connected
    with transitions from the passed state *)
@@ -140,17 +141,21 @@ let get_unreachable_states (statemachine : statemachine) : state list =
 (* Function to run through all of the validation checks - add all new checks into this function *)
 let validate_state_machine (statemachine : statemachine) : unit =
   check_duplicate_state_names statemachine;
-  check_duplicate_transistions statemachine;
+  (* check_duplicate_transistions statemachine; *) (* Removed as it is now a warning *)
   check_start_reaches_final statemachine
+
+let collect_warnings (statemachine : statemachine) : warning list =
+  check_duplicate_transistions statemachine
 
 (*---------------------------(* ANALYSE THE STATEMACHINE *)---------------------------*)
 
 (* This function is the one called by other files. It build the statemachine and runs through all the
    checks. The statemachine that is returned is the one used for codegen *)
-let analyse (p : program) : statemachine =
+let analyse (p : program) : statemachine * warning list =
   let machine = create_state_machine p in
       validate_state_machine machine;
-      machine
+  let warnings = collect_warnings machine in
+      (machine, warnings)
 
 
 (*---------------------------(* PRINT FUNCTIONS FOR DEBUGGIN *)---------------------------*)

@@ -32,6 +32,15 @@ let print_program p =
   Printf.printf "Machine: %s\n" p.machine_name;
   List.iter print_state p.states
 
+let print_warning (statemachine, warning) =
+  begin match warning with
+  | DuplicateTransitions (src, event, dest) ->
+      Printf.printf "Transition: FROM %s ON %s GO %s is declared more than once\n"
+        (string_of_state src)
+        (string_of_event event)
+        (string_of_state dest)
+  end
+
 (***)
 
 (***)
@@ -56,16 +65,14 @@ let () =
         exit 1
   in 
 
-  let transition = Semantic.collect_transitions ast in  (*Printing out what will be transitions in DOT*)
-
-    Dottest.printer transition;
-
+  
   close_in chan;
   print_program ast;
-
   (* Debugging print statement - TODO remove later *)
 let statemachine = Semantic.analyse ast in
-  Printf.printf "--> StateMachine Analysed! <--\n--> Machine name = %s <--" statemachine.statemachine_name
+  List.iter print_warning statemachine
+  
+
 
 (* let transitions = Semantic.collect_transitions ast in
   Semantic.print_iter_trans transitions; *)

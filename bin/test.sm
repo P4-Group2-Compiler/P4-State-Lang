@@ -5,6 +5,7 @@ Statemachine M {
 
    State Closed {
       ON Kick GO Broken
+      ON Kick GO Broken
    }
 
    State Broken {
