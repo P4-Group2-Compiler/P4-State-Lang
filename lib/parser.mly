@@ -8,9 +8,8 @@
 
 // WHILE lang tokens
 
-%token ELSE PRINT WHILE AND OR NOT
-%token COLON BEGIN END NEWLINE
-%token PLUS MINUS TIMES DIV MOD
+// %token ELSE PRINT AND OR NOT
+
 
 // WHILE lang tokens end
 
@@ -29,13 +28,17 @@
 %token ON
 %token GO
 %token IF
+%token ELSE
+%token ELIF
 
 (* Operators *)
-%token LT
+%token BEQUAL BNEQUAL LT LTE GT GTE 
+%token PLUS MINUS TIMES DIV MOD
 
 // Punctuators
 %token LEFTTUBORG RIGHTTUBORG (* '{' and '}' *)
 %token LP RP COMMA EQUAL (* "("     ")"     ","     "="  *)
+%token PRINT
 
 %nonassoc LT
 
@@ -91,6 +94,10 @@ transition:
     { Transition (Event $2, None, State $4) }
 | ON IDENTIFIER IF expr GO IDENTIFIER
     { Transition (Event $2, Some $4, State $6) }
+(*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE GO IDENTIFIER*)
+(*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE expr GO IDENTIFIER*)
+(*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE stmt GO IDENTIFIER*)
+(*| ON IDENTIFIER IF expr GO IDENTIFIER ELIF expr GO IDENTIFIER ELSE*)
 ;
 
 
@@ -98,18 +105,26 @@ transition:
 simple_stmt:
 | id = ident EQUAL e = expr
     { Sassign (id, e) }
-
-%inline binop:
-| PLUS  { Badd }
-| MINUS { Bsub }
-| TIMES { Bmul }
-| DIV   { Bdiv }
-| MOD   { Bmod }
-| LT    { Blt }
-| AND   { Band }
-| OR    { Bor  }
+| id = ident PLUS EQUAL e = expr
+    { Sassign (id, Ebinop (Badd, Eident id, e)) }
+| PRINT LP el = separated_list(COMMA, expr) RP
+    { Sprint el }
 ;
 
+binop:
+| PLUS           { Badd }
+(*| MINUS          { Bsub }
+| TIMES          { Bmul }
+| DIV            { Bdiv }
+| MOD            { Bmod }
+| BEQUAL         { Beq }
+| BNEQUAL        { Bneq } *)
+| LT             { Blt }
+(*| LTE            { Ble }
+| GT             { Bgt }
+| GTE            { Bge }*)
+;
+
+ 
 ident:
-  id = IDENT { { loc = ($startpos, $endpos); id } }
-;
+  IDENTIFIER { { loc = ($startpos, $endpos); id = $1 } }

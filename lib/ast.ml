@@ -6,18 +6,16 @@ if we want guards to work with generic expressions and not tailor made state gua
 type location = Lexing.position * Lexing.position
 type ident = { loc: location; id: string; }
 
-(********** BOOLEAN SHENANIGANS I RELATION TO GUARDS*********)
-(*******************EG: ON EVENT IF (x < 4) GO B, ELSE GO C ****************************)
+(********** BOOLEAN SHENANIGANS IN RELATION TO GUARDS*********)
+(*******************EG: ON EVENT IF (3 < 4) GO B****************************)
 (* Unary operators. *)
-type unop =
-  | Uneg (* -e *)
-  | Unot (* not e *)
+
 
 (* Binary operators. *)
 type binop =
-  | Badd | Bsub | Bmul | Bdiv | Bmod    (* + - * // % *)
-  | Beq | Bneq | Blt | Ble | Bgt | Bge  (* == != < <= > >= *)
-  | Band | Bor                          (* and or *)
+  | Badd    (* + - * // % *)
+  (*| Beq | Bneq *)| Blt (*| Ble | Bgt | Bge*)  (* == != < <= > >= *)
+  (*| Band | Bor*)                          (* and or *)
 
 (* Constants. *)
 type constant =
@@ -28,17 +26,12 @@ type constant =
 (* Expressions. *)
 type expr =
   | Ecst of constant                   (* constant *)
-  | Eunop of unop * expr               (* unary operation *)
   | Ebinop of binop * expr * expr      (* binary operation *)
   | Eident of ident                    (* variable *)                  
 
 (* Statements. *)
 type stmt =
-  | Sif of expr * stmt * stmt       (* conditional *)
-  | Sassign of ident * expr         (* modifying a variable *)
-  | Sblock of stmt list             (* a sequence of statements *)
-  | Sprint of expr list             (* printing a list of expressions *)
-  | Swhile of expr * stmt           (* while loop *)
+  | Stmt_if of expr * stmt * stmt       (* conditional *)
   
 type event =
   | Event of string (* Might be better to have simply 'type event = string' *)
@@ -48,7 +41,7 @@ type state =
 
 type transition =
   | Transition of event * expr option * state
-  (*| GuardTrans of event * expr * state *)
+(*| GuardTrans of event * expr * state *)
 
 type state_kind =
   | Normal

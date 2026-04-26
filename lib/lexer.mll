@@ -12,13 +12,13 @@ let IdentifierChars = ['a'-'z' 'A'-'Z' '0'-'9' '_']
 (* All the tokenization rules. When lexer hits any of the below, what token should be created *)
 rule token = parse
     (* Whitespace, tab and newline defined *)
-    | [' ' '\t' '\n' '\r']                  { token lexbuf }
+    | [' ' '\t' '\n' '\r']              { token lexbuf }
 
     (* Single-line comments *)
-    | "//" [^ '\n' '\r']*                   { token lexbuf }
+    | "//" [^ '\n' '\r']*               { token lexbuf }
 
     (* Block comments *)
-    | "(*"                                  { block_comment lexbuf }
+    | "(*"                              { block_comment lexbuf }
 
     (* Keywords *)
 | "Statemachine"                        { STATEMACHINE }
@@ -35,9 +35,20 @@ rule token = parse
 (* Numbers *)
 | ['0'-'9']+ as n                       { INT n }
 
-(* Less than operator *)
+(* Binops *)
+| '+'                                   { PLUS }
+| '-'                                   { MINUS }
+| '*'                                   { TIMES }
+| "/"                                   { DIV }
+| '%'                                   { MOD }
+| '='                                   { EQUAL }
+| "=="                                  { BEQUAL }
+| "!="                                  { BNEQUAL }
 | "<"                                   { LT }
-    
+| "<="                                  { LTE }
+| ">"                                   { GT }
+| ">="                                  { GTE }    
+
 (* Seperators *)
 | '{'                                   { LEFTTUBORG }
 | '}'                                   { RIGHTTUBORG }
@@ -53,8 +64,8 @@ rule token = parse
 
 (* Rule for block comments *)
 and block_comment = parse
-    | "*)"                                { token lexbuf }
+    | "*)"                              { token lexbuf }
     | eof {
         raise (Lexing_error "Unterminated block comment")
       }
-    | _                                   { block_comment lexbuf }
+    | _                                 { block_comment lexbuf }

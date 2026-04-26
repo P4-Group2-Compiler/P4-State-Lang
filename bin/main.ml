@@ -5,6 +5,7 @@ open Dottest
 open Ast
 open Semantic
 
+
 let string_of_state = function
   | State s -> s
 
@@ -17,9 +18,9 @@ let string_of_state_kind = function
   | Final -> "Final"
 
 let string_of_binop = function
-  | Badd -> "+" | Bsub -> "-" | Bmul -> "*" | Bdiv -> "/" | Bmod -> "%"
-  | Beq -> "==" | Bneq -> "!=" | Blt -> "<" | Ble -> "<=" | Bgt -> ">" | Bge -> ">="
-  | Band -> "and" | Bor -> "or"
+  | Badd -> "+" (*| Bsub -> "-" | Bmul -> "*" | Bdiv -> "/" | Bmod -> "%"
+  | Beq -> "==" | Bneq -> "!=" *)| Blt -> "<" (*| Ble -> "<=" | Bgt -> ">" | Bge -> ">="
+  | Band -> "and" | Bor -> "or"*)
 
 let string_of_constant = function
   | Cbool b -> string_of_bool b
@@ -29,8 +30,6 @@ let string_of_constant = function
 let rec string_of_expr = function
   | Ecst c -> string_of_constant c
   | Eident id -> id.id
-  | Eunop (Uneg, e) -> "-" ^ string_of_expr e
-  | Eunop (Unot, e) -> "not " ^ string_of_expr e
   | Ebinop (op, e1, e2) ->
       Printf.sprintf "(%s %s %s)"
         (string_of_expr e1)
@@ -84,7 +83,15 @@ let () =
         Printf.printf "Parse error\n";
         close_in chan;
         exit 1
-  in 
+  in
+  (* Typecheck the program *)
+begin
+  try
+    Typechecker.type_program ast
+  with Typechecker.Type_error msg ->
+    Printf.printf "Type error: %s\n" msg;
+    exit 1
+end;    
 
   let transition = Semantic.collect_transitions ast in  (*Printing out what will be transitions in DOT*)
 
