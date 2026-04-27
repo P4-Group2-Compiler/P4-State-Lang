@@ -30,7 +30,7 @@ let rec type_expr (env : type_env) = function
   | Eident {id} -> 
       (try Hashtbl.find env id 
       with Not_found ->
-        type_error ("Unbound bariable_ " ^ id))
+        type_error ("Unbound variable_ : " ^ id))
   | Ebinop (binop, e1, e2) ->
       let t1 = type_expr env e1 in
       let t2 = type_expr env e2 in
