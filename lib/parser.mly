@@ -18,7 +18,7 @@
 (* Identifiers and integers *)
 %token <string> IDENTIFIER
 %token <string> INT
-%token <string> IDENT
+(*%token <string> IDENT*)
 
 (* Keywords *)
 %token STATEMACHINE
@@ -28,18 +28,21 @@
 %token ON
 %token GO
 %token IF
-%token ELSE
-%token ELIF
+%token HASH
+%token VAR
+(*%token ELSE
+%token ELIF*)
 
 (* Operators *)
-%token BEQUAL BNEQUAL LT LTE GT GTE 
-%token PLUS MINUS TIMES DIV MOD
+%token (* BEQUAL BNEQUAL LTE GT GTE*) LT  
+%token PLUS (* MINUS TIMES DIV MOD *)
 
 // Punctuators
 %token LEFTTUBORG RIGHTTUBORG (* '{' and '}' *)
-%token LP RP COMMA EQUAL (* "("     ")"     ","     "="  *)
-%token PRINT
+%token LP RP (* COMMA *) EQUAL (* "("     ")"     ","     "="  *)
+(*%token PRINT*)
 
+%left PLUS
 %nonassoc LT
 
 // Grammatical starting point
@@ -54,7 +57,7 @@
 // Grammar Rules
 
 prog:
-| STATEMACHINE IDENTIFIER LEFTTUBORG states RIGHTTUBORG EOF  { {machine_name = $2; states = $4} }
+| STATEMACHINE IDENTIFIER LEFTTUBORG variables states RIGHTTUBORG EOF  { {machine_name = $2; variables = $4; states = $5} }
 ;
 
 states:
@@ -64,22 +67,32 @@ states:
 
 state:
 | state_kind STATE IDENTIFIER LEFTTUBORG transitions RIGHTTUBORG  {{ kind = $1; name = State $3; transitions = $5 }}
-
 ;
 
 state_kind:
 | START { Start }
 | FINAL { Final }
 |       { Normal } // Empty means that there is no State Kind
+;
+
+variables:
+| { [] }
+| variable variables { $1 :: $2 }
+;
+
+variable:
+| HASH VAR id = IDENTIFIER EQUAL n = INT { Var_decl (id, int_of_string n) }
+;
 
 expr:
-  | IDENTIFIER
-      { let dummy_loc = (Lexing.dummy_pos, Lexing.dummy_pos) in
-        Eident { loc = dummy_loc; id = $1 } }
+  | id = ident          
+      { Eident id }
   | INT
       { Ecst (Cint (int_of_string $1)) }
-  | e1 = expr o = binop e2 = expr
-      { Ebinop (o, e1, e2) }
+  | e1 = expr PLUS e2 = expr
+      { Ebinop (Badd, e1, e2) }
+  | e1 = expr LT e2 = expr
+      { Ebinop (Blt, e1, e2) }
   | LP e = expr RP
       { e }
 ;
@@ -102,29 +115,30 @@ transition:
 
 
 
-simple_stmt:
+(*simple_stmt:
 | id = ident EQUAL e = expr
     { Sassign (id, e) }
 | id = ident PLUS EQUAL e = expr
     { Sassign (id, Ebinop (Badd, Eident id, e)) }
 | PRINT LP el = separated_list(COMMA, expr) RP
     { Sprint el }
-;
+;*)
 
-binop:
+(*binop:
 | PLUS           { Badd }
-(*| MINUS          { Bsub }
+(*| MINUS        { Bsub }
 | TIMES          { Bmul }
 | DIV            { Bdiv }
 | MOD            { Bmod }
 | BEQUAL         { Beq }
 | BNEQUAL        { Bneq } *)
 | LT             { Blt }
-(*| LTE            { Ble }
+(*| LTE          { Ble }
 | GT             { Bgt }
-| GTE            { Bge }*)
+| GTE            { Bge }*)*)
 ;
 
  
 ident:
   IDENTIFIER { { loc = ($startpos, $endpos); id = $1 } }
+;

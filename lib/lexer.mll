@@ -28,6 +28,8 @@ rule token = parse
 | "ON"                                  { ON }
 | "GO"                                  { GO }
 | "IF"                                  { IF }
+| "#"                                   { HASH }
+| "VAR"                                 { VAR }
 
 (* Identifiers *)
 | (Letter IdentifierChars*) as id       { IDENTIFIER id }
@@ -35,19 +37,20 @@ rule token = parse
 (* Numbers *)
 | ['0'-'9']+ as n                       { INT n }
 
+
 (* Binops *)
 | '+'                                   { PLUS }
-| '-'                                   { MINUS }
+(*| '-'                                   { MINUS }
 | '*'                                   { TIMES }
 | "/"                                   { DIV }
-| '%'                                   { MOD }
+| '%'                                   { MOD } *)
 | '='                                   { EQUAL }
-| "=="                                  { BEQUAL }
-| "!="                                  { BNEQUAL }
+(*| "=="                                  { BEQUAL }
+| "!="                                  { BNEQUAL }*)
 | "<"                                   { LT }
-| "<="                                  { LTE }
+(*| "<="                                  { LTE }
 | ">"                                   { GT }
-| ">="                                  { GTE }    
+| ">="                                  { GTE }*)    
 
 (* Seperators *)
 | '{'                                   { LEFTTUBORG }

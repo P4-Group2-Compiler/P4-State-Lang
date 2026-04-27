@@ -56,4 +56,6 @@ let initial_env () = Hashtbl.create 16
 
 let type_program p =
   let env = initial_env () in
+  List.iter (fun (Var_decl (name, _)) ->
+    Hashtbl.add env name Tint) p.variables;
   List.iter (type_state_decl env) p.states

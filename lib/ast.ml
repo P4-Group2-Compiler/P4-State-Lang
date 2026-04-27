@@ -6,10 +6,9 @@ if we want guards to work with generic expressions and not tailor made state gua
 type location = Lexing.position * Lexing.position
 type ident = { loc: location; id: string; }
 
-(********** BOOLEAN SHENANIGANS IN RELATION TO GUARDS*********)
-(*******************EG: ON EVENT IF (3 < 4) GO B****************************)
-(* Unary operators. *)
-
+(* **************************************************************************** *) 
+(*  BOOLEAN SHENANIGANS IN RELATION TO GUARDS --- EG: ON EVENT IF (3 < 4) GO B  *)
+(* **************************************************************************** *)
 
 (* Binary operators. *)
 type binop =
@@ -32,6 +31,10 @@ type expr =
 (* Statements. *)
 type stmt =
   | Stmt_if of expr * stmt * stmt       (* conditional *)
+
+(* ************************************************************************** *) 
+(*                          STATEMACHINE RELATED TYPES                        *)
+(* ************************************************************************** *)
   
 type event =
   | Event of string (* Might be better to have simply 'type event = string' *)
@@ -48,6 +51,9 @@ type state_kind =
   | Start
   | Final
 
+type var_decl = 
+  | Var_decl of string * int
+
 type state_decl = {
   kind : state_kind;
   name : state;                     (*state B {}*) (*= State of string*)
@@ -56,5 +62,6 @@ type state_decl = {
 
 type program = {
   machine_name : string;
+  variables : var_decl list;
   states : state_decl list;
 }

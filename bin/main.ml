@@ -57,8 +57,16 @@ let print_state st =
   (string_of_state st.name);
   List.iter print_transition st.transitions
 
+let string_of_var = function
+  | Var_decl (name, value) -> Printf.sprintf "%s = %d" name value
+
+let print_vars vars =
+  Printf.printf "Variables:\n";
+  List.iter (fun v -> Printf.printf "  %s\n" (string_of_var v)) vars
+
 let print_program p =
   Printf.printf "Machine: %s\n" p.machine_name;
+  print_vars p.variables;
   List.iter print_state p.states
 
 (***)
