@@ -75,6 +75,7 @@ let () =
   let chan = open_in filename in
   let lexbuf = Lexing.from_channel chan in
 
+  (* Initiationg the actual parsing *)
   let ast =
     try
       Parser.prog Lexer.token lexbuf
@@ -84,6 +85,7 @@ let () =
         close_in chan;
         exit 1
   in
+
   (* Typecheck the program *)
 begin
   try
