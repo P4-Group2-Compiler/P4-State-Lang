@@ -1,32 +1,38 @@
-  
-
-(*type state = 
-  (*| State of string *)
-  | State of string*)
-
-(*type binstate =
-  | START of state
-  | FINAL of state*)
+(* Mega pasted from WHILE language, seems like we need to make a mini-arith-while language
+if we want guards to work with generic expressions and not tailor made state guards *)
 
 
-(*
-type start =
-  | Start of string
-type final =
-  | Final of string*)
+
+type location = Lexing.position * Lexing.position
+type ident = { loc: location; id: string; }
+
+(********** BOOLEAN SHENANIGANS IN RELATION TO GUARDS*********)
+(*******************EG: ON EVENT IF (3 < 4) GO B****************************)
+(* Unary operators. *)
 
 
-(* TO BE ADDED
-  (* Maybe change type name to 'event', depends what statements (if any) we add *)
-type stmt =
-  | Event of string *)
+(* Binary operators. *)
+type binop =
+  | Badd    (* + - * // % *)
+  (*| Beq | Bneq *)| Blt (*| Ble | Bgt | Bge*)  (* == != < <= > >= *)
+  (*| Band | Bor*)                          (* and or *)
 
+(* Constants. *)
+type constant =
+  | Cbool of bool
+  | Cstring of string
+  | Cint of int
 
-(* TO BE ADDED
+(* Expressions. *)
 type expr =
-  | Identifier of string
-  | Transition of state * stmt * state (* (State, Event -> State') *) *)
+  | Ecst of constant                   (* constant *)
+  | Ebinop of binop * expr * expr      (* binary operation *)
+  | Eident of ident                    (* variable *)                  
 
+(* Statements. *)
+type stmt =
+  | Stmt_if of expr * stmt * stmt       (* conditional *)
+  
 type event =
   | Event of string (* Might be better to have simply 'type event = string' *)
 
@@ -34,7 +40,8 @@ type state =
   | State of string (* Might be better to have simply 'type state = string' *)
 
 type transition =
-  | Transition of event * state
+  | Transition of event * expr option * state
+(*| GuardTrans of event * expr * state *)
 
 type state_kind =
   | Normal
