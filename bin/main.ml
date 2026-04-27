@@ -75,18 +75,21 @@ let () =
   let chan = open_in filename in
   let lexbuf = Lexing.from_channel chan in
 
-  (* Initiationg the actual parsing *)
-  let ast =
-    try
-      Parser.prog Lexer.token lexbuf
-    with
-    | _ ->
-        Printf.printf "Parse error\n";
-        close_in chan;
-        exit 1
-  in
+let ast =
+  try
+    Parser.prog Lexer.token lexbuf
+  with
+  | Lexer.Lexing_error msg ->
+      Printf.printf "Lexing error: %s\n" msg;
+      close_in chan;
+      exit 1
+  | Parser.Error ->
+      Printf.printf "Parse error\n";
+      close_in chan;
+      exit 1
+in
 
-  (* Typecheck the program *)
+    (* Typecheck the program *)
 begin
   try
     Typechecker.type_program ast
