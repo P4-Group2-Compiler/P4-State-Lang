@@ -35,7 +35,7 @@ let print_program p =
 let print_warning (statemachine, warning) =
   begin match warning with
   | DuplicateTransitions (src, event, dest) ->
-      Printf.printf "Transition: FROM %s ON %s GO %s is declared more than once\n"
+      Printf.printf "WARNING: Transition: {FROM %s ON %s GO %s} is declared more than once\n"
         (string_of_state src)
         (string_of_event event)
         (string_of_state dest)
@@ -67,10 +67,9 @@ let () =
 
   
   close_in chan;
-  print_program ast;
-  (* Debugging print statement - TODO remove later *)
-let statemachine = Semantic.analyse ast in
-  List.iter print_warning statemachine
+  (* print_program ast; *)
+let statemachine, warnings = Semantic.analyse ast in
+  List.iter (fun warning -> print_warning (statemachine, warning)) warnings
   
 
 
