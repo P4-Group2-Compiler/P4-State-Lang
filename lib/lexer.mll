@@ -11,16 +11,28 @@ let IdentifierChars = ['a'-'z' 'A'-'Z' '0'-'9' '_']
 
 (* All the tokenization rules. When lexer hits any of the below, what token should be created *)
 rule token = parse
-    (* Whitespace, tab and newline defined *)
-    | [' ' '\t' '\n' '\r']              { token lexbuf }
 
-    (* Single-line comments *)
-    | "//" [^ '\n' '\r']*               { token lexbuf }
+(* Whitespace, tab and newline defined *)
+| [' ' '\t' '\r']              { token lexbuf }
 
-    (* Block comments *)
-    | "(*"                              { block_comment lexbuf }
+| '\n' {
+    let p = lexbuf.lex_curr_p in
+    let new_p = {
+      p with
+      pos_lnum = p.pos_lnum + 1;
+      pos_bol  = p.pos_cnum;
+    } in
+    lexbuf.lex_curr_p <- new_p;
+    token lexbuf
+  }
 
-    (* Keywords *)
+(* Single-line comments *)
+| "//" [^ '\n' '\r']*               { token lexbuf }
+
+(* Block comments *)
+| "(*"                              { block_comment lexbuf }
+
+(* Keywords *)
 | "Statemachine"                        { STATEMACHINE }
 | "Start"                               { START }
 | "Final"                               { FINAL }

@@ -71,7 +71,7 @@ let print_program p =
 
 (***)
 
-(***)
+(**)
 
 let () =
   if Array.length Sys.argv <> 2 then begin
@@ -82,7 +82,13 @@ let () =
   let filename = Sys.argv.(1) in
   let chan = open_in filename in
   let lexbuf = Lexing.from_channel chan in
-
+    (* Loads the filename from CLI argument (Sys.argv) into the lexbuf position record *)
+    lexbuf.lex_curr_p <- { 
+    lexbuf.lex_curr_p with
+    pos_fname = filename
+    };
+  
+  (* 'Run' the compiler *)
 let ast =
   try
     Parser.prog Lexer.token lexbuf
