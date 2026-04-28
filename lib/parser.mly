@@ -30,6 +30,8 @@
 %token IF
 %token HASH
 %token VAR
+%token AND
+%token OR
 (*%token ELSE
 %token ELIF*)
 
@@ -107,6 +109,11 @@ expr:
       { Ebinop (Bgt, e1, e2) }
   | e1 = expr GTE e2 = expr
       { Ebinop (Bge, e1, e2) }
+  | e1 = expr AND e2 = expr 
+    { Ebinop (Band, e1, e2) }
+  | e1 = expr OR  e2 = expr 
+    { Ebinop (Bor,  e1, e2) }
+
   | LP e = expr RP
       { e }
 ;

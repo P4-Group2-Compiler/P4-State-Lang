@@ -1,6 +1,6 @@
 open Ast
 
-(* Error handling *)
+(* Error handling and setup using location for debugging *)
 exception Type_error of string
 
 let highlight source (startpos, endpos) msg =
@@ -25,18 +25,17 @@ let type_error ?(loc : (Lexing.position * Lexing.position) option = None) s =
       raise (Type_error s)
 
   | Some (startpos, endpos) ->
-      (* Load the source file *)
       let source =
-        let ic = open_in startpos.Lexing.pos_fname in
-        let len = in_channel_length ic in
-        let text = really_input_string ic len in
-        close_in ic;
+        let chan = open_in startpos.Lexing.pos_fname in
+        let len = in_channel_length chan in
+        let text = really_input_string chan len in
+        close_in chan;
         text
       in
 
       (* Use s directly as the message *)
-      let pretty = highlight source (startpos, endpos) s in
-      raise (Type_error pretty)
+      let pretty_error = highlight source (startpos, endpos) s in
+      raise (Type_error pretty_error)
 
 (* primary/primitive(?) types *)
 type ty =
@@ -64,13 +63,13 @@ let rec type_expr (env : type_env) = function
   | Eident {id; loc} -> 
       (try Hashtbl.find env id 
         with Not_found ->
-      type_error ~loc:(Some loc) ("Unbound variable: " ^ id))
+      type_error ~loc:(Some loc) ("Unbound variable: " ^ id)) (* Added location for better debugging *)
   | Ebinop (binop, e1, e2) ->
       let t1 = type_expr env e1 in
       let t2 = type_expr env e2 in
-      begin match binop, t1,   t2 with
+      begin match binop, t1, t2 with
       | (Blt | Ble | Bgt | Bge) ,Tint, Tint -> Tbool
-      | _ -> type_error "Type error: Comparisons expects 'int < int'"
+      | _ -> type_error "Comparisons expects 'int : int'"
       end
 
 (* Checking transitions *)

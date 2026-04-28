@@ -6,15 +6,15 @@ if we want guards to work with generic expressions and not tailor made state gua
 type location = Lexing.position * Lexing.position
 type ident = { loc: location; id: string; }
 
-(* **************************************************************************** *) 
-(*  BOOLEAN SHENANIGANS IN RELATION TO GUARDS --- EG: ON EVENT IF (3 < 4) GO B  *)
-(* **************************************************************************** *)
+(* ******************************************************************************** *) 
+(*  BOOLEAN SHENANIGANS IN RELATION TO GUARDS --- EG: ON EVENT IF (x < 4) GO STATE  *)
+(* ******************************************************************************** *)
 
 (* Binary operators. *)
 type binop =
   | Badd | Bsub | Bmul | Bdiv | Bmod   (* + - * // % *)
   (*| Beq | Bneq *)| Blt | Ble | Bgt | Bge  (* == != < <= > >= *)
-  (*| Band | Bor*)  (* and or *)
+  | Band | Bor  (* and or *)
 
 (* Constants. *)
 type constant =

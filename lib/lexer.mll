@@ -15,6 +15,7 @@ rule token = parse
 (* Whitespace, tab and newline defined *)
 | [' ' '\t' '\r']              { token lexbuf }
 
+(* Updates lexbuf with a new line number, when newline \n is encountered *)
 | '\n' {
     let p = lexbuf.lex_curr_p in
     let new_p = {
@@ -62,7 +63,9 @@ rule token = parse
 | "<"                                   { LT }
 | "<="                                  { LTE }
 | ">"                                   { GT }
-| ">="                                  { GTE }    
+| ">="                                  { GTE }
+| "AND"                                 { AND }
+| "OR"                                  { OR }
 
 (* Seperators *)
 | '{'                                   { LEFTTUBORG }
