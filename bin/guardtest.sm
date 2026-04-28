@@ -1,6 +1,6 @@
 Statemachine M {
    # VAR x = 10
-   # VAR y = 3
+   # VAR y = 4
    # VAR amount_of_shots = 13
    // This is a single line comment
    Start State Open {
@@ -10,7 +10,7 @@ Statemachine M {
    Final State Closed {
    (* This is a block comment 
    With two lines. *)
-    ON Pull GO Open
+    ON Pull IF y >= x GO Open
     ON TEST GO SOMETHING
    }
 }

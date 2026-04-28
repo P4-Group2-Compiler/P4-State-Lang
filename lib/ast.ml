@@ -12,9 +12,9 @@ type ident = { loc: location; id: string; }
 
 (* Binary operators. *)
 type binop =
-  | Badd    (* + - * // % *)
-  (*| Beq | Bneq *)| Blt (*| Ble | Bgt | Bge*)  (* == != < <= > >= *)
-  (*| Band | Bor*)                          (* and or *)
+  | Badd | Bsub | Bmul | Bdiv | Bmod   (* + - * // % *)
+  (*| Beq | Bneq *)| Blt | Ble | Bgt | Bge  (* == != < <= > >= *)
+  (*| Band | Bor*)  (* and or *)
 
 (* Constants. *)
 type constant =

@@ -18,9 +18,9 @@ let string_of_state_kind = function
   | Final -> "Final"
 
 let string_of_binop = function
-  | Badd -> "+" (*| Bsub -> "-" | Bmul -> "*" | Bdiv -> "/" | Bmod -> "%"
-  | Beq -> "==" | Bneq -> "!=" *)| Blt -> "<" (*| Ble -> "<=" | Bgt -> ">" | Bge -> ">="
-  | Band -> "and" | Bor -> "or"*)
+  | Badd -> "+" | Bsub -> "-" | Bmul -> "*" | Bdiv -> "/" | Bmod -> "%"
+  (*| Beq -> "==" | Bneq -> "!=" *)| Blt -> "<" | Ble -> "<=" | Bgt -> ">" | Bge -> ">="
+  (*| Band -> "and" | Bor -> "or"*)
 
 let string_of_constant = function
   | Cbool b -> string_of_bool b

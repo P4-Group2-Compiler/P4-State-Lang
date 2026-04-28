@@ -35,8 +35,8 @@ let rec type_expr (env : type_env) = function
       let t1 = type_expr env e1 in
       let t2 = type_expr env e2 in
       begin match binop, t1,   t2 with
-      | (Blt (*| Ble | Bgt | Bge*)) ,Tint, Tint -> Tbool
-      | _ -> type_error "Type error: < expects 'int < int'"
+      | (Blt | Ble | Bgt | Bge) ,Tint, Tint -> Tbool
+      | _ -> type_error "Type error: Comparisons expects 'int < int'"
       end
 
 (* Checking transitions *)

@@ -12,6 +12,7 @@ let test_collect_states_happy () =
   (* The program is defined, some State Machine M, consisting of states "A" and "B" *)
   let prog = {
     machine_name = "M";
+    variables = [Var_decl ("x", 10) ];
     states = [ state "A"; state "B" ];
   } in
 

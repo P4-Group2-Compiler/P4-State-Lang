@@ -40,17 +40,17 @@ rule token = parse
 
 (* Binops *)
 | '+'                                   { PLUS }
-(*| '-'                                   { MINUS }
+| '-'                                   { MINUS }
 | '*'                                   { TIMES }
 | "/"                                   { DIV }
-| '%'                                   { MOD } *)
+| '%'                                   { MOD } 
 | '='                                   { EQUAL }
-(*| "=="                                  { BEQUAL }
+(*| "=="                                { BEQUAL }
 | "!="                                  { BNEQUAL }*)
 | "<"                                   { LT }
-(*| "<="                                  { LTE }
+| "<="                                  { LTE }
 | ">"                                   { GT }
-| ">="                                  { GTE }*)    
+| ">="                                  { GTE }    
 
 (* Seperators *)
 | '{'                                   { LEFTTUBORG }

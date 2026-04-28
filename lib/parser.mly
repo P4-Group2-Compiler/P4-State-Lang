@@ -34,8 +34,8 @@
 %token ELIF*)
 
 (* Operators *)
-%token (* BEQUAL BNEQUAL LTE GT GTE*) LT  
-%token PLUS (* MINUS TIMES DIV MOD *)
+%token (* BEQUAL BNEQUAL*) LTE GT GTE LT  
+%token PLUS MINUS TIMES DIV MOD
 
 // Punctuators
 %token LEFTTUBORG RIGHTTUBORG (* '{' and '}' *)
@@ -91,8 +91,22 @@ expr:
       { Ecst (Cint (int_of_string $1)) }
   | e1 = expr PLUS e2 = expr
       { Ebinop (Badd, e1, e2) }
+  | e1 = expr MINUS e2 = expr
+      { Ebinop (Bsub, e1, e2) }
+  | e1 = expr TIMES e2 = expr
+      { Ebinop (Bmul, e1, e2) }
+  | e1 = expr DIV e2 = expr
+      { Ebinop (Bdiv, e1, e2) }
+  | e1 = expr MOD e2 = expr
+      { Ebinop (Bmod, e1, e2) }
   | e1 = expr LT e2 = expr
       { Ebinop (Blt, e1, e2) }
+  | e1 = expr LTE e2 = expr
+      { Ebinop (Ble, e1, e2) }
+  | e1 = expr GT e2 = expr
+      { Ebinop (Bgt, e1, e2) }
+  | e1 = expr GTE e2 = expr
+      { Ebinop (Bge, e1, e2) }
   | LP e = expr RP
       { e }
 ;
