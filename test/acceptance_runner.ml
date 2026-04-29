@@ -49,25 +49,25 @@ let expect_rejected filename () =
 let valid_tests =
   [
     Alcotest.test_case "AT-01 minimal valid state machine" `Quick
-      (expect_accepted "acceptance/valid/at01_minimal_valid_state_machine.dsl");
+      (expect_accepted "test/acceptance/valid/at01_minimal.dsl");
 
     Alcotest.test_case "AT-02 valid machine with guard and variable" `Quick
-      (expect_accepted "acceptance/valid/at02_valid_machine_with_guard_and_variable.dsl");
+      (expect_accepted "test/acceptance/valid/at02_guard_and_variable.dsl");
 
     Alcotest.test_case "AT-03 implicit transition behavior" `Quick
-      (expect_accepted "acceptance/valid/at03_implicit_transition_behavior.dsl");
+      (expect_accepted "test/acceptance/valid/at03_implicit_transition.dsl");
   ]
 
 let invalid_tests =
   [
     Alcotest.test_case "AT-04 missing start state" `Quick
-      (expect_rejected "acceptance/invalid/at04_missing_start_state.dsl");
+      (expect_rejected "test/acceptance/invalid/at04_missing_start.dsl");
 
     Alcotest.test_case "AT-05 missing statemachine block" `Quick
-      (expect_rejected "acceptance/invalid/at05_missing_statemachine_block.dsl");
+      (expect_rejected "test/acceptance/invalid/at05_missing_statemachine_block.dsl");
 
     Alcotest.test_case "AT-06 transition to undefined state" `Quick
-      (expect_rejected "acceptance/invalid/at06_transition_to_undefined_state.dsl");
+      (expect_rejected "test/acceptance/invalid/at06_transition_to_undefined_state.dsl");
   ]
 
 let () =
@@ -76,4 +76,3 @@ let () =
       ("valid programs", valid_tests);
       ("invalid programs", invalid_tests);
     ]
-    
