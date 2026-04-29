@@ -18,9 +18,9 @@ let string_of_state_kind = function
   | Final -> "Final"
 
 let string_of_binop = function
-  | Badd -> "+" (*| Bsub -> "-" | Bmul -> "*" | Bdiv -> "/" | Bmod -> "%"
-  | Beq -> "==" | Bneq -> "!=" *)| Blt -> "<" (*| Ble -> "<=" | Bgt -> ">" | Bge -> ">="
-  | Band -> "and" | Bor -> "or"*)
+  | Badd -> "+" | Bsub -> "-" | Bmul -> "*" | Bdiv -> "/" | Bmod -> "%"
+  (*| Beq -> "==" | Bneq -> "!=" *)| Blt -> "<" | Ble -> "<=" | Bgt -> ">" | Bge -> ">="
+  | Band -> "AND" | Bor -> "OR"
 
 let string_of_constant = function
   | Cbool b -> string_of_bool b
@@ -57,13 +57,21 @@ let print_state st =
   (string_of_state st.name);
   List.iter print_transition st.transitions
 
+let string_of_var = function
+  | Var_decl (name, value) -> Printf.sprintf "%s = %d" name value
+
+let print_vars vars =
+  Printf.printf "Variables:\n";
+  List.iter (fun v -> Printf.printf "  %s\n" (string_of_var v)) vars
+
 let print_program p =
   Printf.printf "Machine: %s\n" p.machine_name;
+  print_vars p.variables;
   List.iter print_state p.states
 
 (***)
 
-(***)
+(**)
 
 let () =
   if Array.length Sys.argv <> 2 then begin
@@ -74,7 +82,13 @@ let () =
   let filename = Sys.argv.(1) in
   let chan = open_in filename in
   let lexbuf = Lexing.from_channel chan in
-
+    (* Loads the filename from CLI argument (Sys.argv) into the lexbuf position record *)
+    lexbuf.lex_curr_p <- { 
+    lexbuf.lex_curr_p with
+    pos_fname = filename
+    };
+  
+  (* 'Run' the compiler *)
 let ast =
   try
     Parser.prog Lexer.token lexbuf
