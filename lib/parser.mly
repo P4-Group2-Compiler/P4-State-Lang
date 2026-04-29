@@ -44,8 +44,12 @@
 %token LP RP (* COMMA *) EQUAL (* "("     ")"     ","     "="  *)
 (*%token PRINT*)
 
-%left PLUS
-%nonassoc LT
+%left OR
+%left AND
+%nonassoc LT LTE GT GTE
+%left PLUS MINUS
+%left TIMES DIV MOD
+
 
 // Grammatical starting point
 %start prog
