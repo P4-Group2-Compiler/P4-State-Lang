@@ -44,13 +44,6 @@ rule token = parse
 | "#"                                   { HASH }
 | "VAR"                                 { VAR }
 
-(* Identifiers *)
-| (Letter IdentifierChars*) as id       { IDENTIFIER id }
-
-(* Numbers *)
-| ['0'-'9']+ as n                       { INT n }
-
-
 (* Binops *)
 | '+'                                   { PLUS }
 | '-'                                   { MINUS }
@@ -58,14 +51,22 @@ rule token = parse
 | "/"                                   { DIV }
 | '%'                                   { MOD } 
 | '='                                   { EQUAL }
-(*| "=="                                { BEQUAL }
-| "!="                                  { BNEQUAL }*)
+| "=="                                  { BEQUAL }
+| "!="                                  { BNEQUAL }
 | "<"                                   { LT }
 | "<="                                  { LTE }
 | ">"                                   { GT }
 | ">="                                  { GTE }
 | "AND"                                 { AND }
 | "OR"                                  { OR }
+
+(* Identifiers *)
+| (Letter IdentifierChars*) as id       { IDENTIFIER id }
+
+(* Numbers *)
+| ['0'-'9']+ as n                       { INT n }
+
+
 
 (* Seperators *)
 | '{'                                   { LEFTTUBORG }

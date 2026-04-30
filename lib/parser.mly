@@ -36,7 +36,7 @@
 %token ELIF*)
 
 (* Operators *)
-%token (* BEQUAL BNEQUAL*) LTE GT GTE LT  
+%token BEQUAL BNEQUAL LTE GT GTE LT  
 %token PLUS MINUS TIMES DIV MOD
 
 // Punctuators
@@ -46,7 +46,7 @@
 
 %left OR
 %left AND
-%nonassoc LT LTE GT GTE
+%nonassoc BEQUAL BNEQUAL LT LTE GT GTE
 %left PLUS MINUS
 %left TIMES DIV MOD
 
@@ -90,6 +90,34 @@ variable:
 | HASH VAR id = IDENTIFIER EQUAL n = INT { Var_decl (id, int_of_string n) }
 ;
 
+transitions:
+  {[]}
+| transition transitions    { $1 :: $2 }
+;
+
+transition:
+| ON IDENTIFIER GO IDENTIFIER
+    { Transition (Event $2, None, State $4) }
+| ON IDENTIFIER IF expr GO IDENTIFIER
+    { Transition (Event $2, Some $4, State $6) }
+(*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE GO IDENTIFIER*)
+(*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE expr GO IDENTIFIER*)
+(*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE stmt GO IDENTIFIER*)
+(*| ON IDENTIFIER IF expr GO IDENTIFIER ELIF expr GO IDENTIFIER ELSE*)
+;
+
+expr:
+  | id = ident
+      { Eident id }
+  | INT
+      { Ecst (Cint (int_of_string $1)) }
+  | e1 = expr o = binop e2 = expr
+      { Ebinop (o, e1, e2) }
+  | LP e = expr RP
+      { e }
+;
+
+(*
 expr:
   | id = ident          
       { Eident id }
@@ -117,26 +145,15 @@ expr:
     { Ebinop (Band, e1, e2) }
   | e1 = expr OR  e2 = expr 
     { Ebinop (Bor,  e1, e2) }
+  | e1 = expr BEQUAL  e2 = expr 
+    { Ebinop (Beq,  e1, e2) }
+  | e1 = expr BNEQUAL  e2 = expr 
+    { Ebinop (Bneq,  e1, e2) }
 
   | LP e = expr RP
       { e }
 ;
-
-transitions:
-  {[]}
-| transition transitions    { $1 :: $2 }
-;
-
-transition:
-| ON IDENTIFIER GO IDENTIFIER
-    { Transition (Event $2, None, State $4) }
-| ON IDENTIFIER IF expr GO IDENTIFIER
-    { Transition (Event $2, Some $4, State $6) }
-(*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE GO IDENTIFIER*)
-(*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE expr GO IDENTIFIER*)
-(*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE stmt GO IDENTIFIER*)
-(*| ON IDENTIFIER IF expr GO IDENTIFIER ELIF expr GO IDENTIFIER ELSE*)
-;
+*)
 
 
 
@@ -149,18 +166,20 @@ transition:
     { Sprint el }
 ;*)
 
-(*binop:
-| PLUS           { Badd }
-(*| MINUS        { Bsub }
-| TIMES          { Bmul }
-| DIV            { Bdiv }
-| MOD            { Bmod }
-| BEQUAL         { Beq }
-| BNEQUAL        { Bneq } *)
-| LT             { Blt }
-(*| LTE          { Ble }
-| GT             { Bgt }
-| GTE            { Bge }*)*)
+%inline binop:
+  | PLUS    { Badd }
+  | MINUS   { Bsub }
+  | TIMES   { Bmul }
+  | DIV     { Bdiv }
+  | MOD     { Bmod }
+  | LT      { Blt }
+  | LTE     { Ble }
+  | GT      { Bgt }
+  | GTE     { Bge }
+  | BEQUAL  { Beq }
+  | BNEQUAL { Bneq }
+  | AND     { Band }
+  | OR      { Bor }
 ;
 
  
