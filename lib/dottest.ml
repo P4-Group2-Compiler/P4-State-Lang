@@ -8,7 +8,7 @@ let stringify_trans (s1, e, _, s2) =
  let s1_str = state_to_string s1 in
  let e_str = event_to_string e in
  let s2_str = state_to_string s2 in
- Printf.sprintf "%s -> %s [label=\"%s\"];" s1_str s2_str e_str 
+ Printf.sprintf "%s -> %s [label=\"%s\"];\n" s1_str s2_str e_str 
 
 (*Outputs a list of DOT transition as strings, using above function*)
 let trans_string_list (t : (state * event * _ * state) list) =
@@ -23,7 +23,7 @@ let string_list_printer (t : (string) list) =
 
 let stringify_start s =
   let start_s = state_to_string s in
-  Printf.sprintf "null -> %s;" start_s
+  Printf.sprintf "null -> %s;\n" start_s
 
 let start_string (t : (state)) =
   stringify_start t
@@ -33,7 +33,7 @@ let start_string (t : (state)) =
 
 let stringify_final s =
   let final_s = state_to_string s in
-  Printf.sprintf "%s [shape = doublecircle;];" final_s
+  Printf.sprintf "%s [shape = doublecircle;];\n" final_s
   
 let final_string_list (t : (state) list) =
   List.map stringify_final t
@@ -48,7 +48,7 @@ let graphFromStatemachine (sm : (statemachine)) =
   let finalStateList = final_string_list sm.final_state in
   let transList = trans_string_list sm.transitions in
 
-  let dot_topSyntax = "digraph " ^ smName ^ " { rankdir = LR; node [shape = circle;]; null [shape = point;];" in
+  let dot_topSyntax = "digraph " ^ smName ^ " {\n rankdir = LR;\n node [shape = circle;];\n null [shape = point;];\n" in
   let dot_bottomSyntax = "}" in
 
   let dotBuf = Buffer.create 16 in
@@ -59,8 +59,8 @@ let graphFromStatemachine (sm : (statemachine)) =
   | h :: t -> Buffer.add_string dotBuf h; addEachString t in
 
   Buffer.add_string dotBuf dot_topSyntax;
-  addEachString transList;
   Buffer.add_string dotBuf startState;
+  addEachString transList;
   addEachString finalStateList;
   Buffer.add_string dotBuf dot_bottomSyntax;
 
