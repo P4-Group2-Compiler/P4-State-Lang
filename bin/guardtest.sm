@@ -8,9 +8,9 @@ Statemachine M {
    }
 
    Final State Closed {
-   (* This is a block comment 
-   With two lines. *)
-    ON Pull IF y + 4 >= x GO Open
+    ON Pull IF SuperLangVariabel < 4 AND 4 > x GO Open
+    ON Pull IF x == 10 GO Closed
+    ON Pull IF x < y GO Closed
     ON TEST GO SOMETHING
    }
 }

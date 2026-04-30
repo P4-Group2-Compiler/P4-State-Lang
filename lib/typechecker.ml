@@ -68,7 +68,9 @@ let rec type_expr (env : type_env) = function
       let t1 = type_expr env e1 in
       let t2 = type_expr env e2 in
       begin match binop, t1, t2 with
-      | (Blt | Ble | Bgt | Bge) ,Tint, Tint -> Tbool
+      | (Band | Bor), Tbool, Tbool -> Tbool
+      | (Badd | Bsub | Bdiv | Bmul), Tint, Tint -> Tint
+      | (Beq | Bneq | Blt | Ble | Bgt | Bge), Tint, Tint -> Tbool
       | _ -> type_error "Comparisons expects 'int : int'"
       end
 

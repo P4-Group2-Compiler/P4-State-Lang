@@ -19,7 +19,7 @@ let string_of_state_kind = function
 
 let string_of_binop = function
   | Badd -> "+" | Bsub -> "-" | Bmul -> "*" | Bdiv -> "/" | Bmod -> "%"
-  (*| Beq -> "==" | Bneq -> "!=" *)| Blt -> "<" | Ble -> "<=" | Bgt -> ">" | Bge -> ">="
+  | Beq -> "==" | Bneq -> "!=" | Blt -> "<" | Ble -> "<=" | Bgt -> ">" | Bge -> ">="
   | Band -> "AND" | Bor -> "OR"
 
 let string_of_constant = function
