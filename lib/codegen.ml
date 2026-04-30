@@ -16,7 +16,7 @@ let rec convert_expr_to_string = function
   | Eident { id } -> id
   | Ebinop (Blt,  expr1, expr2) -> Printf.sprintf "(%s < %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
   | Ebinop (Badd, expr1, expr2) -> Printf.sprintf "(%s + %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
-
+  | _ -> "NOT MATCHED"
 
 (*======================================================================================*)
 let generate_c_code ir =
