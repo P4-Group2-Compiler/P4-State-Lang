@@ -1,18 +1,12 @@
-Statemachine Door { // This is a single line comment 1234!?&$*_-//||\\☺↑↓→←
-	Start State Closed {
-		ON push GO Open
-      ON lock GO Locked
-	}
-
-	State Open {
-      ON pull GO Closed
-	}
-
-	Final State Locked {
-      ON unlock GO Closed
-      
-      (* This is a block comment...
-      ...on multiple lines!
-      *)
-	}
+Statemachine Door {
+  Start State Closed {
+    ON Push IF 3 < 4  GO Closed
+	ON lock GO Locked
+  }
+  State Open {
+	ON pull GO Closed
+  }
+  Final State Locked {
+	ON unlock GO Closed
+  }
 }

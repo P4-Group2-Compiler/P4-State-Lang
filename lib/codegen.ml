@@ -7,6 +7,17 @@ let state_string_identifier = function
 let event_string_identifier = function
   | Ast.Event event_string -> event_string
 
+
+let rec convert_expr_to_string = function
+  | Ecst (Cint n) -> string_of_int n
+  | Ecst (Cbool true)  -> "1"
+  | Ecst (Cbool false) -> "0"
+  | Ecst (Cstring string) -> string
+  | Eident { id } -> id
+  | Ebinop (Blt,  expr1, expr2) -> Printf.sprintf "(%s < %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
+  | Ebinop (Badd, expr1, expr2) -> Printf.sprintf "(%s + %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
+
+
 (*======================================================================================*)
 let generate_c_code ir =
 
@@ -16,64 +27,64 @@ let generate_c_code ir =
   let c_out_channel = open_out c_file in
 (*-------------------------------------------------------------------------------------*)
   (* Includes: *)
-  Printf.fprintf c_out_channel "#include \"state_machine.h\"\n";
-  Printf.fprintf c_out_channel "#include <stdio.h>\n\n";
+  Printf.fprintf c_out_channel "#include <stdio.h>\n";
+  Printf.fprintf c_out_channel "#include <string.h>\n\n";
 (*-------------------------------------------------------------------------------------*)
-  (* The StateID ENUM: *)
+  (* The State ENUM: *)
   Printf.fprintf c_out_channel "typedef enum {\n    ";
   List.iter (fun state -> 
     Printf.fprintf c_out_channel "%s,\n    " (state_string_identifier state)
   ) ir.states;
-  Printf.fprintf c_out_channel "\n    STATE_COUNT\n} StateID;\n\n";
+  Printf.fprintf c_out_channel "} State;\n\n";
 (*-------------------------------------------------------------------------------------*)
-  (* main() + StateMachine struct init + loop that populates the states[] array: *)
-  Printf.fprintf c_out_channel "int main(void) {\n";
-  Printf.fprintf c_out_channel "    StateMachine %s = {0};\n" ir.statemachine_name;
+(* This is an array to hold the state names, so they can be printed to the terminal: *)
+  Printf.fprintf c_out_channel "const char* state_names[] = {";
   List.iter (fun state ->
-    let current_state_name = state_string_identifier state in
-    Printf.fprintf c_out_channel "    %s.states[%s] = (State){.name = \"%s\"};\n"
-      ir.statemachine_name current_state_name current_state_name
+    Printf.fprintf c_out_channel "\"%s\", " (state_string_identifier state)
   ) ir.states;
-  Printf.fprintf c_out_channel "    %s.state_count = STATE_COUNT;\n" ir.statemachine_name;
+  Printf.fprintf c_out_channel "};\n\n";
+(*-------------------------------------------------------------------------------------*)
+(* We use this to track the current_state: *)
+Printf.fprintf c_out_channel "State global_current_state = %s;\n\n" start_state_name;
+(*-------------------------------------------------------------------------------------*)
+(* The "state_machine_step-function" is now just here to avoid the extra state_machine-file include *)
+(* It contains the switch-core of the C output with states as cases containing transitions *)
+Printf.fprintf c_out_channel "State state_machine_step(State current_state, const char* fired_event) {\n";
+  Printf.fprintf c_out_channel "    switch (current_state) {\n";
 
-  Printf.fprintf c_out_channel "\n";
-(*-------------------------------------------------------------------------------------*)
-  (* .start_state + .current_state + .final_states[]: *)
-  Printf.fprintf c_out_channel "    %s.start_state = %s.states[%s];\n" ir.statemachine_name ir.statemachine_name start_state_name;
-  Printf.fprintf c_out_channel "    %s.current_state = %s.start_state;\n" ir.statemachine_name ir.statemachine_name;
-  List.iteri (fun i state ->
-    let current_state_name = state_string_identifier state in
-    Printf.fprintf c_out_channel "    %s.final_states[%d] = %s.states[%s];\n"
-      ir.statemachine_name i ir.statemachine_name current_state_name
-  ) ir.final_state;
+  List.iter (fun state ->
+    Printf.fprintf c_out_channel "    case %s:\n" (state_string_identifier state);
+    List.iter (fun (src_state, event, guard_expr, dst_state) ->
+      if src_state = state then
+        match guard_expr with
+        | None ->
+        Printf.fprintf c_out_channel "        if (strcmp(fired_event, \"%s\") == 0) return %s;\n"
+          (event_string_identifier event)
+          (state_string_identifier dst_state)
+        | Some expr ->
+          Printf.fprintf c_out_channel "        if (strcmp(fired_event, \"%s\") == 0 && (%s)) return %s;\n"
+          (event_string_identifier event)
+          (convert_expr_to_string expr)
+          (state_string_identifier dst_state)
+    ) ir.transitions;
+    Printf.fprintf c_out_channel "        return current_state;\n"
+  ) ir.states;
 
-  Printf.fprintf c_out_channel "\n";
+  Printf.fprintf c_out_channel "    default:\nreturn current_state;\n";
+  Printf.fprintf c_out_channel "    }\n}\n\n";
 (*-------------------------------------------------------------------------------------*)
-  (* Loop that populates the .transitions[] array: *)
-  List.iteri (fun i (src_state, event, dst_state) ->
-    Printf.fprintf c_out_channel "    %s.transitions[%d] = (Transition){\n" ir.statemachine_name i;
-    Printf.fprintf c_out_channel "        .src_state = %s.states[%s],\n" ir.statemachine_name (state_string_identifier src_state);
-    Printf.fprintf c_out_channel "        .event     = (Event){.name = \"%s\"},\n" (event_string_identifier event);
-    Printf.fprintf c_out_channel "        .dst_state = %s.states[%s]\n" ir.statemachine_name (state_string_identifier dst_state);
-    Printf.fprintf c_out_channel "    };\n";
-  ) ir.transitions;
-  Printf.fprintf c_out_channel "    %s.transition_count = %d;\n" ir.statemachine_name (List.length ir.transitions);
-(*-------------------------------------------------------------------------------------*)
-  (* The state machine's main-loop that reads user input + call to state_machine_step(...): *)
-  Printf.fprintf c_out_channel "    \n#define STATE_MACHINE_RUNNING true\n\n";
+  (* main() + the main state machine loop that takes the users input: *)
+  Printf.fprintf c_out_channel "#define STATE_MACHINE_RUNNING 1\n\n";
+  Printf.fprintf c_out_channel "int main(void) {\n";
   Printf.fprintf c_out_channel "    while (STATE_MACHINE_RUNNING) {\n";
-  Printf.fprintf c_out_channel "        printf(\"\\nCurrent state: %%s\\n\", %s.current_state.name);\n" ir.statemachine_name;
+  Printf.fprintf c_out_channel "        printf(\"\\nCurrent state: %%s\\n\", state_names[global_current_state]);\n";
   Printf.fprintf c_out_channel "        printf(\"Enter event: \");\n";
-  Printf.fprintf c_out_channel "        char entered_event_name[256];\n";
-  Printf.fprintf c_out_channel "        while (scanf(\"%%s255\", &entered_event_name) != true) {\n";
-  Printf.fprintf c_out_channel "            printf(\"\\nInvalid Input!\\n\");\n";
-  Printf.fprintf c_out_channel "            while (getchar() != '\\n');\n";
-  Printf.fprintf c_out_channel "        };\n";
-  Printf.fprintf c_out_channel "        Event entered_event = (Event){.name = entered_event_name};\n";
-  Printf.fprintf c_out_channel "        state_machine_step(&%s, entered_event);\n" ir.statemachine_name;
-  Printf.fprintf c_out_channel "    }\n\n";
+  Printf.fprintf c_out_channel "        char entered_event[256];\n";
+  Printf.fprintf c_out_channel "        scanf(\"%%255s\", entered_event);\n";
+  Printf.fprintf c_out_channel "        global_current_state = state_machine_step(global_current_state, entered_event);\n";
+  Printf.fprintf c_out_channel "    }\n";
   Printf.fprintf c_out_channel "    return 0;\n";
-  Printf.fprintf c_out_channel "}";
+  Printf.fprintf c_out_channel "}\n";
 (*-------------------------------------------------------------------------------------*)
   close_out c_out_channel;
 

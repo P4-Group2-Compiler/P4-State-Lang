@@ -4,14 +4,14 @@ open Ast
 (**************************************************************************************************************************************************)
 (*Strings of transitions*)
 
-let stringify_trans (s1, e, s2) =
+let stringify_trans (s1, e, _, s2) =
  let s1_str = state_to_string s1 in
  let e_str = event_to_string e in
  let s2_str = state_to_string s2 in
  Printf.sprintf "%s -> %s [label=\"%s\"];" s1_str s2_str e_str 
 
 (*Outputs a list of DOT transition as strings, using above function*)
-let trans_string_list (t : (state * event * state) list) =
+let trans_string_list (t : (state * event * _ * state) list) =
   List.map stringify_trans t
 
 (*Prints string lists*)
