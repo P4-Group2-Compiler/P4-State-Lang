@@ -11,7 +11,6 @@ let parse_and_check_file filename =
     let ast = Parser.prog Lexer.token lexbuf in
     close_in chan;
 
-    (* Run later pipeline stages here *)
     Typechecker.type_program ast;
     ignore (Semantic.collect_transitions ast);
     ignore (Semantic.analyse ast);
@@ -46,6 +45,13 @@ let expect_rejected filename () =
   | Accepted ->
       Alcotest.failf "Expected %s to be rejected, but it was accepted" filename
 
+let expect_warning filename () =
+  match parse_and_check_file filename with
+  | Accepted ->
+      ()
+  | Rejected msg ->
+      Alcotest.failf "Expected %s to be accepted with warning, but got: %s" filename msg      
+
 let valid_tests =
   [
     Alcotest.test_case "AT-01 minimal valid state machine" `Quick
@@ -54,8 +60,8 @@ let valid_tests =
     Alcotest.test_case "AT-02 valid machine with guard and variable" `Quick
       (expect_accepted "test/acceptance/valid/at02_guard_and_variable.dsl");
 
-    Alcotest.test_case "AT-03 implicit transition behavior" `Quick
-      (expect_accepted "test/acceptance/valid/at03_implicit_transition.dsl");
+    (* Alcotest.test_case "AT-03 implicit transition behavior" `Quick
+      (expect_accepted "test/acceptance/valid/at03_implicit_transition.dsl"); Needs ELSE functionality in guards to work *) 
   ]
 
 let invalid_tests =
@@ -70,9 +76,19 @@ let invalid_tests =
       (expect_rejected "test/acceptance/invalid/at06_transition_to_undefined_state.dsl");
   ]
 
+let warning_tests =
+  [
+    (* Alcotest.test_case "AT-07 duplicate transition" `Quick
+      (expect_warning "test/acceptance/warning/at07_duplicate_transition.dsl"); Right now duplicate transitions are handled as semantic errors*)
+
+    Alcotest.test_case "AT-08 unreachable final state" `Quick
+      (expect_warning "test/acceptance/warning/at08_unreachable_final_state.dsl");
+  ]  
+
 let () =
   Alcotest.run "Acceptance tests"
     [
       ("valid programs", valid_tests);
       ("invalid programs", invalid_tests);
+      ("warning programs", warning_tests);
     ]

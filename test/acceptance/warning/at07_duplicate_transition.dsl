@@ -1,9 +1,9 @@
 Statemachine M {
   Start State A {
-    ON b GO B;
-    ON b GO B;
+    ON Push GO B
+    ON Push GO B
   }
 
-  State B {
+  Final State B {
   }
 }
