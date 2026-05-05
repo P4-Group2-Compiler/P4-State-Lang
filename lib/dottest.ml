@@ -67,4 +67,5 @@ let graphFromStatemachine (sm : (statemachine)) =
   let oc = open_out "graph.gv" in
   Buffer.output_buffer oc dotBuf;
   close_out oc;
+  ignore (Sys.command "dot -Tpng graph.gv -o graph.png");
 ;

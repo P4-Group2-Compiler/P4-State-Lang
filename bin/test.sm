@@ -1,12 +1,20 @@
-Statemachine Door {
-  Start State Closed {
-    ON Push IF 3 < 4  GO Closed
-	ON lock GO Locked
-  }
-  State Open {
-	ON pull GO Closed
-  }
-  Final State Locked {
-	ON unlock GO Closed
-  }
+Statemachine Silke {
+
+   Start State Sober {
+      ON Tequila GO Party
+   }
+
+   State Party {
+      ON Dance GO Wasted
+   }
+
+   State Home {
+      ON Bed GO Sleep
+   }
+   
+   Final State Wasted {
+      ON Shots GO Wasted
+      ON Water GO Home
+      ON Cola GO Burger
+   }
 }

@@ -1,11 +1,13 @@
-digraph Door {
+digraph Silke {
  rankdir = LR;
  node [shape = circle;];
  null [shape = point;];
-null -> Closed;
-Closed -> Closed [label="Push"];
-Closed -> Locked [label="lock"];
-Open -> Closed [label="pull"];
-Locked -> Closed [label="unlock"];
-Locked [shape = doublecircle;];
+null -> Sober;
+Sober -> Party [label="Tequila"];
+Party -> Wasted [label="Dance"];
+Home -> Sleep [label="Bed"];
+Wasted -> Wasted [label="Shots"];
+Wasted -> Home [label="Water"];
+Wasted -> Burger [label="Cola"];
+Wasted [shape = doublecircle;];
 }
