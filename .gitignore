@@ -5,3 +5,7 @@ output/c/.clang-format
 output/c/generated_state_machine.c
 .DS_Store
 bufftest
+test.sm
+guardtest.sm
+graph.gv
+graph.png
