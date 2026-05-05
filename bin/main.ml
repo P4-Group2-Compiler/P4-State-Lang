@@ -109,15 +109,6 @@ begin
     exit 1
 end;    
 
-    (* Typecheck the program *)
-begin
-  try
-    Typechecker.type_program ast
-  with Typechecker.Type_error msg ->
-    Printf.printf "Type error: %s\n" msg;
-    exit 1
-end;    
-
   (**************************************************************************************************)
   (*Collect functions in a functions, to use on the statemachine*)
   let statemachine = Semantic.analyse ast in
