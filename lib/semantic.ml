@@ -14,7 +14,7 @@ type statemachine =
   states : state list;
   start_state : state;
   final_state : state list;
-  transitions : (state * event * state) list;
+  transitions : (state * event * expr option * state) list;
 }
 
 let state_to_string = function
@@ -22,6 +22,7 @@ let state_to_string = function
 let event_to_string = function
   | Event e -> e
 
+(*Silke - "Mine funktioner i ./dottest bruger de to nederste og ikke de øverste, ved ikke med jer andre."*)
 let event_to_string (Event e) = e (*Base printer for event*)
 let state_to_string (State s) = s (*Base printer for state*)
 
@@ -48,24 +49,23 @@ let get_start_states (p: program) : state =
 let get_final_states (p: program) : state list = 
   List.fold_left (fun list state_decl ->
     match state_decl.kind with
-    |Final -> state_decl.name :: list
+    | Final -> state_decl.name :: list
     | Normal | Start -> list)
     []
     p.states
 
 (* Function for adding the source state with the states: (event, state) -> (state, event, state) *)
-let add_source_state (st_decl : state_decl) : (state * event * state) list = 
+let add_source_state (st_decl : state_decl) : (state * event * expr option * state) list = 
   let src = st_decl.name in
   List.map (fun trans -> 
     match trans with
-    | Transition (event, Some expr, dest) -> (src, event, dest)
-    | Transition (event, None, dest) -> (src, event, dest))
+    | Transition (event, Some expr, dest) -> (src, event, Some expr, dest)
+    | Transition (event, None, dest) -> (src, event, None, dest))
 st_decl.transitions
 
 (* Collecting all the transitions using the add_source_state function: List of all (state, event, state)*)
-let collect_transitions (p : program) : (state * event * state) list = 
+let collect_transitions (p : program) : (state * event * expr option * state) list = 
   List.concat (List.map add_source_state p.states)
-
 
 (*----------------(* CREATING THE STATEMACHIN WITH THE HELPER FUNCTIONS *)----------------*)
 
@@ -78,7 +78,6 @@ let create_state_machine (p: program) : statemachine =
     final_state = get_final_states p;
     transitions = collect_transitions p;
   }
-
 
 (*----------------------------(* VALIDATING THE STATEMACHINE *)---------------------------*)
 
@@ -108,7 +107,7 @@ let check_duplicate_transistions (statemachine : statemachine) : unit =
 (* Helper function for checking if start can reach final. It returns a list of destination states connected
    with transitions from the passed state *)
 let successors (statemachine : statemachine) (state : state) : state list =
-  List.fold_left (fun acc (src, _, dest) ->
+  List.fold_left (fun acc (src, _, _, dest) ->
     if src = state then dest :: acc else acc)
   [] statemachine.transitions
 
@@ -148,7 +147,6 @@ let analyse (p : program) : statemachine =
   let machine = create_state_machine p in
       validate_state_machine machine;
       machine
-
 
 (*---------------------------(* PRINT FUNCTIONS FOR DEBUGGIN *)---------------------------*)
 
