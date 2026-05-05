@@ -1,11 +1,11 @@
 _build/
 build-and-test.yaml
-output/c/*.exe
+output/c/
 output/c/.clang-format
 output/c/generated_state_machine.c
 .DS_Store
 bufftest
-test.sm
-guardtest.sm
-graph.gv
-graph.png
+bin/test.sm
+bin/guardtest.sm
+bin/graph.gv
+bin/graph.pnggit  
