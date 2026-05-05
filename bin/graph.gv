@@ -1,13 +1,11 @@
-digraph Silke {
+digraph M {
  rankdir = LR;
  node [shape = circle;];
  null [shape = point;];
-null -> Sober;
-Sober -> Party [label="Tequila"];
-Party -> Wasted [label="Dance"];
-Home -> Sleep [label="Bed"];
-Wasted -> Wasted [label="Shots"];
-Wasted -> Home [label="Water"];
-Wasted -> Burger [label="Cola"];
-Wasted [shape = doublecircle;];
+null -> Open;
+Open -> Closed [label="Push"];
+Closed -> Closed [label="Push"];
+Closed -> Closed [label="Pull"];
+Closed -> SOMETHING [label="TEST"];
+Closed [shape = doublecircle;];
 }

@@ -2,26 +2,23 @@
 #include <string.h>
 
 typedef enum {
-    Closed,
     Open,
-    Locked,
+    Closed,
     } State;
 
-const char* state_names[] = {"Closed", "Open", "Locked", };
+const char* state_names[] = {"Open", "Closed", };
 
-State global_current_state = Closed;
+State global_current_state = Open;
 
 State state_machine_step(State current_state, const char* fired_event) {
     switch (current_state) {
-    case Closed:
-        if (strcmp(fired_event, "Push") == 0 && ((3 < 4))) return Closed;
-        if (strcmp(fired_event, "lock") == 0) return Locked;
-        return current_state;
     case Open:
-        if (strcmp(fired_event, "pull") == 0) return Closed;
+        if (strcmp(fired_event, "Push") == 0 && ((x < 4))) return Closed;
         return current_state;
-    case Locked:
-        if (strcmp(fired_event, "unlock") == 0) return Closed;
+    case Closed:
+        if (strcmp(fired_event, "Push") == 0 && (NOT MATCHED)) return Closed;
+        if (strcmp(fired_event, "Pull") == 0 && ((x < y))) return Closed;
+        if (strcmp(fired_event, "TEST") == 0) return SOMETHING;
         return current_state;
     default:
 return current_state;

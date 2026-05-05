@@ -1,20 +1,15 @@
-Statemachine Silke {
-
-   Start State Sober {
-      ON Tequila GO Party
+Statemachine M {
+   # VAR x = 10
+   # VAR y = 4
+   # VAR amount_of_shots = 13
+   // This is a single line comment
+   Start State Open {
+    ON Push IF x < 4  GO Closed
    }
 
-   State Party {
-      ON Dance GO Wasted
-   }
-
-   State Home {
-      ON Bed GO Sleep
-   }
-   
-   Final State Wasted {
-      ON Shots GO Wasted
-      ON Water GO Home
-      ON Cola GO Burger
+   Final State Closed {
+    ON Push IF x == 10 GO Closed
+    ON Pull IF x < y GO Closed
+    ON TEST GO SOMETHING
    }
 }
