@@ -6,6 +6,7 @@ open Ast
 open Semantic
 
 
+
 let string_of_state = function
   | State s -> s
 
@@ -121,7 +122,9 @@ end;
   (*Printf.printf "--> StateMachine Analysed! <--\n--> Machine name = %s <--" statemachine.statemachine_name*)
 
   (*Creating the .gv file from statemachine*)
-  Dottest.graphFromStatemachine statemachine
+  Dottest.graphFromStatemachine statemachine;
+
+  Codegen.generate_c_code statemachine;
 
   (* let transitions = Semantic.collect_transitions ast in
   Semantic.print_iter_trans transitions; *)
