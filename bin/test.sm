@@ -15,5 +15,6 @@ Statemachine Silke {
    Final State Wasted {
       ON Shots GO Wasted
       ON Water GO Home
+      ON Cola GO Burger
    }
 }

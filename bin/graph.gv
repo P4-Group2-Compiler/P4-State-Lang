@@ -8,5 +8,6 @@ Party -> Wasted [label="Dance"];
 Home -> Sleep [label="Bed"];
 Wasted -> Wasted [label="Shots"];
 Wasted -> Home [label="Water"];
+Wasted -> Burger [label="Cola"];
 Wasted [shape = doublecircle;];
 }
