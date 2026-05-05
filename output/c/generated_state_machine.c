@@ -14,7 +14,7 @@ State global_current_state = Closed;
 State state_machine_step(State current_state, const char* fired_event) {
     switch (current_state) {
     case Closed:
-        if (strcmp(fired_event, "Push") == 0 && ((5 < 16))) return Closed;
+        if (strcmp(fired_event, "Push") == 0 && ((3 < 4))) return Closed;
         if (strcmp(fired_event, "lock") == 0) return Locked;
         return current_state;
     case Open:

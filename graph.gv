@@ -2,10 +2,10 @@ digraph Door {
  rankdir = LR;
  node [shape = circle;];
  null [shape = point;];
-null -> Closed;
-Closed -> Closed [label="Push"];
-Closed -> Locked [label="lock"];
-Open -> Closed [label="pull"];
-Locked -> Closed [label="unlock"];
+null -> Lukket;
+Lukket -> Lukket [label="Push"];
+Lukket -> Locked [label="lock"];
+Open -> Lukket [label="pull"];
+Locked -> Lukket [label="unlock"];
 Locked [shape = doublecircle;];
 }

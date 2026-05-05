@@ -23,7 +23,7 @@ let generate_c_code ir =
 
   let start_state_name = state_string_identifier ir.start_state in
 
-  let c_file = "output/c/generated_state_machine.c" in
+  let c_file = "../output/c/generated_state_machine.c" in
   let c_out_channel = open_out c_file in
 (*-------------------------------------------------------------------------------------*)
   (* Includes: *)
