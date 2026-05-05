@@ -1,6 +1,4 @@
-  
-
-(*type state = 
+  (*type state = 
   (*| State of string *)
   | State of string*)
 
