@@ -5,7 +5,7 @@ digraph M {
 null -> Open;
 Open -> Closed [label="Push"];
 Closed -> Closed [label="Push"];
-Closed -> Closed [label="Pull"];
+Closed -> Closed [label="Shove"];
 Closed -> SOMETHING [label="TEST"];
 Closed [shape = doublecircle;];
 }
