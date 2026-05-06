@@ -1,4 +1,4 @@
-
+dune clean
 dune build 
 cd bin
 dune exec ./main.exe -- test.sm
