@@ -8,4 +8,4 @@ bufftest
 bin/test.sm
 bin/guardtest.sm
 bin/graph.gv
-bin/graph.pnggit  
+bin/graph.png
