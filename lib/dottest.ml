@@ -1,21 +1,71 @@
 open Semantic
 open Ast
 
-let transition_to_string (s1, e, s2) =       (*Prints (state, event, state) in DOT syntax as string*)
-  Printf.printf "%s -> %s [label=\"%s\"];"
-  (state_to_string s1)
-  (state_to_string s2)
-  (event_to_string e)
-
-let printer (t : (state * event * state) list) = (*Prints all transitions, as modified by transition_to_string*)
-  List.iter transition_to_string t
-  
 (**************************************************************************************************************************************************)
-  
-let rec stringify f = function (*Not in use for now*)
-| [] -> []
-| h :: t -> f h :: stringify f t
+(*Strings of transitions*)
 
-(* let transList lst = stringify (transition_to_string) lst (*Not in use for now*)
-let result = Semantic.transList (*Not in use for now. Just storing the list of collected transitions here, for now.*)
-let stuff = Semantic.collect_transitions (*Not in use for now. Same as above*) *)
+let stringify_trans (s1, e, _, s2) =
+ let s1_str = state_to_string s1 in
+ let e_str = event_to_string e in
+ let s2_str = state_to_string s2 in
+ Printf.sprintf "%s -> %s [label=\"%s\"];\n" s1_str s2_str e_str 
+
+(*Outputs a list of DOT transition as strings, using above function*)
+let trans_string_list (t : (state * event * _ * state) list) =
+  List.map stringify_trans t
+
+(*Prints string lists*)
+let string_list_printer (t : (string) list) = 
+  List.iter print_endline t
+
+(**************************************************************************************************************************************************)
+(*Strings of start states*)
+
+let stringify_start s =
+  let start_s = state_to_string s in
+  Printf.sprintf "null -> %s;\n" start_s
+
+let start_string (t : (state)) =
+  stringify_start t
+
+(**************************************************************************************************************************************************)
+(*Strings of final states*)
+
+let stringify_final s =
+  let final_s = state_to_string s in
+  Printf.sprintf "%s [shape = doublecircle;];\n" final_s
+  
+let final_string_list (t : (state) list) =
+  List.map stringify_final t
+
+(**************************************************************************************************************************************************)
+(*Function that takes the entire statemachine*)
+
+let graphFromStatemachine (sm : (statemachine)) =
+
+  let smName = sm.statemachine_name in
+  let startState = start_string sm.start_state in
+  let finalStateList = final_string_list sm.final_state in
+  let transList = trans_string_list sm.transitions in
+
+  let dot_topSyntax = "digraph " ^ smName ^ " {\n rankdir = LR;\n node [shape = circle;];\n null [shape = point;];\n" in
+  let dot_bottomSyntax = "}" in
+
+  let dotBuf = Buffer.create 16 in
+  
+  (*Helper function for getting each string in the stringlists of transitions and final states*)
+  let rec addEachString = function
+  | [] -> ()
+  | h :: t -> Buffer.add_string dotBuf h; addEachString t in
+
+  Buffer.add_string dotBuf dot_topSyntax;
+  Buffer.add_string dotBuf startState;
+  addEachString transList;
+  addEachString finalStateList;
+  Buffer.add_string dotBuf dot_bottomSyntax;
+
+  let oc = open_out "graph.gv" in
+  Buffer.output_buffer oc dotBuf;
+  close_out oc;
+  ignore (Sys.command "dot -Tpng graph.gv -o graph.png");
+;
