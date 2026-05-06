@@ -124,12 +124,11 @@ end;
 
   (**************************************************************************************************)
   (*Collect functions in a functions, to use on the statemachine*)
-  let statemachine = Semantic.analyse ast in
+  let statemachine, warnings = Semantic.analyse ast in
     Printf.printf "This is statemachine ---> %s <---!\n" statemachine.statemachine_name;
   
   close_in chan;
   (* print_program ast; *)
-let statemachine, warnings = Semantic.analyse ast in
   List.iter (fun warning -> print_warning (statemachine, warning)) warnings
   
 
