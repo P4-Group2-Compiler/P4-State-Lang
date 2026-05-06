@@ -1,15 +1,27 @@
-Statemachine M {
-   # VAR x = 10
-   # VAR y = 4
-   # VAR amount_of_shots = 13
-   // This is a single line comment
-   Start State Open {
-    ON Push IF x < 4  GO Closed
-   }
+Statemachine Door {
+  Start State Open {
+    ON Push IF 3 + 4  GO Open
+    ON Push IF 3 - 4  GO Open
+    ON Push IF 3 * 4  GO Open
+    ON Push IF 3 / 4  GO Open
+    ON Push IF 3 % 4  GO Open
+    ON Push IF 3 == 4  GO Open
+    ON Push IF 3 != 4  GO Open
+    ON Push IF 3 < 4  GO Open
+    ON Push IF 3 <= 4  GO Open
+    ON Push IF 3 > 4  GO Open
+    ON Push IF 3 >= 4  GO Open
+    ON Push IF 3 AND 4  GO Open
+    ON Push IF 3 OR 4  GO Open
+	  
+    ON lock GO Locked
+  }
 
-   Final State Closed {
-    ON Push IF x == 10 GO Closed
-    ON Pull IF x < y GO Closed
-    ON TEST GO SOMETHING
-   }
+  State Open {
+	  ON pull GO Closed
+  }
+
+  Final State Locked {
+	  ON unlock GO Closed
+  }
 }
