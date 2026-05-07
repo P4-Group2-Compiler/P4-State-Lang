@@ -3,9 +3,10 @@ digraph M {
  node [shape = circle;];
  null [shape = point;];
 null -> Open;
-Open -> Closed [label="Push"];
-Closed -> Closed [label="Push"];
-Closed -> Closed [label="Shove"];
+Open -> Closed [label="Push( < 4)"];
+Open -> Home [label="Push( > 4)"];
+Closed -> Closed [label="Push( == 10)"];
+Closed -> Closed [label="Pull( < )"];
 Closed -> SOMETHING [label="TEST"];
 Closed [shape = doublecircle;];
 }
