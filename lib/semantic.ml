@@ -9,6 +9,7 @@ let error msg = raise (Semantic_error msg)
 type warning = 
   | DuplicateTransitions of state * event * state
   | TooManyStates of int
+  | UnreachableFinalState of state
 
 let maxStates = 20 (* Num of states that break the DOT output readability
                       Used for TooManyStates warning *)
@@ -133,10 +134,11 @@ let rec can_reach_final_state (statemachine : statemachine) (visited : state lis
     List.exists (fun next -> can_reach_final_state statemachine (state :: visited) next) next_states
 
 (* We check if the Start state has a path to the Final state *)
-let check_start_reaches_final (statemachine : statemachine) : unit =
-  let start = statemachine.start_state in  
+let check_start_reaches_final (statemachine : statemachine) : warning list =
+  let start = statemachine.start_state in 
   if not (can_reach_final_state statemachine [] start) then
-      error ("{Start State " ^ state_to_string start ^ "} cannot reach a Final State")
+      [UnreachableFinalState start]
+  else []
 
 (* Returns a list of states that cannot reach Final state (dead-ends) might use for warnings later? *)
 let get_unreachable_states (statemachine : statemachine) : state list =
@@ -148,16 +150,16 @@ let get_unreachable_states (statemachine : statemachine) : state list =
 
 (* Function to run through all of the validation checks - add all new checks into this function *)
 let validate_state_machine (statemachine : statemachine) : unit =
-  check_duplicate_state_names statemachine;
-  (* check_duplicate_transistions statemachine; *) (* Removed as it is now a warning *)
-  check_start_reaches_final statemachine
+  check_duplicate_state_names statemachine
 
 let collect_warnings (statemachine : statemachine) : warning list =
   let warnings = [] in
     warnings
     @ (check_duplicate_transistions statemachine)
     @ (check_number_of_states statemachine)
-    
+    @ (check_start_reaches_final statemachine)
+
+
   (* let TooManyStates = check_number_of_states statemachine; *)
 
 (*---------------------------(* ANALYSE THE STATEMACHINE *)---------------------------*)

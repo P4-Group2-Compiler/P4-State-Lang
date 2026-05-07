@@ -70,6 +70,7 @@ let print_program p =
   print_vars p.variables;
   List.iter print_state p.states
 
+(* Pattern matches the Warnings to print them in the correct form *)
 let print_warning (statemachine, warning) =
   begin match warning with
   | DuplicateTransitions (src, event, dest) ->
@@ -81,6 +82,9 @@ let print_warning (statemachine, warning) =
       Printf.printf "WARNING {AmountOfStates}:\n\tLarge amount of states declared (%i > %i); output graph may become difficult to read\n"
         stateNum
         maxStates
+  | UnreachableFinalState state ->
+      Printf.printf "WARNING {UnreachableFinalState}:\n\tStart State: \"%s\" is unable to reach any Final State\n"
+        (string_of_state state)
   end
 
 (***)
