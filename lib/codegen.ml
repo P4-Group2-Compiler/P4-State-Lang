@@ -14,9 +14,29 @@ let rec convert_expr_to_string = function
   | Ecst (Cbool false) -> "0"
   | Ecst (Cstring string) -> string
   | Eident { id } -> id
-  | Ebinop (Blt,  expr1, expr2) -> Printf.sprintf "(%s < %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
+
+  (*[ +, -, *, /, % ]*)
   | Ebinop (Badd, expr1, expr2) -> Printf.sprintf "(%s + %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
-  | _ -> "NOT MATCHED"
+  | Ebinop (Bsub, expr1, expr2) -> Printf.sprintf "(%s - %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
+  | Ebinop (Bmul, expr1, expr2) -> Printf.sprintf "(%s * %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
+  | Ebinop (Bdiv, expr1, expr2) -> Printf.sprintf "(%s / %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
+  | Ebinop (Bmod, expr1, expr2) -> Printf.sprintf "(%s %% %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
+
+  (*[ ==, != ]*)
+  | Ebinop (Beq,  expr1, expr2) -> Printf.sprintf "(%s == %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
+  | Ebinop (Bneq,  expr1, expr2) -> Printf.sprintf "(%s != %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
+
+  (*[ <, <=, >, >= ]*)
+  | Ebinop (Blt,  expr1, expr2) -> Printf.sprintf "(%s < %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
+  | Ebinop (Ble,  expr1, expr2) -> Printf.sprintf "(%s <= %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
+  | Ebinop (Bgt,  expr1, expr2) -> Printf.sprintf "(%s > %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
+  | Ebinop (Bge,  expr1, expr2) -> Printf.sprintf "(%s >= %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
+  
+  (*[ &&, || ]*)
+  | Ebinop (Band,  expr1, expr2) -> Printf.sprintf "(%s && %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
+  | Ebinop (Bor,  expr1, expr2) -> Printf.sprintf "(%s || %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
+
+  (* | _ -> "NOT MATCHED" *)
 
 (*======================================================================================*)
 let generate_c_code ir =

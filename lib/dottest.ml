@@ -65,8 +65,8 @@ let graphFromStatemachine (sm : (statemachine)) =
   addEachString finalStateList;
   Buffer.add_string dotBuf dot_bottomSyntax;
 
-  let oc = open_out "graph.gv" in
+  let oc = open_out "../output/DOT/graph.gv" in
   Buffer.output_buffer oc dotBuf;
   close_out oc;
-  ignore (Sys.command "dot -Tpng graph.gv -o graph.png");
+  ignore (Sys.command "cd ../output/DOT && dot -Tpng graph.gv -o graph.png");
 ;

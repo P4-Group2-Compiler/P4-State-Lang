@@ -1,0 +1,9 @@
+digraph A {
+ rankdir = LR;
+ node [shape = circle;];
+ null [shape = point;];
+null -> Closed;
+Closed -> Open [label="Pull"];
+Open -> Closed [label="Push"];
+Open [shape = doublecircle;];
+}
