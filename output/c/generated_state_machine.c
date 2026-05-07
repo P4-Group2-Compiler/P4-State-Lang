@@ -14,6 +14,7 @@ State state_machine_step(State current_state, const char* fired_event) {
     switch (current_state) {
     case Open:
         if (strcmp(fired_event, "Push") == 0 && ((x < 4))) return Closed;
+        if (strcmp(fired_event, "Push") == 0 && (NOT MATCHED)) return Home;
         return current_state;
     case Closed:
         if (strcmp(fired_event, "Push") == 0 && (NOT MATCHED)) return Closed;
