@@ -32,6 +32,7 @@
 %token VAR
 %token AND
 %token OR
+%token INPUT
 (*%token ELSE
 %token ELIF*)
 
@@ -63,7 +64,7 @@
 // Grammar Rules
 
 prog:
-| STATEMACHINE IDENTIFIER LEFTTUBORG variables states RIGHTTUBORG EOF  { {machine_name = $2; variables = $4; states = $5} }
+| STATEMACHINE IDENTIFIER LEFTTUBORG variables inputs states RIGHTTUBORG EOF  { {machine_name = $2; variables = $4; inputs = $5; states = $6} }
 ;
 
 states:
@@ -90,8 +91,17 @@ variable:
 | HASH VAR id = IDENTIFIER EQUAL n = INT { Var_decl (id, int_of_string n) }
 ;
 
+inputs:
+| { [] }
+| input inputs { $1 :: $2 }
+;
+
+input:
+| INPUT id = IDENTIFIER { Input_decl id }
+;
+
 transitions:
-  {[]}
+|  {[]}
 | transition transitions    { $1 :: $2 }
 ;
 
