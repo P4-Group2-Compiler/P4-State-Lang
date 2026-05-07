@@ -1,4 +1,11 @@
 open P4
+(* ******************* *)
+(* Tests:              *)
+(* test_collect_states_happy 
+*)
+(*                                *) 
+(* ******************* *)
+
 (********************* FUN COLLECT_STATES *********************)
 (********************* Happy test *********************)
 let test_collect_states_happy () = 
@@ -28,7 +35,30 @@ let test_collect_states_happy () =
     (List.map Semantic.state_to_string expected)
     (List.map Semantic.state_to_string result)
 
-let test_collect_transitions_happy () = assert true
+(* let test_collect_transitions_happy () =
+
+
+let open P4.Ast in
+let state name =
+  { kind = Start; name = State name; transitions = [] }
+in
+let prog = {
+  machine_name = "M";
+  variables = [];
+  states = [ state "A"]
+} in
+
+let result = P4.Semantic.get_start_states prog in
+
+let expected = state.kind in
+Alcotest.(check (list string))
+  "get_start_state returns the correct start state"
+  (List.map Semantic.state_to_string expected)
+  (List.map Semanitc.state_to_string result) *)
+
+
+
+  
 
 (********************* Sad test *********************)
 
