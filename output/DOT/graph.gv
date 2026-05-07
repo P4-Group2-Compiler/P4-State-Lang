@@ -1,9 +1,11 @@
-digraph A {
+digraph M {
  rankdir = LR;
  node [shape = circle;];
  null [shape = point;];
-null -> Closed;
-Closed -> Open [label="Pull"];
+null -> Open;
 Open -> Closed [label="Push"];
-Open [shape = doublecircle;];
+Closed -> Closed [label="Push"];
+Closed -> Closed [label="Pull"];
+Closed -> SOMETHING [label="TEST"];
+Closed [shape = doublecircle;];
 }

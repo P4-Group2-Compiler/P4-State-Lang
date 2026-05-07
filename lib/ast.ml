@@ -53,6 +53,9 @@ type state_kind =
 type var_decl = 
   | Var_decl of string * int
 
+type input_decl =
+  | Input_decl of string list
+
 type state_decl = {
   kind : state_kind;
   name : state;                     (*state B {}*) (*= State of string*)
@@ -62,5 +65,6 @@ type state_decl = {
 type program = {
   machine_name : string;
   variables : var_decl list;
+  inputs : input_decl list;
   states : state_decl list;
 }
