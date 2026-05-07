@@ -153,8 +153,12 @@ let validate_state_machine (statemachine : statemachine) : unit =
   check_start_reaches_final statemachine
 
 let collect_warnings (statemachine : statemachine) : warning list =
-  let DuplicateWarnings = check_duplicate_transistions statemachine;
-  let TooManyStates = check_number_of_states statemachine;
+  let warnings = [] in
+    warnings
+    @ (check_duplicate_transistions statemachine)
+    @ (check_number_of_states statemachine)
+    
+  (* let TooManyStates = check_number_of_states statemachine; *)
 
 (*---------------------------(* ANALYSE THE STATEMACHINE *)---------------------------*)
 
