@@ -20,6 +20,7 @@ let test_collect_states_happy () =
   let prog = {
     machine_name = "M";
     variables = [];
+    inputs = [];
     states = [ state "A"; state "B" ];
   } in
 
