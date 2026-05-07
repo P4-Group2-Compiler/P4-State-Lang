@@ -77,6 +77,10 @@ let print_warning (statemachine, warning) =
         (string_of_state src)
         (string_of_event event)
         (string_of_state dest)
+  | TooManyStates stateNum ->
+      Printf.printf "WARNING: Number of States declared: %i is over the reccomended amount of %i which might negatively affect readability of the output graph\n"
+        stateNum
+        maxStates
   end
 
 (***)
@@ -126,6 +130,8 @@ end;
   (*Collect functions in a functions, to use on the statemachine*)
   let statemachine, warnings = Semantic.analyse ast in
     Printf.printf "This is statemachine ---> %s <---!\n" statemachine.statemachine_name;
+    Codegen.generate_c_code statemachine;
+    Dottest.graphFromStatemachine statemachine;
   
   close_in chan;
   (* print_program ast; *)

@@ -1,7 +1,7 @@
 Statemachine Door {
   Start State Open {
     ON lock GO Locked
-    ON lock GO Locked
+   
   }
 
   State Closed {
@@ -9,6 +9,10 @@ Statemachine Door {
   }
 
   Final State Locked {
-	  ON unlock GO Closed
+	  ON unlock GO Toomuch
+  }
+
+  State Toomuch {
+    ON some GO Closed
   }
 }

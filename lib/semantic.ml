@@ -8,7 +8,10 @@ let error msg = raise (Semantic_error msg)
 (*-------------------------------------(* WARNINGS *)-------------------------------------*)
 type warning = 
   | DuplicateTransitions of state * event * state
+  | TooManyStates of int
 
+
+let maxStates = 3;
 
 (*------------------------(* DEFINING TYPE AND HELPER FUNCTIONS *)------------------------*)
 
@@ -32,6 +35,11 @@ let state_to_string (State s) = s (*Base printer for state*)
 
 let collect_states (p : program) : state list =
   List.map (fun state_decl -> state_decl.name) p.states
+
+let check_number_of_states (statemachine : statemachine) : warning list =
+  let stateNum = List.length statemachine.states in
+  if stateNum > maxStates then [TooManyStates (stateNum)]
+  else []
 
 
 (* Get a list of all start states then checks the list to see if there is more than one *)
@@ -145,7 +153,8 @@ let validate_state_machine (statemachine : statemachine) : unit =
   check_start_reaches_final statemachine
 
 let collect_warnings (statemachine : statemachine) : warning list =
-  check_duplicate_transistions statemachine
+  let DuplicateWarnings = check_duplicate_transistions statemachine;
+  let TooManyStates = check_number_of_states statemachine;
 
 (*---------------------------(* ANALYSE THE STATEMACHINE *)---------------------------*)
 
