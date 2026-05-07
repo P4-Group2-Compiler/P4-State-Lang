@@ -1,6 +1,8 @@
 Statemachine Door {
   Start State Open {
     ON lock GO Locked
+  
+    ON lock GO Locked
    
   }
 

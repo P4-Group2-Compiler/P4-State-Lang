@@ -78,7 +78,7 @@ let print_warning (statemachine, warning) =
         (string_of_event event)
         (string_of_state dest)
   | TooManyStates stateNum ->
-      Printf.printf "WARNING: Number of States declared: %i is over the reccomended amount of %i which might negatively affect readability of the output graph\n"
+      Printf.printf "WARNING: Too many states declared (%i > %i); output graph may become difficult to read\n"
         stateNum
         maxStates
   end
