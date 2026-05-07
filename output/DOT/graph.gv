@@ -3,6 +3,6 @@ digraph Door {
  node [shape = circle;];
  null [shape = point;];
 null -> Locked;
-Locked -> Broken [label="Kick"];
+Locked -> Broken [label="Kick(x < 3)"];
 Broken [shape = doublecircle;];
 }
