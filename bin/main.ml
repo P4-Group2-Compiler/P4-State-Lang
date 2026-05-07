@@ -73,12 +73,12 @@ let print_program p =
 let print_warning (statemachine, warning) =
   begin match warning with
   | DuplicateTransitions (src, event, dest) ->
-      Printf.printf "WARNING: Transition: {FROM %s ON %s GO %s} is declared more than once\n"
+      Printf.printf "WARNING {DuplicateTransition}:\n\tTransition: {FROM %s ON %s GO %s} is declared more than once\n"
         (string_of_state src)
         (string_of_event event)
         (string_of_state dest)
   | TooManyStates stateNum ->
-      Printf.printf "WARNING: Too many states declared (%i > %i); output graph may become difficult to read\n"
+      Printf.printf "WARNING {AmountOfStates}:\n\tLarge amount of states declared (%i > %i); output graph may become difficult to read\n"
         stateNum
         maxStates
   end

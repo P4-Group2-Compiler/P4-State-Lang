@@ -10,8 +10,8 @@ type warning =
   | DuplicateTransitions of state * event * state
   | TooManyStates of int
 
-
-let maxStates = 3;
+let maxStates = 20 (* Num of states that break the DOT output readability
+                      Used for TooManyStates warning *)
 
 (*------------------------(* DEFINING TYPE AND HELPER FUNCTIONS *)------------------------*)
 
