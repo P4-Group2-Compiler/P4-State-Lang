@@ -43,6 +43,7 @@ rule token = parse
 | "IF"                                  { IF }
 | "#"                                   { HASH }
 | "VAR"                                 { VAR }
+| "DO"                                  { DO }
 
 (* Binops *)
 | '+'                                   { PLUS }

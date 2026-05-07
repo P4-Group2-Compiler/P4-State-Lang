@@ -42,8 +42,11 @@ type event =
 type state =
   | State of string (* Might be better to have simply 'type state = string' *)
 
+type operation =
+  | Do of expr
+
 type transition =
-  | Transition of event * expr option * state
+  | Transition of event * expr option * state * operation list
 (*| GuardTrans of event * expr * state *)
 
 type state_kind =

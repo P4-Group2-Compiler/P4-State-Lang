@@ -74,7 +74,7 @@ Printf.fprintf c_out_channel "State state_machine_step(State current_state, cons
 
   List.iter (fun state ->
     Printf.fprintf c_out_channel "    case %s:\n" (state_string_identifier state);
-    List.iter (fun (src_state, event, guard_expr, dst_state) ->
+    List.iter (fun (src_state, event, guard_expr, dst_state, _ops) ->
       if src_state = state then
         match guard_expr with
         | None ->
