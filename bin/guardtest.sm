@@ -5,6 +5,7 @@ Statemachine M {
    // This is a single line comment
    Start State Open {
     ON Push IF x < 4  GO Closed
+    ON Push IF x > 4  GO Home
    }
 
    Final State Closed {

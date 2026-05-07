@@ -2,7 +2,6 @@ open Ast
 
 (*------------------------------(* ERROR HANDLING CREATION *)-----------------------------*)
 exception Semantic_error of string
-
 let error msg = raise (Semantic_error msg)
 
 
@@ -22,13 +21,62 @@ let state_to_string = function
 let event_to_string = function
   | Event e -> e
 
-(*Silke - "Mine funktioner i ./dottest bruger de to nederste og ikke de øverste, ved ikke med jer andre."*)
+(*********************************************************************************************************)
+(*                                          STRING PRINTERS                                              *)
+(*********************************************************************************************************)
 let event_to_string (Event e) = e (*Base printer for event*)
 let state_to_string (State s) = s (*Base printer for state*)
 
+let binop_to_string = function
+  | Badd -> "+" | Bsub -> "-"  | Bmul -> "*" | Bdiv -> "/" | Bmod -> "%" 
+  | Beq -> "==" | Bneq -> "!=" | Blt -> "<"  | Ble -> "<=" | Bgt -> ">"  
+  | Bge -> ">=" | Band -> "AND"| Bor -> "OR" 
+
+let constant_to_string (c : constant) = 
+  let const_string =
+    match c with
+    | Cbool c -> string_of_bool c
+    | Cstring c -> c
+    | Cint c -> string_of_int c
+  in
+  const_string
+
+let ident_to_string (i : ident) =
+  i.id
+
+let rec expr_to_string (e : expr) =
+  let expr_string =
+    match e with
+    (*| Evar e -> ""*)
+    | Ecst e -> constant_to_string e
+    | Ebinop (b, e1, e2) -> 
+        Printf.sprintf "(%s %s %s)"
+        (expr_to_string e1)
+        (binop_to_string b)
+        (expr_to_string e2)
+    | Eident e -> ident_to_string e (*idk what this is useful for, but it's here*)
+  in
+  expr_string
+
+let expr_option_to_string = function
+  | None -> ""
+  | Some expr -> expr_to_string expr
+  
+let rec stmt_to_string (s : stmt) =
+  let stmt_string =
+    match s with
+    | Stmt_if (e, s1, s2) ->
+      Printf.sprintf "(%s %s %s)"
+      (expr_to_string e)
+      (stmt_to_string s1)
+      (stmt_to_string s2)
+  in
+  stmt_string
+
+(*********************************************************************************************************)
+
 let collect_states (p : program) : state list =
   List.map (fun state_decl -> state_decl.name) p.states
-
 
 (* Get a list of all start states then checks the list to see if there is more than one *)
 (* TODO: Fix the if statement in the end of this function, might mess up later development *)
