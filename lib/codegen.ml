@@ -50,10 +50,18 @@ let generate_c_code ir =
   Printf.fprintf c_out_channel "#include <stdio.h>\n";
   Printf.fprintf c_out_channel "#include <string.h>\n\n";
 (*-------------------------------------------------------------------------------------*)
+  (* Macros to color the terminal print text-output (purely cosmetic, no "functional" use) *)
+  (* The codes are called "ANSI Escape Codes". More info here: https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797 *)
+  (* TEXT_RESET turns the text-format back to "default", otherwise all future text would be red after using RED for example *)
+  Printf.fprintf c_out_channel "#define RED           \"\\n\\033[31m\"\n";
+  Printf.fprintf c_out_channel "#define YELLOW        \"\\n\\033[93m\"\n";
+  Printf.fprintf c_out_channel "#define YELLOW_BOLD   \"\\n\\033[1;93m\"\n";
+  Printf.fprintf c_out_channel "#define TEXT_RESET   \"\\033[0m\"\n\n\n";
+(*-------------------------------------------------------------------------------------*)
   (* The State ENUM: *)
-  Printf.fprintf c_out_channel "typedef enum {\n    ";
+  Printf.fprintf c_out_channel "typedef enum {\n";
   List.iter (fun state -> 
-    Printf.fprintf c_out_channel "%s,\n    " (state_string_identifier state)
+    Printf.fprintf c_out_channel "    %s,\n" (state_string_identifier state)
   ) ir.states;
   Printf.fprintf c_out_channel "} State;\n\n";
 (*-------------------------------------------------------------------------------------*)
@@ -82,23 +90,29 @@ Printf.fprintf c_out_channel "State state_machine_step(State current_state, cons
           (event_string_identifier event)
           (state_string_identifier dst_state)
         | Some expr ->
-          Printf.fprintf c_out_channel "        if (strcmp(fired_event, \"%s\") == 0 && (%s)) return %s;\n"
-          (event_string_identifier event)
+          Printf.fprintf c_out_channel "        if (strcmp(fired_event, \"%s\") == 0) {\n"
+          (event_string_identifier event);
+          Printf.fprintf c_out_channel "            if (%s) return %s;\n"
           (convert_expr_to_string expr)
-          (state_string_identifier dst_state)
+          (state_string_identifier dst_state);
+          (* The "RED" and "TEXT_RESET" are the ANSI codes that color the text (defined as macros at the top) (purely cosmetic, not "functional") *)
+          Printf.fprintf c_out_channel "            else { (printf(RED\"    \\\"%s\\\" transition was blocked by guard: %s \\n\"TEXT_RESET)); return current_state; };\n        };\n"
+          (event_string_identifier event)
+          (convert_expr_to_string expr);
     ) ir.transitions;
-    Printf.fprintf c_out_channel "        return current_state;\n"
+    Printf.fprintf c_out_channel "        printf(RED\"    Unrecognized event for this state!\\n\"TEXT_RESET);\n";
+    Printf.fprintf c_out_channel "        return current_state;\n";
   ) ir.states;
 
-  Printf.fprintf c_out_channel "    default:\nreturn current_state;\n";
+  Printf.fprintf c_out_channel "    default:\n    return current_state;\n";
   Printf.fprintf c_out_channel "    }\n}\n\n";
 (*-------------------------------------------------------------------------------------*)
   (* main() + the main state machine loop that takes the users input: *)
   Printf.fprintf c_out_channel "#define STATE_MACHINE_RUNNING 1\n\n";
   Printf.fprintf c_out_channel "int main(void) {\n";
   Printf.fprintf c_out_channel "    while (STATE_MACHINE_RUNNING) {\n";
-  Printf.fprintf c_out_channel "        printf(\"\\nCurrent state: %%s\\n\", state_names[global_current_state]);\n";
-  Printf.fprintf c_out_channel "        printf(\"Enter event: \");\n";
+  Printf.fprintf c_out_channel "        printf(YELLOW_BOLD\"Current state: \"TEXT_RESET\"%%s\\n\", state_names[global_current_state]);\n";
+  Printf.fprintf c_out_channel "        printf(YELLOW\"Enter event: \"TEXT_RESET);\n";
   Printf.fprintf c_out_channel "        char entered_event[256];\n";
   Printf.fprintf c_out_channel "        scanf(\"%%255s\", entered_event);\n";
   Printf.fprintf c_out_channel "        global_current_state = state_machine_step(global_current_state, entered_event);\n";

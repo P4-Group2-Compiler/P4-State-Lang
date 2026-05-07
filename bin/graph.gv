@@ -3,9 +3,11 @@ digraph Door {
  node [shape = circle;];
  null [shape = point;];
 null -> Closed;
-Closed -> Closed [label="Push"];
+Closed -> Open [label="push"];
+Closed -> Closed [label="kick"];
 Closed -> Locked [label="lock"];
 Open -> Closed [label="pull"];
+Open -> Closed [label="slam"];
 Locked -> Closed [label="unlock"];
 Locked [shape = doublecircle;];
 }
