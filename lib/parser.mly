@@ -97,11 +97,14 @@ inputs:
 ;
 
 input:
-| INPUT id = IDENTIFIER { Input_decl id }
-;
+| INPUT identifier_list { Input_decl $2 }
+
+identifier_list:
+| id = IDENTIFIER { [id] }
+| id = IDENTIFIER identifier_list { id :: $2 }
 
 transitions:
-|  {[]}
+| { [] }
 | transition transitions    { $1 :: $2 }
 ;
 

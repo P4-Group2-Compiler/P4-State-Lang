@@ -55,7 +55,7 @@ type var_decl =
   | Var_decl of string * int
 
 type input_decl =
-  | Input_decl of string
+  | Input_decl of string list
 
 type state_decl = {
   kind : state_kind;
