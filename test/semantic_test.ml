@@ -1,13 +1,20 @@
 open P4
-(* ******************* *)
-(* Tests:              *)
-(* test_collect_states_happy 
-*)
-(*                                *) 
-(* ******************* *)
+(* **************************************** *)
+(* Tests:                                   *)
+(* test_collect_states_happy                *)
+(*                                          *) 
+(* **************************************** *)
 
-(********************* FUN COLLECT_STATES *********************)
-(********************* Happy test *********************)
+(* **************************************** *)
+(*                                          *)
+(*            FUN COLLECT_STATES            *)
+(*                                          *)
+(* **************************************** *)
+
+(* **************************************** *)
+(*               Happy test                 *)
+(* **************************************** *)
+
 let test_collect_states_happy () = 
   (* ARRANGE
     Use our AST and define a test input. We dont care for transitions,
@@ -36,8 +43,18 @@ let test_collect_states_happy () =
     (List.map Semantic.state_to_string expected)
     (List.map Semantic.state_to_string result)
 
-(* let test_collect_transitions_happy () =
+    
+    
+(* ******************************************************** *)
+(*                                                          *)
+(*                FUN COLLECT_TRANSITIONS                   *)
+(*                                                          *)
+(************************************************************)
 
+(************************************************************)
+(*                        HAPPY TEST                        *)
+(************************************************************)
+let test_collect_transitions_happy () =
 
 let open P4.Ast in
 let state name =
@@ -46,31 +63,65 @@ in
 let prog = {
   machine_name = "M";
   variables = [];
+  inputs = [];
   states = [ state "A"]
 } in
 
 let result = P4.Semantic.get_start_states prog in
 
-let expected = state.kind in
-Alcotest.(check (list string))
+let expected = State "A" in
+Alcotest.(check string)
   "get_start_state returns the correct start state"
-  (List.map Semantic.state_to_string expected)
-  (List.map Semanitc.state_to_string result) *)
+  (P4.Semantic.state_to_string expected)
+  (P4.Semantic.state_to_string result) 
 
+(*************************************************************)
+(*                        SAD TESTS                          *)
+(*************************************************************)
 
+let test_transitions_multiple_start_states () =
 
-  
+let open P4.Ast in
+let state name =
+    { kind = Start; name = State name; transitions = [] } in
+let prog = {
+    machine_name = "M";
+    variables = [];
+    inputs = [];
+    states = [ state "A"; state "B" ] 
+} in
+Alcotest.check_raises
+    "get_start_states raises error: 'Multiple Start states declared'"
+    (P4.Semantic.Semantic_error "Multiple Start states declared")
+    (fun () -> ignore (P4.Semantic.get_start_states prog))
 
-(********************* Sad test *********************)
+let test_transition_no_start_state () =
 
-(****************************************************)
+let open P4.Ast in
+let state name = 
+    { kind = Normal; name = State name; transitions = [] } in
+let prog = {
+    machine_name = "M";
+    variables = [];
+    inputs = [];
+    states = [ state "A"; state "B"]
+ } in
+ Alcotest.check_raises
+    "get_start_states raises error: 'Missing Start state declared"
+    (P4.Semantic.Semantic_error "Missing Start state declared")
+    (fun () -> ignore (P4.Semantic.get_start_states prog))
 
-
+(* *************************************************** *)
+(*                                                     *)
 (* Initializing the tests. The de facto 'run' function *)
+(*                                                     *)
+(* *************************************************** *)
+
 let () =
   Alcotest.run "Semantic Tests" [
     "semantic", [
       Alcotest.test_case "collect_states" `Quick test_collect_states_happy;
       Alcotest.test_case "collect_transitions" `Quick test_collect_transitions_happy;
-    ];
+      Alcotest.test_case "collect_transitions" `Quick test_transitions_multiple_start_states;
+      ];
   ]
