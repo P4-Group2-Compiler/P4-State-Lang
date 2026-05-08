@@ -116,7 +116,7 @@ let generate_c_code ir =
 
   List.iter (fun state ->
     emit_c "    case %s:\n" (get_state_name_string state);
-    List.iter (fun (src_state, event, guard_expr, dst_state) ->
+    List.iter (fun (src_state, event, guard_expr, dst_state, _ops) ->
       if src_state = state then
         match guard_expr with
         | None ->

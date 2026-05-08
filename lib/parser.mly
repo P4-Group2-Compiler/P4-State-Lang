@@ -35,6 +35,7 @@
 %token INPUT
 (*%token ELSE
 %token ELIF*)
+%token DO
 
 (* Operators *)
 %token BEQUAL BNEQUAL LTE GT GTE LT  
@@ -109,15 +110,28 @@ transitions:
 ;
 
 transition:
-| ON IDENTIFIER GO IDENTIFIER
-    { Transition (Event $2, None, State $4) }
-| ON IDENTIFIER IF expr GO IDENTIFIER
-    { Transition (Event $2, Some $4, State $6) }
+| ON IDENTIFIER GO IDENTIFIER operation_block_opt
+    { Transition (Event $2, None, State $4, $5) }
+| ON IDENTIFIER IF expr GO IDENTIFIER operation_block_opt
+    { Transition (Event $2, Some $4, State $6, $7) }
 (*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE GO IDENTIFIER*)
 (*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE expr GO IDENTIFIER*)
 (*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE stmt GO IDENTIFIER*)
 (*| ON IDENTIFIER IF expr GO IDENTIFIER ELIF expr GO IDENTIFIER ELSE*)
 ;
+
+operation_block_opt:
+  | { [] }
+  | LEFTTUBORG operations RIGHTTUBORG { $2 }
+  ;
+
+operations:
+  | operation { [$1] }    
+  | operation operations { $1 :: $2 }
+  ;
+
+operation:
+  | DO expr { Do $2 }  
 
 expr:
   | id = ident

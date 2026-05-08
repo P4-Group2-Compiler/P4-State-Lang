@@ -42,11 +42,11 @@ let string_of_guard = function
   | None -> ""
 
 let print_transition = function
-  | Transition (event, None, target) ->
+  | Transition (event, None, target, _ops) ->
       Printf.printf "    ON %s GO %s\n"
         (string_of_event event)
         (string_of_state target)
-  | Transition (event, Some guard, target) ->
+  | Transition (event, Some guard, target, _ops) ->
       Printf.printf "    ON %s IF %s GO %s\n"
         (string_of_event event)
         (string_of_expr guard)
