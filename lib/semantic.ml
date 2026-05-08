@@ -13,7 +13,7 @@ type statemachine =
   states : state list;
   start_state : state;
   final_state : state list;
-  transitions : (state * event * expr option * state) list;
+  transitions : (state * event * expr option * state * operation list) list;
   g_variables : var_decl list;
 }
 

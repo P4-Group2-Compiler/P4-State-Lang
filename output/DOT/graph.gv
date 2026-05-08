@@ -1,11 +1,8 @@
-digraph A {
+digraph Door {
  rankdir = LR;
  node [shape = circle;];
  null [shape = point;];
-null -> Open;
-Open -> Closed [label="Push"];
-Closed -> Closed [label="Push"];
-Closed -> Closed [label="Pull"];
-Closed -> SOMETHING [label="TEST"];
-Closed [shape = doublecircle;];
+null -> Locked;
+Locked -> Broken [label="Kick(x < 3)"];
+Broken [shape = doublecircle;];
 }
