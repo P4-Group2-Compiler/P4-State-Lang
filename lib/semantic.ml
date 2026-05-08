@@ -2,7 +2,6 @@ open Ast
 
 (*------------------------------(* ERROR HANDLING CREATION *)-----------------------------*)
 exception Semantic_error of string
-
 let error msg = raise (Semantic_error msg)
 
 (*-------------------------------------(* WARNINGS *)-------------------------------------*)
@@ -22,7 +21,8 @@ type statemachine =
   states : state list;
   start_state : state;
   final_state : state list;
-  transitions : (state * event * expr option * state) list;
+  transitions : (state * event * expr option * state * operation list) list;
+  g_variables : var_decl list;
 }
 
 let state_to_string = function
@@ -30,9 +30,59 @@ let state_to_string = function
 let event_to_string = function
   | Event e -> e
 
-(*Silke - "Mine funktioner i ./dottest bruger de to nederste og ikke de øverste, ved ikke med jer andre."*)
+(*********************************************************************************************************)
+(*                                          STRING PRINTERS                                              *)
+(*********************************************************************************************************)
 let event_to_string (Event e) = e (*Base printer for event*)
 let state_to_string (State s) = s (*Base printer for state*)
+
+let binop_to_string = function
+  | Badd -> "+" | Bsub -> "-"  | Bmul -> "*" | Bdiv -> "/" | Bmod -> "%" 
+  | Beq -> "==" | Bneq -> "!=" | Blt -> "<"  | Ble -> "<=" | Bgt -> ">"  
+  | Bge -> ">=" | Band -> "AND"| Bor -> "OR" 
+
+let constant_to_string (c : constant) = 
+  let const_string =
+    match c with
+    | Cbool c -> string_of_bool c
+    | Cstring c -> c
+    | Cint c -> string_of_int c
+  in
+  const_string
+
+let ident_to_string (i : ident) =
+  i.id
+
+let rec expr_to_string (e : expr) =
+  let expr_string =
+    match e with
+    (*| Evar e -> ""*)
+    | Ecst e -> constant_to_string e
+    | Ebinop (b, e1, e2) -> 
+        Printf.sprintf "(%s %s %s)"
+        (expr_to_string e1)
+        (binop_to_string b)
+        (expr_to_string e2)
+    | Eident e -> ident_to_string e (*idk what this is useful for, but it's here*)
+  in
+  expr_string
+
+let expr_option_to_string = function
+  | None -> ""
+  | Some expr -> expr_to_string expr
+  
+let rec stmt_to_string (s : stmt) =
+  let stmt_string =
+    match s with
+    | Stmt_if (e, s1, s2) ->
+      Printf.sprintf "(%s %s %s)"
+      (expr_to_string e)
+      (stmt_to_string s1)
+      (stmt_to_string s2)
+  in
+  stmt_string
+
+(*********************************************************************************************************)
 
 let collect_states (p : program) : state list =
   List.map (fun state_decl -> state_decl.name) p.states
@@ -68,17 +118,20 @@ let get_final_states (p: program) : state list =
     p.states
 
 (* Function for adding the source state with the states: (event, state) -> (state, event, state) *)
-let add_source_state (st_decl : state_decl) : (state * event * expr option * state) list = 
+let add_source_state (st_decl : state_decl) : (state * event * expr option * state * operation list) list = 
   let src = st_decl.name in
   List.map (fun trans -> 
     match trans with
-    | Transition (event, Some expr, dest) -> (src, event, Some expr, dest)
-    | Transition (event, None, dest) -> (src, event, None, dest))
+    | Transition (event, Some expr, dest, ops) -> (src, event, Some expr, dest, ops)
+    | Transition (event, None, dest, ops) -> (src, event, None, dest, ops))
 st_decl.transitions
 
 (* Collecting all the transitions using the add_source_state function: List of all (state, event, state)*)
-let collect_transitions (p : program) : (state * event * expr option * state) list = 
+let collect_transitions (p : program) : (state * event * expr option * state * operation list) list = 
   List.concat (List.map add_source_state p.states)
+
+let collect_g_variables (p : program) : (var_decl) list =
+  p.variables
 
 (*----------------(* CREATING THE STATEMACHIN WITH THE HELPER FUNCTIONS *)----------------*)
 
@@ -90,6 +143,7 @@ let create_state_machine (p: program) : statemachine =
     start_state = get_start_states p;
     final_state = get_final_states p;
     transitions = collect_transitions p;
+    g_variables = collect_g_variables p;
   }
 
 (*----------------------------(* VALIDATING THE STATEMACHINE *)---------------------------*)
@@ -121,7 +175,7 @@ let check_duplicate_transistions (statemachine : statemachine) : warning list =
 (* Helper function for checking if start can reach final. It returns a list of destination states connected
    with transitions from the passed state *)
 let successors (statemachine : statemachine) (state : state) : state list =
-  List.fold_left (fun acc (src, _, _, dest) ->
+  List.fold_left (fun acc (src, _, _, dest, _) ->
     if src = state then dest :: acc else acc)
   [] statemachine.transitions
 

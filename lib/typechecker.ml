@@ -76,8 +76,8 @@ let rec type_expr (env : type_env) = function
 
 (* Checking transitions *)
 let type_transition env = function
-  | Transition (_ev, None, _st) -> ()
-  | Transition (_ev, Some guard, _st) ->
+  | Transition (_ev, None, _st, _ops) -> ()
+  | Transition (_ev, Some guard, _st, _ops) ->
       match type_expr env guard with
         | Tbool -> ()
         | _ -> type_error "Guard expression must have type bool"

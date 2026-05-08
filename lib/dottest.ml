@@ -4,14 +4,15 @@ open Ast
 (**************************************************************************************************************************************************)
 (*Strings of transitions*)
 
-let stringify_trans (s1, e, _, s2) =
- let s1_str = state_to_string s1 in
- let e_str = event_to_string e in
- let s2_str = state_to_string s2 in
- Printf.sprintf "%s -> %s [label=\"%s\"];\n" s1_str s2_str e_str 
-
+let stringify_trans (s1, e, expr_option, s2, _ops) =
+  let s1_str = state_to_string s1 in
+  let e_str = event_to_string e in
+  let eo_str = expr_option_to_string expr_option in
+  let s2_str = state_to_string s2 in
+  Printf.sprintf "%s -> %s [label=\"%s%s\"];\n" s1_str s2_str e_str eo_str
+  
 (*Outputs a list of DOT transition as strings, using above function*)
-let trans_string_list (t : (state * event * _ * state) list) =
+let trans_string_list (t : (state * event * _ * state * operation list) list) =
   List.map stringify_trans t
 
 (*Prints string lists*)
@@ -64,8 +65,8 @@ let graphFromStatemachine (sm : (statemachine)) =
   addEachString finalStateList;
   Buffer.add_string dotBuf dot_bottomSyntax;
 
-  let oc = open_out "graph.gv" in
+  let oc = open_out "../output/DOT/graph.gv" in
   Buffer.output_buffer oc dotBuf;
   close_out oc;
-  ignore (Sys.command "dot -Tpng graph.gv -o graph.png");
+  ignore (Sys.command "cd ../output/DOT && dot -Tpng graph.gv -o graph.png");
 ;

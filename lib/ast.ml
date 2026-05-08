@@ -1,8 +1,6 @@
 (* Mega pasted from WHILE language, seems like we need to make a mini-arith-while language
 if we want guards to work with generic expressions and not tailor made state guards *)
 
-
-
 type location = Lexing.position * Lexing.position
 type ident = { loc: location; id: string; }
 
@@ -24,9 +22,10 @@ type constant =
 
 (* Expressions. *)
 type expr =
+  (*| Evar of variable*)
   | Ecst of constant                   (* constant *)
   | Ebinop of binop * expr * expr      (* binary operation *)
-  | Eident of ident                    (* variable *)                  
+  | Eident of ident                    (* variable *)
 
 (* Statements. *)
 type stmt =
@@ -35,15 +34,18 @@ type stmt =
 (* ************************************************************************** *) 
 (*                          STATEMACHINE RELATED TYPES                        *)
 (* ************************************************************************** *)
-  
+
 type event =
   | Event of string (* Might be better to have simply 'type event = string' *)
 
 type state =
   | State of string (* Might be better to have simply 'type state = string' *)
 
+type operation =
+  | Do of expr
+
 type transition =
-  | Transition of event * expr option * state
+  | Transition of event * expr option * state * operation list
 (*| GuardTrans of event * expr * state *)
 
 type state_kind =
@@ -54,6 +56,9 @@ type state_kind =
 type var_decl = 
   | Var_decl of string * int
 
+type input_decl =
+  | Input_decl of string list
+
 type state_decl = {
   kind : state_kind;
   name : state;                     (*state B {}*) (*= State of string*)
@@ -63,5 +68,6 @@ type state_decl = {
 type program = {
   machine_name : string;
   variables : var_decl list;
+  inputs : input_decl list;
   states : state_decl list;
 }

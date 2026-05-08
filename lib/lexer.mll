@@ -43,6 +43,8 @@ rule token = parse
 | "IF"                                  { IF }
 | "#"                                   { HASH }
 | "VAR"                                 { VAR }
+| "INPUT"                               { INPUT }
+| "DO"                                  { DO }
 
 (* Binops *)
 | '+'                                   { PLUS }
@@ -65,8 +67,6 @@ rule token = parse
 
 (* Numbers *)
 | ['0'-'9']+ as n                       { INT n }
-
-
 
 (* Seperators *)
 | '{'                                   { LEFTTUBORG }
