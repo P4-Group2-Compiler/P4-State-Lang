@@ -70,6 +70,27 @@ let print_program p =
   print_vars p.variables;
   List.iter print_state p.states
 
+(* Pattern matches the Warnings to print them in the correct form *)
+let print_warning (statemachine, warning) =
+  begin match warning with
+  | DuplicateTransitions (src, event, dest) ->
+      Printf.printf "WARNING {DuplicateTransition}:\n\tTransition: {FROM %s ON %s GO %s} is declared more than once\n"
+        (string_of_state src)
+        (string_of_event event)
+        (string_of_state dest)
+  | TooManyStates stateNum ->
+      Printf.printf "WARNING {AmountOfStates}:\n\tLarge amount of states declared (%i > %i); output graph may become difficult to read\n"
+        stateNum
+        maxStates
+  | UnreachableFinalState state ->
+      Printf.printf "WARNING {UnreachableFinalState}:\n\tStart State: \"%s\" is unable to reach any Final State\n"
+        (string_of_state state)
+  end
+
+(***)
+
+(***)
+
 let () =
   if Array.length Sys.argv <> 2 then begin
     Printf.printf "Usage: %s <file>\n" Sys.argv.(0);
@@ -111,20 +132,16 @@ end;
 
   (**************************************************************************************************)
   (*Collect functions in a functions, to use on the statemachine*)
-  let statemachine = Semantic.analyse ast in
+  let statemachine, warnings = Semantic.analyse ast in
     Printf.printf "This is statemachine ---> %s <---!\n" statemachine.statemachine_name;
+    Codegen.generate_c_code statemachine;
+    Dottest.graphFromStatemachine statemachine;
   
   close_in chan;
-  (*print_program ast;*)
+  (* print_program ast; *)
+  List.iter (fun warning -> print_warning (statemachine, warning)) warnings
+  
 
-  (* Debugging print statement - TODO remove later *)
-  let statemachine = Semantic.analyse ast in
-  (*Printf.printf "--> StateMachine Analysed! <--\n--> Machine name = %s <--" statemachine.statemachine_name*)
-
-  (*Creating the .gv file from statemachine*)
-  Dottest.graphFromStatemachine statemachine;
-
-  Codegen.generate_c_code statemachine;
 
   (* let transitions = Semantic.collect_transitions ast in
   Semantic.print_iter_trans transitions; *)
