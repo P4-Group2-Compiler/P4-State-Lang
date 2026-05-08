@@ -100,20 +100,21 @@ let ast =
       exit 1
 in
 
-    (* Typecheck the program *)
-begin
-  try
-    Typechecker.type_program ast
-  with Typechecker.Type_error msg ->
-    Printf.printf "Type error: %s\n" msg;
-    exit 1
-end;
+
 
 (**************************************************************************************************)
   (*Collect functions in a functions, to use on the statemachine*)
   let statemachine = Semantic.analyse ast in
     Printf.printf "This is statemachine ---> %s <---!\n" statemachine.statemachine_name;
-  
+        
+    (* Typecheck the program *)
+        begin
+        try
+            Typechecker.type_program statemachine
+        with Typechecker.Type_error msg ->
+            Printf.printf "Type error: %s\n" msg;
+            exit 1
+        end;
   close_in chan;
   (*print_program ast;*)
 

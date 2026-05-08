@@ -1,4 +1,5 @@
 open Ast
+open Semantic
 
 (* Error handling and setup using location for debugging *)
 exception Type_error of string
@@ -82,15 +83,12 @@ let type_transition env = function
         | Tbool -> ()
         | _ -> type_error "Guard expression must have type bool"
 
-(* Checking state declarations *)
-let type_state_decl env st =
-  List.iter (type_transition env) st.transitions
-
 (* Checking the program *)
 let initial_env () = Hashtbl.create 16
 
-let type_program p =
+let type_program statemachine =
   let env = initial_env () in
   List.iter (fun (Var_decl (name, _)) ->
-    Hashtbl.add env name Tint) p.variables;
-  List.iter (type_state_decl env) p.states
+    Hashtbl.add env name Tint) statemachine.g_variables;
+  List.iter (fun (src, event, guard, dest, op) ->
+    type_transition env (Transition (event, guard, dest, op))) statemachine.transitions
