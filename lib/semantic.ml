@@ -165,7 +165,7 @@ let check_duplicate_transistions (statemachine : statemachine) : warning list =
   let rec checker seen warnings = function
     | [] -> warnings
     | head :: tail ->
-      let (src, event, _, dest) = head in
+      let (src, event, _, dest, _) = head in
       if List.mem head seen then
         checker seen (DuplicateTransitions (src, event, dest) :: warnings) tail
       else
