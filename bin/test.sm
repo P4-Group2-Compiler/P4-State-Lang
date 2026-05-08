@@ -1,13 +1,41 @@
 Statemachine Door {
+  # VAR x = 10
+  # VAR y = 7
+  # VAR Carsten = 26
+
   Start State Closed {
-    ON push IF (2 * 2 == 4 OR 6 / 2 == 3)  GO Open
-    ON kick IF (64 / 2) != 32 GO Closed
+    ON nothing GO Closed
+    ON push IF y < 100 GO Open
+    ON kick IF (x / 2 == 2) GO Open
+    ON knock IF (Carsten > 18) GO Open
     ON lock GO Locked
   }
 
   State Open {
 	  ON pull GO Closed
     ON slam IF (2 * 2) > 4 GO Closed
+  }
+
+  # VAR counter = 0
+
+  State A {
+    ON a GO b
+  }
+
+  State B {
+    AUTO IF (guard) GO C
+  }
+
+  State C {
+    
+  }
+
+
+
+  State Counting {
+    AUTO IF counter < 100 DO counter + 1 GO Counting
+
+    On Count IF counter < 100 DO counter + 1 GO Counting
   }
 
   Final State Locked {

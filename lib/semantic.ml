@@ -15,6 +15,7 @@ type statemachine =
   start_state : state;
   final_state : state list;
   transitions : (state * event * expr option * state) list;
+  g_variables : var_decl list;
 }
 
 let state_to_string = function
@@ -67,6 +68,9 @@ st_decl.transitions
 let collect_transitions (p : program) : (state * event * expr option * state) list = 
   List.concat (List.map add_source_state p.states)
 
+let collect_g_variables (p : program) : (var_decl) list =
+  p.variables
+
 (*----------------(* CREATING THE STATEMACHIN WITH THE HELPER FUNCTIONS *)----------------*)
 
 (* Function to create the mathmatical StateMachine *)
@@ -77,6 +81,7 @@ let create_state_machine (p: program) : statemachine =
     start_state = get_start_states p;
     final_state = get_final_states p;
     transitions = collect_transitions p;
+    g_variables = collect_g_variables p;
   }
 
 (*----------------------------(* VALIDATING THE STATEMACHINE *)---------------------------*)

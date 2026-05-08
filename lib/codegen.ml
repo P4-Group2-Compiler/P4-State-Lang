@@ -1,20 +1,22 @@
 open Ast
 open Semantic
 
-let state_string_identifier = function
-  | Ast.State state_string -> state_string
+(* ...to-string helper functions: *)
+let get_state_name_string = function
+  | State state_string -> state_string
 
-let event_string_identifier = function
-  | Ast.Event event_string -> event_string
-
+let get_event_name_string = function
+  | Event event_string -> event_string
 
 let rec convert_expr_to_string = function
+  (* The base single "atoms" of an expression: *)
   | Ecst (Cint n) -> string_of_int n
   | Ecst (Cbool true)  -> "1"
   | Ecst (Cbool false) -> "0"
   | Ecst (Cstring string) -> string
   | Eident { id } -> id
 
+  (* And the groups of different binop composite expressions that string-convert-recurses down to their atoms: *)
   (*[ +, -, *, /, % ]*)
   | Ebinop (Badd, expr1, expr2) -> Printf.sprintf "(%s + %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
   | Ebinop (Bsub, expr1, expr2) -> Printf.sprintf "(%s - %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
@@ -37,88 +39,129 @@ let rec convert_expr_to_string = function
   | Ebinop (Bor,  expr1, expr2) -> Printf.sprintf "(%s || %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
 
   (* | _ -> "NOT MATCHED" *)
+(*--------------------------------------------------------------------------------------*)
+let rec convert_var_to_string = function
+  | Var_decl (string, int) -> Printf.sprintf "int %s = %d" (string) (int)
 
 (*======================================================================================*)
 let generate_c_code ir =
 
-  let start_state_name = state_string_identifier ir.start_state in
+  let start_state_name = get_state_name_string ir.start_state in
 
   let c_file = "../output/c/generated_state_machine.c" in
   let c_out_channel = open_out c_file in
+
+  (* This is just a wrapper for the "fprint"-function: *)
+  let emit_c fmt = Printf.fprintf c_out_channel fmt in
 (*-------------------------------------------------------------------------------------*)
   (* Includes: *)
-  Printf.fprintf c_out_channel "#include <stdio.h>\n";
-  Printf.fprintf c_out_channel "#include <string.h>\n\n";
+  emit_c "#include <stdio.h>\n";
+  emit_c "#include <string.h>\n\n";
 (*-------------------------------------------------------------------------------------*)
-  (* Macros to color the terminal print text-output (purely cosmetic, no "functional" use) *)
+  (* Macros to color and format the terminals print-output (PURELY COSMETIC, no "functional" use) *)
   (* The codes are called "ANSI Escape Codes". More info here: https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797 *)
   (* TEXT_RESET turns the text-format back to "default", otherwise all future text would be red after using RED for example *)
-  Printf.fprintf c_out_channel "#define RED           \"\\n\\033[31m\"\n";
-  Printf.fprintf c_out_channel "#define YELLOW        \"\\n\\033[93m\"\n";
-  Printf.fprintf c_out_channel "#define YELLOW_BOLD   \"\\n\\033[1;93m\"\n";
-  Printf.fprintf c_out_channel "#define TEXT_RESET   \"\\033[0m\"\n\n\n";
+  emit_c "#define RED           \"\\033[31m\"\n";
+  emit_c "#define YELLOW        \"\\033[93m\"\n";
+  emit_c "#define YELLOW_BOLD   \"\\033[1;93m\"\n";
+  emit_c "#define GREEN         \"\\033[1;32m\"\n";
+  emit_c "#define BOLD          \"\\033[1m\"\n";
+  emit_c "#define TEXT_RESET    \"\\033[0m\"\n\n";
 (*-------------------------------------------------------------------------------------*)
   (* The State ENUM: *)
-  Printf.fprintf c_out_channel "typedef enum {\n";
+  emit_c "typedef enum {\n";
   List.iter (fun state -> 
-    Printf.fprintf c_out_channel "    %s,\n" (state_string_identifier state)
+    emit_c "    %s,\n" (get_state_name_string state)
   ) ir.states;
-  Printf.fprintf c_out_channel "} State;\n\n";
+  emit_c "} State;\n\n";
 (*-------------------------------------------------------------------------------------*)
-(* This is an array to hold the state names, so they can be printed to the terminal: *)
-  Printf.fprintf c_out_channel "const char* state_names[] = {";
+(* This is an array to hold the state names (as strings) so they can be printed to the terminal: *)
+  emit_c "const char* state_names[] = {";
   List.iter (fun state ->
-    Printf.fprintf c_out_channel "\"%s\", " (state_string_identifier state)
+    emit_c " \"%s\"," (get_state_name_string state)
   ) ir.states;
-  Printf.fprintf c_out_channel "};\n\n";
+  emit_c " };\n\n";
 (*-------------------------------------------------------------------------------------*)
-(* We use this to track the current_state: *)
-Printf.fprintf c_out_channel "State global_current_state = %s;\n\n" start_state_name;
+  (* Helper functions primarily for making the C code more readable: *)
+
+  (* Print GUARD BLOCK message: *)
+  emit_c "void print_guard_block_msg(const char* transition, const char* guard) {\n";
+  emit_c "    printf(RED\"\\\"%%s\\\" transition was \"BOLD\"blocked by guard:\"TEXT_RESET\" %%s \\n\"TEXT_RESET, transition, guard);\n}\n";
+  (* Print UNRECOGNIZED EVENT message: *)
+  emit_c "void print_unrecognized_event_msg(const char* event) {\n";
+  emit_c "    printf(RED\"\\\"%%s\\\" is an \"BOLD\"unrecognized event \"TEXT_RESET RED\"for this state!\\n\"TEXT_RESET, event);\n}\n";
+  (* Print the GREEN "[src]--->[dst]" message: *)
+  emit_c "void pretty_print_transition(State src_state, State dst_state) {\n";
+  emit_c "    printf(GREEN\"[%%s] ---> [%%s]\\n\"TEXT_RESET, state_names[src_state], state_names[dst_state]);\n}\n";
+  (* MATCH EVENT strings: *)
+  emit_c "int event_match(const char* input, const char* event) {\n";
+  emit_c "    return (strcmp(input, event) == 0);\n}\n";
+
+  emit_c "\n";
 (*-------------------------------------------------------------------------------------*)
-(* The "state_machine_step-function" is now just here to avoid the extra state_machine-file include *)
-(* It contains the switch-core of the C output with states as cases containing transitions *)
-Printf.fprintf c_out_channel "State state_machine_step(State current_state, const char* fired_event) {\n";
-  Printf.fprintf c_out_channel "    switch (current_state) {\n";
+  (* We use this to track the current_state: *)
+  emit_c "State global_current_state = %s;\n\n" start_state_name;
+(*-------------------------------------------------------------------------------------*)
+  (* Global variables: *)
+  List.iter (fun var ->
+    emit_c "%s;\n" (convert_var_to_string var) 
+  ) ir.g_variables;
+
+  emit_c "\n";
+(*-------------------------------------------------------------------------------------*)
+  (* The "state_machine_step-function" is now just here to avoid the extra state_machine-file include *)
+  (* It contains the switch-core of the C output with states as cases containing transitions *)
+  emit_c "State state_machine_step(State current_state, const char* fired_event) {\n";
+  emit_c "    switch (current_state) {\n";
 
   List.iter (fun state ->
-    Printf.fprintf c_out_channel "    case %s:\n" (state_string_identifier state);
+    emit_c "    case %s:\n" (get_state_name_string state);
     List.iter (fun (src_state, event, guard_expr, dst_state) ->
       if src_state = state then
         match guard_expr with
         | None ->
-        Printf.fprintf c_out_channel "        if (strcmp(fired_event, \"%s\") == 0) return %s;\n"
-          (event_string_identifier event)
-          (state_string_identifier dst_state)
+          emit_c "        if (event_match(fired_event, \"%s\")) { /*THEN*/ return %s; }\n"
+          (get_event_name_string event)
+          (get_state_name_string dst_state)
         | Some expr ->
-          Printf.fprintf c_out_channel "        if (strcmp(fired_event, \"%s\") == 0) {\n"
-          (event_string_identifier event);
-          Printf.fprintf c_out_channel "            if (%s) return %s;\n"
+          emit_c "        if (event_match(fired_event, \"%s\")) { "
+          (get_event_name_string event);
+          emit_c "/*AND*/ if (%s) { /*THEN*/ return %s; }\n"
           (convert_expr_to_string expr)
-          (state_string_identifier dst_state);
-          (* The "RED" and "TEXT_RESET" are the ANSI codes that color the text (defined as macros at the top) (purely cosmetic, not "functional") *)
-          Printf.fprintf c_out_channel "            else { (printf(RED\"    \\\"%s\\\" transition was blocked by guard: %s \\n\"TEXT_RESET)); return current_state; };\n        };\n"
-          (event_string_identifier event)
+          (get_state_name_string dst_state);
+          emit_c "            else { print_guard_block_msg(fired_event, \"%s\"); /*THEN*/ return current_state; }; };\n"
           (convert_expr_to_string expr);
     ) ir.transitions;
-    Printf.fprintf c_out_channel "        printf(RED\"    Unrecognized event for this state!\\n\"TEXT_RESET);\n";
-    Printf.fprintf c_out_channel "        return current_state;\n";
+    (*emit_c "        print_unrecognized_event_msg(fired_event);\n";
+    emit_c "        return current_state;\n";*)
+    emit_c "        goto unrecognized_input_fallback;\n"
   ) ir.states;
 
-  Printf.fprintf c_out_channel "    default:\n    return current_state;\n";
-  Printf.fprintf c_out_channel "    }\n}\n\n";
+  emit_c "    default:\n";
+  emit_c "    unrecognized_input_fallback:\n";
+  emit_c "        print_unrecognized_event_msg(fired_event);\n";
+  emit_c "        return current_state;\n";
+  emit_c "    }\n}\n\n";
 (*-------------------------------------------------------------------------------------*)
   (* main() + the main state machine loop that takes the users input: *)
-  Printf.fprintf c_out_channel "#define STATE_MACHINE_RUNNING 1\n\n";
-  Printf.fprintf c_out_channel "int main(void) {\n";
-  Printf.fprintf c_out_channel "    while (STATE_MACHINE_RUNNING) {\n";
-  Printf.fprintf c_out_channel "        printf(YELLOW_BOLD\"Current state: \"TEXT_RESET\"%%s\\n\", state_names[global_current_state]);\n";
-  Printf.fprintf c_out_channel "        printf(YELLOW\"Enter event: \"TEXT_RESET);\n";
-  Printf.fprintf c_out_channel "        char entered_event[256];\n";
-  Printf.fprintf c_out_channel "        scanf(\"%%255s\", entered_event);\n";
-  Printf.fprintf c_out_channel "        global_current_state = state_machine_step(global_current_state, entered_event);\n";
-  Printf.fprintf c_out_channel "    }\n";
-  Printf.fprintf c_out_channel "    return 0;\n";
-  Printf.fprintf c_out_channel "}\n";
+  emit_c "int main(void) {\n";
+  emit_c "    #define STATE_MACHINE_RUNNING 1\n";
+  emit_c "    while (STATE_MACHINE_RUNNING) {\n";
+  emit_c "        State initial_state = global_current_state;\n";
+  emit_c "        printf(YELLOW_BOLD\"Current state: \"TEXT_RESET\"%%s\\n\", state_names[global_current_state]);\n";
+  emit_c "        printf(YELLOW\"Event: \"TEXT_RESET);\n";
+  emit_c "        char entered_event[256];\n";
+  emit_c "        scanf(\"%%255s\", entered_event);\n";
+  emit_c "        global_current_state = state_machine_step(global_current_state, entered_event);\n";
+  (*
+  emit_c "        pretty_print_transition(initial_state, /*--->*/ global_current_state);\n";
+  *)
+  emit_c "        if (initial_state != global_current_state) {\n";
+  emit_c "            pretty_print_transition(initial_state, /*--->*/ global_current_state);\n";
+  emit_c "        }\n";
+  emit_c "    }\n";
+  emit_c "    return 0;\n";
+  emit_c "}\n";
 (*-------------------------------------------------------------------------------------*)
   close_out c_out_channel;
 
