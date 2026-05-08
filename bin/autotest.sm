@@ -1,0 +1,17 @@
+Statemachine Door {
+
+    # counter = 0
+
+  Start State Closed {
+    ON push GO Open
+  }
+
+  State Open {
+    AUTO IF (counter < 10) GO 
+    ON lock go Locked
+  }
+
+  Final State Locked {
+	ON unlock GO Closed
+  }
+}
