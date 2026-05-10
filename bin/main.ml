@@ -132,7 +132,11 @@ end;
 
   (**************************************************************************************************)
   (*Collect functions in a functions, to use on the statemachine*)
-  let statemachine, warnings = Semantic.analyse ast in
+  let statemachine, warnings =
+    try Semantic.analyse ast with Semantic.Semantic_error msg ->
+      Printf.printf "Semantic error: %s\n" msg;
+      exit 1
+  in
     Printf.printf "This is statemachine ---> %s <---!\n" statemachine.statemachine_name;
     Codegen.generate_c_code statemachine;
     Dottest.graphFromStatemachine statemachine;

@@ -148,8 +148,21 @@ let create_state_machine (p: program) : statemachine =
 
 (*----------------------------(* VALIDATING THE STATEMACHINE *)---------------------------*)
 
+let check_valid_transition (statemachine : statemachine) : unit=
+  List.iter (fun (src, _, _, dest, _) -> 
+    if not (List.mem dest statemachine.states)
+      then error (Printf.sprintf
+        "Transition {FROM: %s TO: %s} is invalid.\n\t%s is not declared as a State"
+        (state_to_string src)
+        (state_to_string dest)
+        (state_to_string dest))
+    else 
+      () )
+  statemachine.transitions
+
+
 (* Recursive function to check if state names are repeated *)
-let check_duplicate_state_names (statemachine: statemachine) : unit =
+let check_duplicate_state_names (statemachine : statemachine) : unit =
   let rec checker seen = function
     | [] -> ()
     | head :: tail ->
@@ -204,7 +217,8 @@ let get_unreachable_states (statemachine : statemachine) : state list =
 
 (* Function to run through all of the validation checks - add all new checks into this function *)
 let validate_state_machine (statemachine : statemachine) : unit =
-  check_duplicate_state_names statemachine
+  check_duplicate_state_names statemachine;
+  check_valid_transition statemachine
 
 let collect_warnings (statemachine : statemachine) : warning list =
   let warnings = [] in
