@@ -1,8 +1,12 @@
-digraph Door {
+digraph Football {
  rankdir = LR;
  node [shape = circle;];
  null [shape = point;];
-null -> Locked;
-Locked -> Broken [label="Kick(x < 3)"];
-Broken [shape = doublecircle;];
+null -> Player;
+Player -> YellowCard [label="Tackle(x < 1)"];
+Player -> RedCard [label="Tackle(x >= 1)"];
+Player -> YellowCard [label="Hands(x < 1)"];
+Player -> RedCard [label="Hands(x >= 1)"];
+YellowCard -> Player [label="PlayOn"];
+RedCard [shape = doublecircle;];
 }

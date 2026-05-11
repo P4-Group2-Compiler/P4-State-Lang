@@ -43,6 +43,13 @@ let rec convert_expr_to_string = function
 let rec convert_var_to_string = function
   | Var_decl (string, int) -> Printf.sprintf "int %s = %d" (string) (int)
 
+let operation_to_c = function
+  | Do (id, expr) ->
+      Printf.sprintf "%s = %s;"
+        id.id
+        (convert_expr_to_string expr)
+
+
 (*======================================================================================*)
 let generate_c_code ir =
 
@@ -116,21 +123,42 @@ let generate_c_code ir =
 
   List.iter (fun state ->
     emit_c "    case %s:\n" (get_state_name_string state);
-    List.iter (fun (src_state, event, guard_expr, dst_state, _ops) ->
+    List.iter (fun (src_state, event, guard_expr, dst_state, ops) ->
       if src_state = state then
         match guard_expr with
         | None ->
-          emit_c "        if (event_match(fired_event, \"%s\")) { /*THEN*/ return %s; }\n"
-          (get_event_name_string event)
-          (get_state_name_string dst_state)
+          emit_c "        if (event_match(fired_event, \"%s\")) {\n"
+            (get_event_name_string event);
+
+          (* Emit transition operations *)
+          List.iter (fun op ->
+            emit_c "            %s\n"
+              (operation_to_c op)
+          ) ops;
+
+          emit_c "            return %s;\n"
+            (get_state_name_string dst_state);
+
+          emit_c "        }\n";
         | Some expr ->
-          emit_c "        if (event_match(fired_event, \"%s\")) { "
-          (get_event_name_string event);
-          emit_c "/*AND*/ if (%s) { /*THEN*/ return %s; }\n"
-          (convert_expr_to_string expr)
-          (get_state_name_string dst_state);
-          emit_c "            else { print_guard_block_msg(fired_event, \"%s\"); /*THEN*/ return current_state; }; };\n"
-          (convert_expr_to_string expr);
+          emit_c "        if (event_match(fired_event, \"%s\")) {\n"
+            (get_event_name_string event);
+
+          emit_c "            if (%s) {\n"
+            (convert_expr_to_string expr);
+
+          (* Emit transition operations *)
+          List.iter (fun op ->
+            emit_c "                %s\n"
+              (operation_to_c op)
+          ) ops;
+
+          emit_c "                return %s;\n"
+            (get_state_name_string dst_state);
+
+          emit_c "            }\n";
+
+          emit_c "        }\n";
     ) ir.transitions;
     (*emit_c "        print_unrecognized_event_msg(fired_event);\n";
     emit_c "        return current_state;\n";*)
@@ -149,6 +177,11 @@ let generate_c_code ir =
   emit_c "    while (STATE_MACHINE_RUNNING) {\n";
   emit_c "        State initial_state = global_current_state;\n";
   emit_c "        printf(YELLOW_BOLD\"Current state: \"TEXT_RESET\"%%s\\n\", state_names[global_current_state]);\n";
+  List.iter (fun (Var_decl (name, _)) ->
+    emit_c "        printf(\"%s = %%d\\n\", %s);\n"
+      name
+      name
+  ) ir.g_variables;
   emit_c "        printf(YELLOW\"Event: \"TEXT_RESET);\n";
   emit_c "        char entered_event[256];\n";
   emit_c "        scanf(\"%%255s\", entered_event);\n";
