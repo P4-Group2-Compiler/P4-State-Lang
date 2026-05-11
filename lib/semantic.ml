@@ -4,6 +4,14 @@ open Ast
 exception Semantic_error of string
 let error msg = raise (Semantic_error msg)
 
+(*-------------------------------------(* WARNINGS *)-------------------------------------*)
+type warning = 
+  | DuplicateTransitions of state * event * state
+  | TooManyStates of int
+  | UnreachableFinalState of state
+
+let maxStates = 20 (* Num of states that break the DOT output readability
+                      Used for TooManyStates warning *)
 
 (*------------------------(* DEFINING TYPE AND HELPER FUNCTIONS *)------------------------*)
 
@@ -79,6 +87,12 @@ let rec stmt_to_string (s : stmt) =
 let collect_states (p : program) : state list =
   List.map (fun state_decl -> state_decl.name) p.states
 
+let check_number_of_states (statemachine : statemachine) : warning list =
+  let stateNum = List.length statemachine.states in
+  if stateNum > maxStates then [TooManyStates (stateNum)]
+  else []
+
+
 (* Get a list of all start states then checks the list to see if there is more than one *)
 (* TODO: Fix the if statement in the end of this function, might mess up later development *)
 let get_start_states (p: program) : state =
@@ -134,8 +148,21 @@ let create_state_machine (p: program) : statemachine =
 
 (*----------------------------(* VALIDATING THE STATEMACHINE *)---------------------------*)
 
+let check_valid_transition (statemachine : statemachine) : unit=
+  List.iter (fun (src, _, _, dest, _) -> 
+    if not (List.mem dest statemachine.states)
+      then error (Printf.sprintf
+        "Transition {FROM: %s TO: %s} is invalid.\n\t%s is not declared as a State"
+        (state_to_string src)
+        (state_to_string dest)
+        (state_to_string dest))
+    else 
+      () )
+  statemachine.transitions
+
+
 (* Recursive function to check if state names are repeated *)
-let check_duplicate_state_names (statemachine: statemachine) : unit =
+let check_duplicate_state_names (statemachine : statemachine) : unit =
   let rec checker seen = function
     | [] -> ()
     | head :: tail ->
@@ -147,15 +174,16 @@ let check_duplicate_state_names (statemachine: statemachine) : unit =
   in checker [] statemachine.states
 
   (* Recursive function that checks if the same transition has been declared more than once *)
-let check_duplicate_transistions (statemachine : statemachine) : unit =
-  let rec checker seen = function
-    | [] -> ()
+let check_duplicate_transistions (statemachine : statemachine) : warning list =
+  let rec checker seen warnings = function
+    | [] -> warnings
     | head :: tail ->
+      let (src, event, _, dest, _) = head in
       if List.mem head seen then
-        error "Dulicate transition declared"
+        checker seen (DuplicateTransitions (src, event, dest) :: warnings) tail
       else
-        checker (head :: seen) tail
-  in checker [] statemachine.transitions
+        checker (head :: seen) warnings tail
+  in checker [] [] statemachine.transitions
 
 (* Helper function for checking if start can reach final. It returns a list of destination states connected
    with transitions from the passed state *)
@@ -173,10 +201,11 @@ let rec can_reach_final_state (statemachine : statemachine) (visited : state lis
     List.exists (fun next -> can_reach_final_state statemachine (state :: visited) next) next_states
 
 (* We check if the Start state has a path to the Final state *)
-let check_start_reaches_final (statemachine : statemachine) : unit =
-  let start = statemachine.start_state in  
+let check_start_reaches_final (statemachine : statemachine) : warning list =
+  let start = statemachine.start_state in 
   if not (can_reach_final_state statemachine [] start) then
-      error ("{Start State " ^ state_to_string start ^ "} cannot reach a Final State")
+      [UnreachableFinalState start]
+  else []
 
 (* Returns a list of states that cannot reach Final state (dead-ends) might use for warnings later? *)
 let get_unreachable_states (statemachine : statemachine) : state list =
@@ -189,17 +218,27 @@ let get_unreachable_states (statemachine : statemachine) : state list =
 (* Function to run through all of the validation checks - add all new checks into this function *)
 let validate_state_machine (statemachine : statemachine) : unit =
   check_duplicate_state_names statemachine;
-  check_duplicate_transistions statemachine;
-  check_start_reaches_final statemachine
+  check_valid_transition statemachine
+
+let collect_warnings (statemachine : statemachine) : warning list =
+  let warnings = [] in
+    warnings
+    @ (check_duplicate_transistions statemachine)
+    @ (check_number_of_states statemachine)
+    @ (check_start_reaches_final statemachine)
+
+
+  (* let TooManyStates = check_number_of_states statemachine; *)
 
 (*---------------------------(* ANALYSE THE STATEMACHINE *)---------------------------*)
 
 (* This function is the one called by other files. It build the statemachine and runs through all the
    checks. The statemachine that is returned is the one used for codegen *)
-let analyse (p : program) : statemachine =
+let analyse (p : program) : statemachine * warning list =
   let machine = create_state_machine p in
       validate_state_machine machine;
-      machine
+  let warnings = collect_warnings machine in
+      (machine, warnings)
 
 (*---------------------------(* PRINT FUNCTIONS FOR DEBUGGIN *)---------------------------*)
 
