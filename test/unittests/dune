@@ -1,4 +1,4 @@
 (test
  (name semantic_test)
- (modules semantic_test)
+ (modules semantic_test test_helper)
  (libraries P4 alcotest))

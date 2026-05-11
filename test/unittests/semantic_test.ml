@@ -1,9 +1,4 @@
 open P4
-(* **************************************** *)
-(* Tests:                                   *)
-(* test_collect_states_happy                *)
-(*                                          *) 
-(* **************************************** *)
 
 (* **************************************** *)
 (*                                          *)
@@ -54,26 +49,35 @@ let test_collect_states_happy () =
 (************************************************************)
 (*                        HAPPY TEST                        *)
 (************************************************************)
+
 let test_collect_transitions_happy () =
+  let open P4.Ast in
+  let open Test_helper in
+  let prog = {
+    machine_name = "M";
+    variables = [];
+    inputs = [];
+    states = [
+      { kind = Start; name = State "A"; transitions = [
+          Transition (Event "e1", None, State "B", [])
+        ]};
+      { kind = Normal; name = State "B"; transitions = [
+          Transition (Event "e2", None, State "A", [])
+        ]};
+    ]
+  } in
 
-let open P4.Ast in
-let state name =
-  { kind = Start; name = State name; transitions = [] }
-in
-let prog = {
-  machine_name = "M";
-  variables = [];
-  inputs = [];
-  states = [ state "A"]
-} in
+  let result = P4.Semantic.collect_transitions prog in
 
-let result = P4.Semantic.get_start_states prog in
+  let expected = [
+    (State "A", Event "e1", None, State "B", []);
+    (State "B", Event "e2", None, State "A", []);
+  ] in
 
-let expected = State "A" in
-Alcotest.(check string)
-  "get_start_state returns the correct start state"
-  (P4.Semantic.state_to_string expected)
-  (P4.Semantic.state_to_string result) 
+  Alcotest.(check (list transition_testable))
+    "collect_transitions returns correct transitions"
+    expected
+    result
 
 (*************************************************************)
 (*                        SAD TESTS                          *)
@@ -107,8 +111,8 @@ let prog = {
     states = [ state "A"; state "B"]
  } in
  Alcotest.check_raises
-    "get_start_states raises error: 'Missing Start state declared"
-    (P4.Semantic.Semantic_error "Missing Start state declared")
+    "get_start_states raises error: 'Missing Start state declaration"
+    (P4.Semantic.Semantic_error "Missing Start state declaration")
     (fun () -> ignore (P4.Semantic.get_start_states prog))
 
 (* ******************************************************** *)
@@ -120,6 +124,27 @@ let prog = {
 (************************************************************)
 (*                        HAPPY TESTS                       *)
 (************************************************************)
+
+let test_get_final_states_happy () =
+  let open P4.Ast in
+
+  let prog = {
+      machine_name = "M";
+      variables = [];
+      inputs = [];
+      states = [
+        { kind = Final; name = State "A"; transitions = [] };
+        { kind = Final; name = State "B"; transitions = [] };
+        { kind = Start; name = State "C"; transitions = [] }
+        ]
+  } in
+    let result = P4.Semantic.get_final_states prog in 
+
+    let expected = [ State "A"; State "B" ] in
+    Alcotest.(check (list string))
+      "collect_states returns correct names"
+      (List.map Semantic.state_to_string expected)
+      (List.map Semantic.state_to_string result)
 
 (* ******************************************************** *)
 (*                                                          *)
@@ -133,5 +158,7 @@ let () =
       Alcotest.test_case "collect_states" `Quick test_collect_states_happy;
       Alcotest.test_case "collect_transitions" `Quick test_collect_transitions_happy;
       Alcotest.test_case "collect_transitions" `Quick test_transitions_multiple_start_states;
+      Alcotest.test_case "collect_transitions" `Quick test_transition_no_start_state;
+      Alcotest.test_case "collect_transitions" `Quick test_get_final_states_happy;
       ];
   ]

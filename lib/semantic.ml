@@ -91,7 +91,7 @@ let get_start_states (p: program) : state =
       p.states
     in
     if List.length start_states > 1 then error "Multiple Start states declared"
-      else if List.length start_states = 0 then error "Missing Start state decleration"
+      else if List.length start_states = 0 then error "Missing Start state declaration"
       else List.hd start_states
 
 (* Get a list of all Finals states in the program *)
