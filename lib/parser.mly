@@ -131,7 +131,8 @@ operations:
   ;
 
 operation:
-  | DO expr { Do $2 }  
+  | DO ident EQUAL expr { Do ($2, $4) }
+  ; 
 
 expr:
   | id = ident
