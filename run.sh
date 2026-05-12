@@ -2,10 +2,10 @@
 
 set -e
 
-#rm -f output/c/generated_state_machine.c
-#rm -f output/c/StateMachine
-#rm -f output/DOT/graph.gv
-#rm -f output/DOT/graph.png
+rm -f output/c/generated_state_machine.c
+rm -f output/c/StateMachine
+rm -f output/DOT/graph.gv
+rm -f output/DOT/graph.png
 
 dune clean
 dune build
