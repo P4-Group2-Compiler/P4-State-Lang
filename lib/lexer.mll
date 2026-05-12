@@ -64,6 +64,7 @@ rule token = parse
 
 (* Identifiers *)
 | (Letter IdentifierChars*) as id       { IDENTIFIER id }
+| (IdentifierChars*) as id              { EVENTIDENT id}
 
 (* Numbers *)
 | ['0'-'9']+ as n                       { INT n }
