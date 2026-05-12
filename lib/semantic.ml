@@ -41,6 +41,10 @@ let binop_to_string = function
   | Beq -> "==" | Bneq -> "!=" | Blt -> "<"  | Ble -> "<=" | Bgt -> ">"  
   | Bge -> ">=" | Band -> "AND"| Bor -> "OR" 
 
+let var_to_string (v : var_decl) =
+  match v with
+  | Var_decl (id, value) -> id ^ " = " ^ string_of_int value
+
 let constant_to_string (c : constant) = 
   let const_string =
     match c with
@@ -56,10 +60,9 @@ let ident_to_string (i : ident) =
 let rec expr_to_string (e : expr) =
   let expr_string =
     match e with
-    (*| Evar e -> ""*)
     | Ecst e -> constant_to_string e
     | Ebinop (b, e1, e2) -> 
-        Printf.sprintf "(%s %s %s)"
+        Printf.sprintf " (%s %s %s)"
         (expr_to_string e1)
         (binop_to_string b)
         (expr_to_string e2)
