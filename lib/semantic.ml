@@ -85,6 +85,13 @@ let rec stmt_to_string (s : stmt) =
   in
   stmt_string
 
+let op_to_string (o : operation) =
+  let op_string =
+    match o with
+    | Do (id, expr) -> ident_to_string id ^ " " ^ expr_to_string expr
+  in  
+  op_string
+
 (*********************************************************************************************************)
 
 let collect_states (p : program) : state list =

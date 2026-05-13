@@ -4,13 +4,36 @@ open Ast
 (*Do? Body?*)
 
 (**************************************************************************************************************************************************)
+let dotOpsBuf = Buffer.create 16 
+
+let someOps lst =
+    match lst with
+    | [] -> false
+    | _ -> true
+
+let rec ops_to_stringList (ops : operation list) = 
+  match ops with
+  | [] -> []
+  | h :: t -> op_to_string h :: ops_to_stringList t 
+
 (*Strings of transitions*)
-let stringify_trans (s1, e, expr_option, s2, _ops) =
+let stringify_trans (s1, e, expr_option, s2, ops) =
   let s1_str = state_to_string s1 in
   let e_str = event_to_string e in
   let eo_str = expr_option_to_string expr_option in
   let s2_str = state_to_string s2 in
-  Printf.sprintf "%s -> %s [label=\"%s%s\"];\n" s1_str s2_str e_str eo_str
+  let ops_str_lst = ops_to_stringList ops in
+
+    if someOps ops_str_lst then
+       let rec addEachOps = function
+        | [] -> ()
+        | h :: t -> Buffer.add_string dotOpsBuf h; 
+        addEachOps t 
+      in
+      addEachOps ops_str_lst;
+      Printf.sprintf "%s -> %s [label=\"%s%s\"];\n" s1_str s2_str e_str eo_str
+    else
+      Printf.sprintf "%s -> %s [label=\"%s%s\"];\n" s1_str s2_str e_str eo_str
   
 (*Outputs a list of DOT transition as strings, using above function*)
 let trans_string_list (t : (state * event * _ * state * operation list) list) =
@@ -51,7 +74,6 @@ let var_string_list (v : (var_decl) list) =
 
 (**************************************************************************************************************************************************)
 (*Function that takes the entire statemachine*)
-
 let graphFromStatemachine (sm : (statemachine)) =
 
   let smName = sm.statemachine_name in
@@ -73,6 +95,9 @@ let graphFromStatemachine (sm : (statemachine)) =
   Buffer.add_string dotBuf startState;
   addEachString transList;
   addEachString finalStateList;
+
+(**************************************************************************************************************************************************)
+
 
 (**************************************************************************************************************************************************)
 (*Adds variables as a list, if there are any. Otherwise finishes the DOT-syntax.*)
