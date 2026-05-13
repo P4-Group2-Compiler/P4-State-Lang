@@ -1,7 +1,7 @@
 open Semantic
 open Ast
 
-(*Do? Body?*)
+(*Do? Body? Back to square one!*)
 
 (**************************************************************************************************************************************************)
 let dotBuf_Ops = Buffer.create 1064
@@ -13,22 +13,12 @@ let rec ops_to_stringList (ops : operation list) =
 
 (*Strings of transitions*)
 let stringify_trans (s1, e, expr_option, s2, ops) =
-  let s1_str = state_to_string s1 in
-  let e_str = event_to_string e in
-  let eo_str = expr_option_to_string expr_option in
-  let s2_str = state_to_string s2 in
-  let ops_str_lst = ops_to_stringList ops in
-
-  if ops_str_lst <> [] then (
-    Buffer.add_string dotBuf_Ops (String.concat "\\n" ops_str_lst);
-    Buffer.add_string dotBuf_Ops "\n";
-
-    Printf.sprintf "%s -> %s [label=\"%s%s%s\"];\n"
-      s1_str s2_str e_str eo_str ""
-  ) else (
-    Printf.sprintf "%s -> %s [label=\"%s%s\"];\n"
-      s1_str s2_str e_str eo_str
-  )
+    let s1_str = state_to_string s1 in
+    let e_str = event_to_string e in
+    let eo_str = expr_option_to_string expr_option in
+    let s2_str = state_to_string s2 in
+    (*let op_str = ops_to_stringList ops in*)
+    Printf.sprintf "%s -> %s [label=\"%s%s%s\"];\n" s1_str s2_str e_str eo_str ""
 
 (*Outputs a list of DOT transition as strings, using above function*)
 let trans_string_list (t : (state * event * _ * state * operation list) list) =
@@ -111,9 +101,9 @@ let graphFromStatemachine (sm : (statemachine)) =
     Buffer.add_string dotBuf_Vars dot_varTopSyntax;
     addEachVar varsList;
     Buffer.add_string dotBuf_Vars "\n";
-    Buffer.add_string dotBuf_Vars "Operations:\n";
-    Buffer.add_buffer dotBuf_Vars dotBuf_Ops;
     Buffer.add_string dotBuf_Vars "\"";
+    (*Buffer.add_string dotBuf_Vars "Operations:\n";*)
+    (*Buffer.add_buffer dotBuf_Vars dotBuf_Ops;*)
     Buffer.add_string dotBuf_Vars "\nshape = rectangle;];\n"; 
     Buffer.add_string dotBuf_Vars dot_varBottomSyntax;
     Buffer.add_buffer dotBuf dotBuf_Vars;
@@ -126,5 +116,4 @@ let graphFromStatemachine (sm : (statemachine)) =
   Buffer.output_buffer oc dotBuf;
   close_out oc;
   ignore (Sys.command "cd ../output/DOT && dot -Tpng graph.gv -o graph.png");
-  print_endline (Buffer.contents dotBuf_Ops);
 ;
