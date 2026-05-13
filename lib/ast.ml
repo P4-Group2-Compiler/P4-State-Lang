@@ -43,7 +43,7 @@ type state =
   | State of string (* Might be better to have simply 'type state = string' *)
 
 type operation =
-  | Do of expr
+  | Do of ident * expr
 
 type transition =
   | Transition of event * expr option * state * operation list
@@ -53,6 +53,7 @@ type state_kind =
   | Normal
   | Start
   | Final
+  | StartFinal
 
 type var_decl = 
   | Var_decl of string * int

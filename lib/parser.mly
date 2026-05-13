@@ -25,6 +25,7 @@
 %token STATE
 %token START
 %token FINAL
+%token STARTFINAL
 %token ON
 %token GO
 %token IF
@@ -79,9 +80,10 @@ state:
 ;
 
 state_kind:
-| START { Start }
-| FINAL { Final }
-|       { Normal } // Empty means that there is no State Kind
+| START      { Start }
+| FINAL      { Final }
+| STARTFINAL { StartFinal }
+|            { Normal } // Empty means that there is no State Kind
 ;
 
 variables:
@@ -111,9 +113,9 @@ transitions:
 ;
 
 transition:
-| ON IDENTIFIER GO IDENTIFIER operation_block_opt
+| ON event_name GO IDENTIFIER operation_block_opt
     { Transition (Event $2, None, State $4, $5) }
-| ON IDENTIFIER IF expr GO IDENTIFIER operation_block_opt
+| ON event_name IF expr GO IDENTIFIER operation_block_opt
     { Transition (Event $2, Some $4, State $6, $7) }
 | AUTO GO IDENTIFIER operation_block_opt
     { Transition (Auto, None, State $3, $4) }
@@ -124,6 +126,10 @@ transition:
 (*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE stmt GO IDENTIFIER*)
 (*| ON IDENTIFIER IF expr GO IDENTIFIER ELIF expr GO IDENTIFIER ELSE*)
 ;
+
+event_name:
+| IDENTIFIER { $1 }
+| INT { $1 }
 
 operation_block_opt:
   | { [] }
@@ -136,7 +142,8 @@ operations:
   ;
 
 operation:
-  | DO expr { Do $2 }  
+  | DO ident EQUAL expr { Do ($2, $4) }
+  ; 
 
 expr:
   | id = ident
@@ -147,6 +154,27 @@ expr:
       { Ebinop (o, e1, e2) }
   | LP e = expr RP
       { e }
+;
+
+%inline binop:
+  | PLUS    { Badd }
+  | MINUS   { Bsub }
+  | TIMES   { Bmul }
+  | DIV     { Bdiv }
+  | MOD     { Bmod }
+  | LT      { Blt }
+  | LTE     { Ble }
+  | GT      { Bgt }
+  | GTE     { Bge }
+  | BEQUAL  { Beq }
+  | BNEQUAL { Bneq }
+  | AND     { Band }
+  | OR      { Bor }
+;
+
+ 
+ident:
+  IDENTIFIER { { loc = ($startpos, $endpos); id = $1 } }
 ;
 
 (*
@@ -197,24 +225,3 @@ expr:
 | PRINT LP el = separated_list(COMMA, expr) RP
     { Sprint el }
 ;*)
-
-%inline binop:
-  | PLUS    { Badd }
-  | MINUS   { Bsub }
-  | TIMES   { Bmul }
-  | DIV     { Bdiv }
-  | MOD     { Bmod }
-  | LT      { Blt }
-  | LTE     { Ble }
-  | GT      { Bgt }
-  | GTE     { Bge }
-  | BEQUAL  { Beq }
-  | BNEQUAL { Bneq }
-  | AND     { Band }
-  | OR      { Bor }
-;
-
- 
-ident:
-  IDENTIFIER { { loc = ($startpos, $endpos); id = $1 } }
-;
