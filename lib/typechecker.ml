@@ -75,13 +75,34 @@ let rec type_expr (env : type_env) = function
       | _ -> type_error "Comparisons expects 'int : int'"
       end
 
+(* Checking transition operations *)
+let type_operation env = function
+  | Do (id, expr) ->
+      let var_type =
+        try Hashtbl.find env id.id
+        with Not_found ->
+          type_error ~loc:(Some id.loc) ("Unbound variable in operation: " ^ id.id)
+      in
+
+      let expr_type = type_expr env expr in
+
+      if var_type <> expr_type then
+        type_error ~loc:(Some id.loc)
+          ("Type mismatch in operation assignment to variable: " ^ id.id)
+
 (* Checking transitions *)
 let type_transition env = function
-  | Transition (_ev, None, _st, _ops) -> ()
-  | Transition (_ev, Some guard, _st, _ops) ->
-      match type_expr env guard with
+  | Transition (_ev, None, _st, ops) ->
+      List.iter (type_operation env) ops
+
+  | Transition (_ev, Some guard, _st, ops) ->
+      begin
+        match type_expr env guard with
         | Tbool -> ()
         | _ -> type_error "Guard expression must have type bool"
+      end;
+
+      List.iter (type_operation env) ops
 
 (* Checking the program *)
 let initial_env () = Hashtbl.create 16
