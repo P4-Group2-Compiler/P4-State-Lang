@@ -25,6 +25,7 @@
 %token STATE
 %token START
 %token FINAL
+%token STARTFINAL
 %token ON
 %token GO
 %token IF
@@ -78,9 +79,10 @@ state:
 ;
 
 state_kind:
-| START { Start }
-| FINAL { Final }
-|       { Normal } // Empty means that there is no State Kind
+| START      { Start }
+| FINAL      { Final }
+| STARTFINAL { StartFinal }
+|            { Normal } // Empty means that there is no State Kind
 ;
 
 variables:
