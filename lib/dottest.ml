@@ -4,7 +4,7 @@ open Ast
 (*Do? Body?*)
 
 (**************************************************************************************************************************************************)
-let ops_buf = Buffer.create 1064
+let dotBuf_Ops = Buffer.create 1064
 
 let rec ops_to_stringList (ops : operation list) = 
   match ops with
@@ -20,8 +20,8 @@ let stringify_trans (s1, e, expr_option, s2, ops) =
   let ops_str_lst = ops_to_stringList ops in
 
   if ops_str_lst <> [] then (
-    Buffer.add_string ops_buf (String.concat "\n" ops_str_lst);
-    Buffer.add_char ops_buf '\n';
+    Buffer.add_string dotBuf_Ops (String.concat "\\n" ops_str_lst);
+    Buffer.add_string dotBuf_Ops "\n";
 
     Printf.sprintf "%s -> %s [label=\"%s%s%s\"];\n"
       s1_str s2_str e_str eo_str ""
@@ -92,9 +92,6 @@ let graphFromStatemachine (sm : (statemachine)) =
   addEachString finalStateList;
 
 (**************************************************************************************************************************************************)
-
-
-(**************************************************************************************************************************************************)
 (*Adds variables as a list, if there are any. Otherwise finishes the DOT-syntax.*)
   let someVars lst =
     match lst with
@@ -113,6 +110,9 @@ let graphFromStatemachine (sm : (statemachine)) =
 
     Buffer.add_string dotBuf_Vars dot_varTopSyntax;
     addEachVar varsList;
+    Buffer.add_string dotBuf_Vars "\n";
+    Buffer.add_string dotBuf_Vars "Operations:\n";
+    Buffer.add_buffer dotBuf_Vars dotBuf_Ops;
     Buffer.add_string dotBuf_Vars "\"";
     Buffer.add_string dotBuf_Vars "\nshape = rectangle;];\n"; 
     Buffer.add_string dotBuf_Vars dot_varBottomSyntax;
@@ -126,4 +126,5 @@ let graphFromStatemachine (sm : (statemachine)) =
   Buffer.output_buffer oc dotBuf;
   close_out oc;
   ignore (Sys.command "cd ../output/DOT && dot -Tpng graph.gv -o graph.png");
+  print_endline (Buffer.contents dotBuf_Ops);
 ;
