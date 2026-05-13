@@ -1,9 +1,10 @@
 _build/
 build-and-test.yaml
-output/
-output/c/*.exe
-output/c/.clang-format
-output/c/generated_state_machine.c
+#Removes all filed in outout/c and output/DOT, except .gitkeep, thus allowing the folder to be commited to main
+output/c/*
+output/DOT/*
+!output/c/.gitkeep
+!output/DOT/.gitkeep
 .DS_Store
 bufftest
 bin/test.sm
