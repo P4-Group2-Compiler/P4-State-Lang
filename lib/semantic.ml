@@ -87,10 +87,7 @@ let rec stmt_to_string (s : stmt) =
 let collect_states (p : program) : state list =
   List.map (fun state_decl -> state_decl.name) p.states
 
-let check_number_of_states (statemachine : statemachine) : warning list =
-  let stateNum = List.length statemachine.states in
-  if stateNum > maxStates then [TooManyStates (stateNum)]
-  else []
+
 
 
 (* Get a list of all start states then checks the list to see if there is more than one *)
@@ -100,9 +97,7 @@ let get_start_states (p: program) : state =
     List.fold_left (fun list state_decl -> 
       match state_decl.kind with
       | Start -> state_decl.name :: list
-      | Normal | Final -> list)
-      []
-      p.states
+      | Normal | Final -> list) [] p.states
     in
     if List.length start_states > 1 then error "Multiple Start states declared"
       else if List.length start_states = 0 then error "Missing Start state declaration"
@@ -113,9 +108,7 @@ let get_final_states (p: program) : state list =
   List.fold_left (fun list state_decl ->
     match state_decl.kind with
     | Final -> state_decl.name :: list
-    | Normal | Start -> list)
-    []
-    p.states
+    | Normal | Start -> list) [] p.states
 
 (* Function for adding the source state with the states: (event, state) -> (state, event, state) *)
 let add_source_state (st_decl : state_decl) : (state * event * expr option * state * operation list) list = 
@@ -148,7 +141,12 @@ let create_state_machine (p: program) : statemachine =
 
 (*----------------------------(* VALIDATING THE STATEMACHINE *)---------------------------*)
 
-let check_valid_transition (statemachine : statemachine) : unit=
+let check_number_of_states (statemachine : statemachine) : warning list =
+  let stateNum = List.length statemachine.states in
+  if stateNum > maxStates then [TooManyStates (stateNum)]
+  else []
+
+let check_valid_transition (statemachine : statemachine) : unit =
   List.iter (fun (src, _, _, dest, _) -> 
     if not (List.mem dest statemachine.states)
       then error (Printf.sprintf
