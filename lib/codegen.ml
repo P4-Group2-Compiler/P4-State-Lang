@@ -7,6 +7,7 @@ let get_state_name_string = function
 
 let get_event_name_string = function
   | Event event_string -> event_string
+  | Auto -> "AUTO"
 
 let rec convert_expr_to_string = function
   (* The base single "atoms" of an expression: *)
@@ -56,7 +57,8 @@ let generate_c_code ir =
 (*-------------------------------------------------------------------------------------*)
   (* Includes: *)
   emit_c "#include <stdio.h>\n";
-  emit_c "#include <string.h>\n\n";
+  emit_c "#include <string.h>\n";
+  emit_c "#include <stdbool.h>\n\n";
 (*-------------------------------------------------------------------------------------*)
   (* Macros to color and format the terminals print-output (PURELY COSMETIC, no "functional" use) *)
   (* The codes are called "ANSI Escape Codes". More info here: https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797 *)
@@ -66,7 +68,9 @@ let generate_c_code ir =
   emit_c "#define YELLOW_BOLD   \"\\033[1;93m\"\n";
   emit_c "#define GREEN         \"\\033[1;32m\"\n";
   emit_c "#define BOLD          \"\\033[1m\"\n";
-  emit_c "#define TEXT_RESET    \"\\033[0m\"\n\n";
+  emit_c "#define UN_BOLD       \"\\033[22m\"\n";
+  emit_c "#define TEXT_RESET    \"\\033[0m\"\n";
+  emit_c "\n\n";
 (*-------------------------------------------------------------------------------------*)
   (* The State ENUM: *)
   emit_c "typedef enum {\n";
@@ -86,10 +90,10 @@ let generate_c_code ir =
 
   (* Print GUARD BLOCK message: *)
   emit_c "void print_guard_block_msg(const char* transition, const char* guard) {\n";
-  emit_c "    printf(RED\"\\\"%%s\\\" transition was \"BOLD\"blocked by guard:\"TEXT_RESET\" %%s \\n\"TEXT_RESET, transition, guard);\n}\n";
+  emit_c "    printf(RED BOLD\"\\\"%%s\\\"\"UN_BOLD\" transition was \"BOLD\"blocked by guard:\"TEXT_RESET\" %%s \\n\", transition, guard);\n}\n";
   (* Print UNRECOGNIZED EVENT message: *)
   emit_c "void print_unrecognized_event_msg(const char* event) {\n";
-  emit_c "    printf(RED\"\\\"%%s\\\" is an \"BOLD\"unrecognized event \"TEXT_RESET RED\"for this state!\\n\"TEXT_RESET, event);\n}\n";
+  emit_c "    printf(RED BOLD\"\\\"%%s\\\"\"UN_BOLD\" is an \"BOLD\"unrecognized event \"UN_BOLD\"for this state!\\n\"TEXT_RESET, event);\n}\n";
   (* Print the GREEN "[src]--->[dst]" message: *)
   emit_c "void pretty_print_transition(State src_state, State dst_state) {\n";
   emit_c "    printf(GREEN\"[%%s] ---> [%%s]\\n\"TEXT_RESET, state_names[src_state], state_names[dst_state]);\n}\n";
@@ -97,7 +101,7 @@ let generate_c_code ir =
   emit_c "int event_match(const char* input, const char* event) {\n";
   emit_c "    return (strcmp(input, event) == 0);\n}\n";
 
-  emit_c "\n";
+  emit_c "\n\n";
 (*-------------------------------------------------------------------------------------*)
   (* We use this to track the current_state: *)
   emit_c "State global_current_state = %s;\n\n" start_state_name;
@@ -111,57 +115,87 @@ let generate_c_code ir =
 (*-------------------------------------------------------------------------------------*)
   (* The "state_machine_step-function" is now just here to avoid the extra state_machine-file include *)
   (* It contains the switch-core of the C output with states as cases containing transitions *)
-  emit_c "State state_machine_step(State current_state, const char* fired_event) {\n";
-  emit_c "    switch (current_state) {\n";
+  
+  emit_c "void transition_to(State dst_state) {\n";
+  emit_c "    pretty_print_transition(global_current_state, /*--->*/ dst_state);\n";
+  emit_c "    global_current_state = dst_state;\n";
+  emit_c "}\n";
+  
+  emit_c "void state_machine_step(const char* input_event) {\n\n";
+  emit_c "    const char* fired_event = input_event;\n";
+  emit_c "    bool is_first_pass = true;\n\n";
+  emit_c "    auto_recheck:\n";
+  emit_c "    if (is_first_pass != true) {\n";
+  emit_c "        fired_event = \"AUTO\";\n";
+  emit_c "    }\n";
+  emit_c "    is_first_pass = false;\n\n";
+
+  emit_c "    switch (global_current_state) {\n";
 
   List.iter (fun state ->
     emit_c "    case %s:\n" (get_state_name_string state);
     List.iter (fun (src_state, event, guard_expr, dst_state, _ops) ->
       if src_state = state then
-        match guard_expr with
-        | None ->
-          emit_c "        if (event_match(fired_event, \"%s\")) { /*THEN*/ return %s; }\n"
-          (get_event_name_string event)
-          (get_state_name_string dst_state)
-        | Some expr ->
-          emit_c "        if (event_match(fired_event, \"%s\")) { "
-          (get_event_name_string event);
-          emit_c "/*AND*/ if (%s) { /*THEN*/ return %s; }\n"
-          (convert_expr_to_string expr)
-          (get_state_name_string dst_state);
-          emit_c "            else { print_guard_block_msg(fired_event, \"%s\"); /*THEN*/ return current_state; }; };\n"
-          (convert_expr_to_string expr);
+        match event with
+        | Auto ->
+          begin
+            match guard_expr with
+            | None ->
+              emit_c "        if (event_match(fired_event, \"AUTO\")) { /*THEN*/ transition_to(%s); goto auto_recheck; }\n"
+              (get_state_name_string dst_state);
+            | Some expr ->
+              emit_c "        if (event_match(fired_event, \"AUTO\")) { /*AND*/ if (%s) { /*THEN*/ transition_to(%s); goto auto_recheck; } }\n"
+              (convert_expr_to_string expr)
+              (get_state_name_string dst_state);
+          end
+        | Event _ ->
+          begin
+            match guard_expr with
+            | None ->
+              emit_c "        if (event_match(fired_event, \"%s\")) { /*THEN*/ transition_to(%s); goto auto_recheck; }\n"
+                (get_event_name_string event)
+                (get_state_name_string dst_state)
+            | Some expr ->
+              emit_c "        if (event_match(fired_event, \"%s\")) { /*AND*/ if (%s) { /*THEN*/ transition_to(%s); goto auto_recheck; }\n"
+                (get_event_name_string event)
+                (convert_expr_to_string expr)
+                (get_state_name_string dst_state);
+              emit_c "            else { print_guard_block_msg(fired_event, \"%s\"); /*THEN*/ break; } }\n"
+                (convert_expr_to_string expr)
+          end
     ) ir.transitions;
-    (*emit_c "        print_unrecognized_event_msg(fired_event);\n";
-    emit_c "        return current_state;\n";*)
+    emit_c "\n";
     emit_c "        goto unrecognized_input_fallback;\n"
   ) ir.states;
 
   emit_c "    default:\n";
-  emit_c "    unrecognized_input_fallback:\n";
-  emit_c "        print_unrecognized_event_msg(fired_event);\n";
-  emit_c "        return current_state;\n";
+  emit_c "        unrecognized_input_fallback:\n";
+  emit_c "        if (fired_event != \"AUTO\") {\n";
+  emit_c "            print_unrecognized_event_msg(fired_event);\n";
+  emit_c "        }\n";
+  emit_c "        break;\n";
   emit_c "    }\n}\n\n";
 (*-------------------------------------------------------------------------------------*)
   (* main() + the main state machine loop that takes the users input: *)
   emit_c "int main(void) {\n";
   emit_c "    #define STATE_MACHINE_RUNNING 1\n";
+  emit_c "    state_machine_step(\"AUTO\");\n";
   emit_c "    while (STATE_MACHINE_RUNNING) {\n";
-  emit_c "        State initial_state = global_current_state;\n";
+
   emit_c "        printf(YELLOW_BOLD\"Current state: \"TEXT_RESET\"%%s\\n\", state_names[global_current_state]);\n";
   emit_c "        printf(YELLOW\"Event: \"TEXT_RESET);\n";
+
   emit_c "        char entered_event[256];\n";
   emit_c "        scanf(\"%%255s\", entered_event);\n";
-  emit_c "        global_current_state = state_machine_step(global_current_state, entered_event);\n";
-  (*
-  emit_c "        pretty_print_transition(initial_state, /*--->*/ global_current_state);\n";
-  *)
-  emit_c "        if (initial_state != global_current_state) {\n";
-  emit_c "            pretty_print_transition(initial_state, /*--->*/ global_current_state);\n";
-  emit_c "        }\n";
-  emit_c "    }\n";
-  emit_c "    return 0;\n";
-  emit_c "}\n";
+
+emit_c "        if (event_match(entered_event, \"AUTO\") != true) {\n";
+emit_c "            state_machine_step(entered_event);\n";
+emit_c "        } else {\n";
+emit_c "            printf(RED BOLD\"\\\"AUTO\\\"\"UN_BOLD\" is a \"BOLD\"reserved event-keyword\"UN_BOLD\" -- It is not allowed as manual input!\\n\");\n";
+emit_c "        }\n";
+emit_c "    }\n";
+emit_c "    return 0;\n";
+emit_c "}\n";
 (*-------------------------------------------------------------------------------------*)
   close_out c_out_channel;
 

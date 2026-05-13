@@ -37,6 +37,7 @@ type stmt =
 
 type event =
   | Event of string (* Might be better to have simply 'type event = string' *)
+  | Auto
 
 type state =
   | State of string (* Might be better to have simply 'type state = string' *)

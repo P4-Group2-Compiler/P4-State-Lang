@@ -2,14 +2,14 @@ digraph Door {
  rankdir = LR;
  node [shape = circle;];
  null [shape = point;];
-null -> Closed;
-Closed -> Closed [label="nothing"];
-Closed -> Open [label="push(y < 100)"];
-Closed -> Open [label="kick((x / 2) == 2)"];
-Closed -> Open [label="knock(Carsten > 18)"];
-Closed -> Locked [label="lock"];
-Open -> Closed [label="pull"];
-Open -> Closed [label="slam((2 * 2) > 4)"];
-Locked -> Closed [label="unlock"];
-Locked [shape = doublecircle;];
+null -> A;
+A -> B [label="AUTO(1 > 10)"];
+A -> B [label="start(2 == 2)"];
+A -> D [label="loop"];
+B -> C [label="AUTO(counter == 0)"];
+C -> A [label="AUTO"];
+C -> B [label="AUTO"];
+C -> A [label="reset"];
+D -> D [label="AUTO"];
+C [shape = doublecircle;];
 }
