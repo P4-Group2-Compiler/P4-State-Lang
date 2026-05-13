@@ -96,13 +96,15 @@ let test_get_start_states_startfinal_happy () =
 let test_get_start_states_multiple_start_states () =
 
 let open P4.Ast in
-let state name =
+let start_state name =
     { kind = Start; name = State name; transitions = [] } in
-let prog = {
+let startfinal_state name =
+    { kind = StartFinal; name = State name; transitions = [] } in
+    let prog = {
     machine_name = "M";
     variables = [];
     inputs = [];
-    states = [ state "A"; state "B" ]
+    states = [ start_state "A"; startfinal_state "B" ]
 } in
 Alcotest.check_raises
     "get_start_states raises error: 'Multiple Start states declared'"
@@ -143,7 +145,7 @@ let test_get_final_states_happy () =
       inputs = [];
       states = [
         { kind = Final; name = State "A"; transitions = [] };
-        { kind = Final; name = State "B"; transitions = [] };
+        { kind = StartFinal; name = State "B"; transitions = [] };
         { kind = Start; name = State "C"; transitions = [] }
         ]
   } in
@@ -390,29 +392,7 @@ let test_check_valid_transition_sad () =
 (*                         HAPPY TEST                          *)
 (* *********************************************************** *)
 
-(* ********************************************************* *)
-(*                         RUN TESTS                         *)
-(* ********************************************************* *)
-
-let () =
-  Alcotest.run "Semantic Tests" [
-    "semantic", [
-      Alcotest.test_case "collect_states" `Quick test_collect_states_happy;
-      Alcotest.test_case "get_start_states" `Quick test_get_start_states_start_happy;
-      Alcotest.test_case "get_start_states" `Quick test_get_start_states_startfinal_happy;
-      Alcotest.test_case "get_start_states" `Quick test_get_start_states_multiple_start_states;
-      Alcotest.test_case "get_start_states" `Quick test_get_start_states_no_start_state;
-      Alcotest.test_case "get_final_states" `Quick test_get_final_states_happy;
-      Alcotest.test_case "collect_transitions" `Quick test_collect_transitions_happy;
-      Alcotest.test_case "collect_g_variables" `Quick test_collect_g_variables_happy;
-      Alcotest.test_case "check_number_of_states" `Quick test_check_number_of_states_happy;
-      Alcotest.test_case "check_number_of_states" `Quick test_check_number_of_states_sad;
-      Alcotest.test_case "check_valid_transition" `Quick test_check_valid_transition_happy;
-      Alcotest.test_case "check_valid_transition" `Quick test_check_valid_transition_sad;
-      ];
-]
-
-(*let test_check_number_of_states_happy () =
+let test_check_duplicate_state_names_happy () =
   let open P4.Ast in
   let open Test_helper in
   let prog = {
@@ -420,14 +400,158 @@ let () =
       variables = [];
       inputs = [];
       states = [
-        { kind = Final; name = State "A"; transitions = [] };
+        { kind = Start; name = State "A"; transitions = []};
+        { kind = Normal; name = State "B"; transitions = []};
+        { kind = Final; name = State "C"; transitions = []}
+      ]
+    } in
+
+  let sm = P4.Semantic.create_state_machine prog in
+  P4.Semantic.check_duplicate_state_names sm
+
+(* ********************************************************* *)
+(*                         SAD TEST                          *)
+(* ********************************************************* *)
+
+let test_check_duplicate_state_names_sad () =
+  let open P4.Ast in
+  let open Test_helper in
+  let prog = {
+    machine_name = "M";
+      variables = [];
+      inputs = [];
+      states = [
+        { kind = Start; name = State "A"; transitions = []};
+        { kind = Normal; name = State "A"; transitions = []};
+        { kind = Final; name = State "C"; transitions = []}
+      ]
+    } in
+
+  let sm = P4.Semantic.create_state_machine prog in
+  
+  expect_semantic_error (fun () ->
+  P4.Semantic.check_duplicate_state_names sm)
+    
+(* *********************************************************** *)
+(*               FUN CHECK_DUPLICATE_TRANSITIONS               *)
+(* *********************************************************** *)
+
+(* *********************************************************** *)
+(*                         HAPPY TEST                          *)
+(* *********************************************************** *)
+
+let test_check_duplicate_transitions_happy () =
+  let open P4.Ast in
+  let open Test_helper in
+  let transA = 
+        [
+        (Transition (Event "e1", None, State "B", []));
+        (Transition (Event "e2", None, State "C", []))
+        ] in
+  let prog = {
+      machine_name = "M";
+      variables = [];
+      inputs = [];
+      states = [
+        { kind = Final; name = State "A"; transitions = transA };
         { kind = Final; name = State "B"; transitions = [] };
         { kind = Start; name = State "C"; transitions = [] }
       ]
   } in
-    let result = P4.Semantic.check_number_of_states prog in
+    let sm = P4.Semantic.create_state_machine prog in
+    let result = P4.Semantic.check_number_of_states sm in
 
-    Alcotest.(check (list P4.Semantic.warning_testable))
-      "No warning when state count is within limit"
+    Alcotest.(check (list warning_testable))
+      "No warning when no duplicate transition"
       []
-      result*)
+      result
+
+(* *********************************************************** *)
+(*                          SAD TEST                           *)
+(* *********************************************************** *)
+
+let test_check_duplicate_transitions_sad () =
+  let open P4.Ast in
+  let open Test_helper in
+  let transA = 
+        [
+        (Transition (Event "e1", None, State "B", []));
+        (Transition (Event "e1", None, State "B", []))
+        ] in
+  let prog = {
+      machine_name = "M";
+      variables = [];
+      inputs = [];
+      states = [
+        { kind = Final; name = State "A"; transitions = transA };
+        { kind = Final; name = State "B"; transitions = [] };
+        { kind = Start; name = State "C"; transitions = [] }
+      ]
+  } in
+    let sm = P4.Semantic.create_state_machine prog in
+    let result = P4.Semantic.check_duplicate_transistions sm in
+ 
+    Alcotest.(check (list warning_testable))
+      "No warning when state count is within limit"
+      [DuplicateTransitions (State "A", Event "e1", State "B")]
+      result
+
+(* *********************************************************** *)
+(*                      FUN SUCCESSORS                         *)
+(* *********************************************************** *)
+
+(* *********************************************************** *)
+(*                         HAPPY TEST                          *)
+(* *********************************************************** *)
+
+let test_successors_happy () =
+  let open P4.Ast in
+  let open Test_helper in
+  let prog = {
+    machine_name = "M";
+      variables = [];
+      inputs = [];
+      states = [
+        { kind = Start; name = State "A"; transitions = []};
+        { kind = Normal; name = State "A"; transitions = []};
+        { kind = Final; name = State "C"; transitions = []}
+      ]
+    } in
+
+    let sm = P4.Semantic.create_state_machine prog in
+    let result = P4.Semantic.successors sm State "A" in
+
+    let expected = (state_to_string sm.states)
+
+    Alcotest.(check (list string))
+    expected
+    result
+    
+
+
+
+(* ********************************************************* *)
+(*                         RUN TESTS                         *)
+(* ********************************************************* *)
+
+let () =
+  Alcotest.run "Semantic Tests" [
+    "semantic", [
+      Alcotest.test_case "collect_states"               `Quick test_collect_states_happy;
+      Alcotest.test_case "get_start_states"             `Quick test_get_start_states_start_happy;
+      Alcotest.test_case "get_start_states"             `Quick test_get_start_states_startfinal_happy;
+      Alcotest.test_case "get_start_states"             `Quick test_get_start_states_multiple_start_states;
+      Alcotest.test_case "get_start_states"             `Quick test_get_start_states_no_start_state;
+      Alcotest.test_case "get_final_states"             `Quick test_get_final_states_happy;
+      Alcotest.test_case "collect_transitions"          `Quick test_collect_transitions_happy;
+      Alcotest.test_case "collect_g_variables"          `Quick test_collect_g_variables_happy;
+      Alcotest.test_case "check_number_of_states"       `Quick test_check_number_of_states_happy;
+      Alcotest.test_case "check_number_of_states"       `Quick test_check_number_of_states_sad;
+      Alcotest.test_case "check_valid_transition"       `Quick test_check_valid_transition_happy;
+      Alcotest.test_case "check_valid_transition"       `Quick test_check_valid_transition_sad;
+      Alcotest.test_case "check_duplicate_state_names"  `Quick test_check_duplicate_state_names_happy;
+      Alcotest.test_case "check_duplicate_state_names"  `Quick test_check_duplicate_state_names_sad;
+      Alcotest.test_case "check_duplicate_transitions"  `Quick test_check_duplicate_transitions_happy;
+      Alcotest.test_case "check_duplicate_transitions"  `Quick test_check_duplicate_transitions_sad;
+      ];
+]

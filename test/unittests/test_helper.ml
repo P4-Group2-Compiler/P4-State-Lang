@@ -83,9 +83,9 @@ let var_decl_testable =
 let var_decl_list_testable =
   Alcotest.(list var_decl_testable)
 
-(* Helper for check_valid_transition *)
+(* Helper for functions that return unit and relies on side effects, like raising errors *)
 let expect_semantic_error f =
-  try
+try
     f (); (* run the argument function *)
     Alcotest.fail "expected Semantic_error, but no exception was raised" (* we expect an error, therefore test FAILS if none is raised *) 
   with
