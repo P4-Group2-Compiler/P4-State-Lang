@@ -17,6 +17,7 @@ let string_of_state_kind = function
   | Normal -> "Normal"
   | Start -> "Start"
   | Final -> "Final"
+  | StartFinal -> "StartFinal"
 
 let string_of_binop = function
   | Badd -> "+" | Bsub -> "-" | Bmul -> "*" | Bdiv -> "/" | Bmod -> "%"

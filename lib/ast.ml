@@ -52,6 +52,7 @@ type state_kind =
   | Normal
   | Start
   | Final
+  | StartFinal
 
 type var_decl = 
   | Var_decl of string * int
