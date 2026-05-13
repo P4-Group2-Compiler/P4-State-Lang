@@ -17,7 +17,6 @@
 
 (* Identifiers and integers *)
 %token <string> IDENTIFIER
-%token <string> EVENTIDENT
 %token <string> INT
 (*%token <string> IDENT*)
 
@@ -111,15 +110,19 @@ transitions:
 ;
 
 transition:
-| ON EVENTIDENT GO IDENTIFIER operation_block_opt
+| ON event_name GO IDENTIFIER operation_block_opt
     { Transition (Event $2, None, State $4, $5) }
-| ON EVENTIDENT IF expr GO IDENTIFIER operation_block_opt
+| ON event_name IF expr GO IDENTIFIER operation_block_opt
     { Transition (Event $2, Some $4, State $6, $7) }
 (*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE GO IDENTIFIER*)
 (*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE expr GO IDENTIFIER*)
 (*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE stmt GO IDENTIFIER*)
 (*| ON IDENTIFIER IF expr GO IDENTIFIER ELIF expr GO IDENTIFIER ELSE*)
 ;
+
+event_name:
+| IDENTIFIER { $1 }
+| INT { $1 }
 
 operation_block_opt:
   | { [] }
