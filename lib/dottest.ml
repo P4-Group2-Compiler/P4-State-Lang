@@ -4,12 +4,7 @@ open Ast
 (*Do? Body?*)
 
 (**************************************************************************************************************************************************)
-let dotOpsBuf = Buffer.create 16 
-
-let someOps lst =
-    match lst with
-    | [] -> false
-    | _ -> true
+let ops_buf = Buffer.create 1064
 
 let rec ops_to_stringList (ops : operation list) = 
   match ops with
@@ -24,17 +19,17 @@ let stringify_trans (s1, e, expr_option, s2, ops) =
   let s2_str = state_to_string s2 in
   let ops_str_lst = ops_to_stringList ops in
 
-    if someOps ops_str_lst then
-       let rec addEachOps = function
-        | [] -> ()
-        | h :: t -> Buffer.add_string dotOpsBuf h; 
-        addEachOps t 
-      in
-      addEachOps ops_str_lst;
-      Printf.sprintf "%s -> %s [label=\"%s%s\"];\n" s1_str s2_str e_str eo_str
-    else
-      Printf.sprintf "%s -> %s [label=\"%s%s\"];\n" s1_str s2_str e_str eo_str
-  
+  if ops_str_lst <> [] then (
+    Buffer.add_string ops_buf (String.concat "\n" ops_str_lst);
+    Buffer.add_char ops_buf '\n';
+
+    Printf.sprintf "%s -> %s [label=\"%s%s%s\"];\n"
+      s1_str s2_str e_str eo_str ""
+  ) else (
+    Printf.sprintf "%s -> %s [label=\"%s%s\"];\n"
+      s1_str s2_str e_str eo_str
+  )
+
 (*Outputs a list of DOT transition as strings, using above function*)
 let trans_string_list (t : (state * event * _ * state * operation list) list) =
   List.map stringify_trans t
@@ -101,7 +96,6 @@ let graphFromStatemachine (sm : (statemachine)) =
 
 (**************************************************************************************************************************************************)
 (*Adds variables as a list, if there are any. Otherwise finishes the DOT-syntax.*)
-
   let someVars lst =
     match lst with
     | [] -> false
