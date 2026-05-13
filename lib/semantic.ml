@@ -21,7 +21,6 @@ type statemachine =
   states : state list;
   start_state : state;
   final_state : state list;
-  (*start_final_state : state;*)
   transitions : (state * event * expr option * state * operation list) list;
   g_variables : var_decl list;
 }
