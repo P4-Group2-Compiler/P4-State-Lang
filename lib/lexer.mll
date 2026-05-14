@@ -37,6 +37,7 @@ rule token = parse
 | "Statemachine"                        { STATEMACHINE }
 | "Start"                               { START }
 | "Final"                               { FINAL }
+| "StartFinal"                          { STARTFINAL }
 | "State"                               { STATE }
 | "ON"                                  { ON }
 | "GO"                                  { GO }

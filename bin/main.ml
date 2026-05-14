@@ -15,6 +15,7 @@ let string_of_state_kind = function
   | Normal -> "Normal"
   | Start -> "Start"
   | Final -> "Final"
+  | StartFinal -> "StartFinal"
 
 let string_of_binop = function
   | Badd -> "+" | Bsub -> "-" | Bmul -> "*" | Bdiv -> "/" | Bmod -> "%"
@@ -83,6 +84,8 @@ let print_warning (statemachine, warning) =
   | UnreachableFinalState state ->
       Printf.printf "WARNING {UnreachableFinalState}:\n\tStart State: \"%s\" is unable to reach any Final State\n"
         (string_of_state state)
+  | NoFinalState ->
+      Printf.printf "WARNING {NoFinalState}:\n\tNo Final State has been declared - No input sequence will be accepted\n"
   end
 
 (***)
