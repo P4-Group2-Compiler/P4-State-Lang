@@ -9,6 +9,7 @@ type warning =
   | DuplicateTransitions of state * event * state
   | TooManyStates of int
   | UnreachableFinalState of state
+  | NoFinalState
 
 let maxStates = 20 (* Num of states that break the DOT output readability
                       Used for TooManyStates warning *)
@@ -205,8 +206,9 @@ let rec can_reach_final_state (statemachine : statemachine) (visited : state lis
 
 (* We check if the Start state has a path to the Final state *)
 let check_start_reaches_final (statemachine : statemachine) : warning list =
-  let start = statemachine.start_state in 
-  if not (can_reach_final_state statemachine [] start) then
+  let start = statemachine.start_state in
+  if List.length statemachine.final_state = 0 then [NoFinalState]
+  else if not (can_reach_final_state statemachine [] start) then
       [UnreachableFinalState start]
   else []
 

@@ -86,6 +86,8 @@ let print_warning (statemachine, warning) =
   | UnreachableFinalState state ->
       Printf.printf "WARNING {UnreachableFinalState}:\n\tStart State: \"%s\" is unable to reach any Final State\n"
         (string_of_state state)
+  | NoFinalState ->
+      Printf.printf "WARNING {NoFinalState}:\n\tNo Final State has ben declared - No input sequeence will be accepted\n"
   end
 
 (***)
