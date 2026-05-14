@@ -1,26 +1,43 @@
 open Semantic
 open Ast
 
+(*Do? Body? Back to square one!*)
+(*1) Need to add the names of the transitions belonging to the operation*)
+
 (**************************************************************************************************************************************************)
+let dotBuf_OpsCollect = Buffer.create 1064
+
+  let rec ops_to_strings (s1 : state) (s2 : state) (ops : operation list) = 
+    match ops with
+      | [] -> ()
+      | h :: t -> Buffer.add_string dotBuf_OpsCollect (state_to_string s1);
+                  Buffer.add_string dotBuf_OpsCollect " → ";
+                  Buffer.add_string dotBuf_OpsCollect (state_to_string s2);
+                  Buffer.add_string dotBuf_OpsCollect ": ";
+                  Buffer.add_string dotBuf_OpsCollect (op_to_string h);
+                  Buffer.add_string dotBuf_OpsCollect "\n"; 
+                  ops_to_strings s1 s2 t
+
 (*Strings of transitions*)
-let stringify_trans (s1, e, expr_option, s2, _ops) =
-  let s1_str = state_to_string s1 in
-  let e_str = event_to_string e in
-  let eo_str = expr_option_to_string expr_option in
-  let s2_str = state_to_string s2 in
-  Printf.sprintf "%s -> %s [label=\"%s%s\"];\n" s1_str s2_str e_str eo_str
-  
+let stringify_trans (s1, e, expr_option, s2, ops) =
+    let s1_str = state_to_string s1 in
+    let e_str = event_to_string e in
+    let eo_str = expr_option_to_string expr_option in
+    let s2_str = state_to_string s2 in
+
+    ops_to_strings s1 s2 ops;  
+    Printf.sprintf "%s -> %s [label=\"%s%s\"];\n" s1_str s2_str e_str eo_str     
+
 (*Outputs a list of DOT transition as strings, using above function*)
 let trans_string_list (t : (state * event * _ * state * operation list) list) =
   List.map stringify_trans t
 
 (*Prints string lists*)
 let string_list_printer (t : (string) list) = 
-  List.iter print_endline t
+  List.iter print_endline t 
 
 (**************************************************************************************************************************************************)
 (*Strings of start states*)
-
 let stringify_start s =
   let start_s = state_to_string s in
   Printf.sprintf "null -> %s;\n" start_s
@@ -30,7 +47,6 @@ let start_string (t : (state)) =
 
 (**************************************************************************************************************************************************)
 (*Strings of final states*)
-
 let stringify_final s =
   let final_s = state_to_string s in
   Printf.sprintf "%s [shape = doublecircle;];\n" final_s
@@ -49,7 +65,6 @@ let var_string_list (v : (var_decl) list) =
 
 (**************************************************************************************************************************************************)
 (*Function that takes the entire statemachine*)
-
 let graphFromStatemachine (sm : (statemachine)) =
 
   let smName = sm.statemachine_name in
@@ -74,7 +89,6 @@ let graphFromStatemachine (sm : (statemachine)) =
 
 (**************************************************************************************************************************************************)
 (*Adds variables as a list, if there are any. Otherwise finishes the DOT-syntax.*)
-
   let someVars lst =
     match lst with
     | [] -> false
@@ -92,8 +106,10 @@ let graphFromStatemachine (sm : (statemachine)) =
 
     Buffer.add_string dotBuf_Vars dot_varTopSyntax;
     addEachVar varsList;
-    Buffer.add_string dotBuf_Vars "\"";
-    Buffer.add_string dotBuf_Vars "\nshape = rectangle;];\n"; 
+    Buffer.add_string dotBuf_Vars "\n";
+    Buffer.add_string dotBuf_Vars "Operations:\n";
+    Buffer.add_string dotBuf_Vars (Buffer.contents dotBuf_OpsCollect);
+    Buffer.add_string dotBuf_Vars "\";\nshape = rectangle;];\n"; 
     Buffer.add_string dotBuf_Vars dot_varBottomSyntax;
     Buffer.add_buffer dotBuf dotBuf_Vars;
     Buffer.add_string dotBuf dot_bottomSyntax;

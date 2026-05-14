@@ -63,7 +63,7 @@ let rec expr_to_string (e : expr) =
     match e with
     | Ecst e -> constant_to_string e
     | Ebinop (b, e1, e2) -> 
-        Printf.sprintf " (%s %s %s)"
+        Printf.sprintf "(%s %s %s)"
         (expr_to_string e1)
         (binop_to_string b)
         (expr_to_string e2)
@@ -85,6 +85,13 @@ let rec stmt_to_string (s : stmt) =
       (stmt_to_string s2)
   in
   stmt_string
+
+let op_to_string (o : operation) =
+  let op_string =
+    match o with
+    | Do (id, expr) -> Printf.sprintf "%s" (ident_to_string id ^ " = " ^ expr_to_string expr)
+  in  
+  op_string
 
 (*********************************************************************************************************)
 
@@ -164,7 +171,6 @@ let check_valid_transition (statemachine : statemachine) : unit=
       () )
   statemachine.transitions
 
-
 (* Recursive function to check if state names are repeated *)
 let check_duplicate_state_names (statemachine : statemachine) : unit =
   let rec checker seen = function
@@ -231,7 +237,6 @@ let collect_warnings (statemachine : statemachine) : warning list =
     @ (check_duplicate_transistions statemachine)
     @ (check_number_of_states statemachine)
     @ (check_start_reaches_final statemachine)
-
 
   (* let TooManyStates = check_number_of_states statemachine; *)
 
