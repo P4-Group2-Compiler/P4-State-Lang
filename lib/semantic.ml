@@ -63,7 +63,7 @@ let rec expr_to_string (e : expr) =
     match e with
     | Ecst e -> constant_to_string e
     | Ebinop (b, e1, e2) -> 
-        Printf.sprintf " (%s %s %s)"
+        Printf.sprintf "(%s %s %s)"
         (expr_to_string e1)
         (binop_to_string b)
         (expr_to_string e2)
@@ -85,6 +85,13 @@ let rec stmt_to_string (s : stmt) =
       (stmt_to_string s2)
   in
   stmt_string
+
+let op_to_string (o : operation) =
+  let op_string =
+    match o with
+    | Do (id, expr) -> Printf.sprintf "%s" (ident_to_string id ^ " = " ^ expr_to_string expr)
+  in  
+  op_string
 
 (*********************************************************************************************************)
 
@@ -108,22 +115,7 @@ let get_start_states (p: program) : state =
     if List.length start_states > 1 then error "Multiple Start states declared"
       else if List.length start_states = 0 then error "Missing Start state declaration"
       else List.hd start_states
-(*
-(* Get a list of fall states which are both start and final*)
-let get_start_final_states (p: program) : state =
-  let start_final_states = 
-    List.fold_left (fun list state_decl ->
-      match state_decl.kind with
-      | StartFinal -> state_decl.name :: list
-      | Start | Normal | Final -> list)
-      []
-      p.states
-    in
-    (*Gør så den tjekker begge typer start states*)
-    if List.length start_final_states > 1 then error "Multiple StartFinal states declared"
-      else if List.length start_final_states = 0 && List.length start_states = 0 then error "Missing StartFinal state decleration"
-      else List.hd start_final_states
-*)
+
 (* Get a list of all Finals states in the program *)
 let get_final_states (p: program) : state list = 
   List.fold_left (fun list state_decl ->
@@ -158,7 +150,6 @@ let create_state_machine (p: program) : statemachine =
     states = collect_states p;
     start_state = get_start_states p;
     final_state = get_final_states p;
-    (*start_final_state = get_start_final_states p;*)
     transitions = collect_transitions p;
     g_variables = collect_g_variables p;
   }
@@ -181,7 +172,6 @@ let check_valid_transition (statemachine : statemachine) : unit =
     else 
       () )
   statemachine.transitions
-
 
 (* Recursive function to check if state names are repeated *)
 let check_duplicate_state_names (statemachine : statemachine) : unit =
@@ -225,8 +215,8 @@ let rec can_reach_final_state (statemachine : statemachine) (visited : state lis
 (* We check if the Start state has a path to the Final state *)
 let check_start_reaches_final (statemachine : statemachine) : warning list =
   let start = statemachine.start_state in
-  if List.length statemachine.final_state = 0 then [NoFinalState] else
-  if not (can_reach_final_state statemachine [] start) then
+  if List.length statemachine.final_state = 0 then [NoFinalState]
+  else if not (can_reach_final_state statemachine [] start) then
       [UnreachableFinalState start]
   else []
 
@@ -249,7 +239,6 @@ let collect_warnings (statemachine : statemachine) : warning list =
     @ (check_duplicate_transistions statemachine)
     @ (check_number_of_states statemachine)
     @ (check_start_reaches_final statemachine)
-
 
   (* let TooManyStates = check_number_of_states statemachine; *)
 

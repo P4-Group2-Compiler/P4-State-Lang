@@ -5,8 +5,6 @@ open Dottest
 open Ast
 open Semantic
 
-
-
 let string_of_state = function
   | State s -> s
 
