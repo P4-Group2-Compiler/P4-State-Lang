@@ -2,14 +2,20 @@ open Semantic
 open Ast
 
 (*Do? Body? Back to square one!*)
+(*1) Pick up the operations from the transitions*)
+(*2) Keep them in one string, adding each one*)
+(*3) Transfer the string to the buffer for the graph*)
+(*4) Profit*)
 
 (**************************************************************************************************************************************************)
-let dotBuf_Ops = Buffer.create 1064
+let dotBuf_OpsCollect = Buffer.create 1064
 
-let rec ops_to_stringList (ops : operation list) = 
-  match ops with
-  | [] -> []
-  | h :: t -> op_to_string h :: ops_to_stringList t 
+  let rec ops_to_strings (ops : operation list) = 
+    match ops with
+      | [] -> ()
+      | h :: t -> Buffer.add_string dotBuf_OpsCollect (op_to_string h);
+                  Buffer.add_string dotBuf_OpsCollect "\n"; 
+                  ops_to_strings t
 
 (*Strings of transitions*)
 let stringify_trans (s1, e, expr_option, s2, ops) =
@@ -17,8 +23,10 @@ let stringify_trans (s1, e, expr_option, s2, ops) =
     let e_str = event_to_string e in
     let eo_str = expr_option_to_string expr_option in
     let s2_str = state_to_string s2 in
-    (*let op_str = ops_to_stringList ops in*)
-    Printf.sprintf "%s -> %s [label=\"%s%s%s\"];\n" s1_str s2_str e_str eo_str ""
+
+    ops_to_strings ops;  
+    Printf.sprintf "%s -> %s [label=\"%s%s\"];\n" s1_str s2_str e_str eo_str 
+    
 
 (*Outputs a list of DOT transition as strings, using above function*)
 let trans_string_list (t : (state * event * _ * state * operation list) list) =
@@ -26,7 +34,7 @@ let trans_string_list (t : (state * event * _ * state * operation list) list) =
 
 (*Prints string lists*)
 let string_list_printer (t : (string) list) = 
-  List.iter print_endline t
+  List.iter print_endline t 
 
 (**************************************************************************************************************************************************)
 (*Strings of start states*)
@@ -101,10 +109,9 @@ let graphFromStatemachine (sm : (statemachine)) =
     Buffer.add_string dotBuf_Vars dot_varTopSyntax;
     addEachVar varsList;
     Buffer.add_string dotBuf_Vars "\n";
-    Buffer.add_string dotBuf_Vars "\"";
-    (*Buffer.add_string dotBuf_Vars "Operations:\n";*)
-    (*Buffer.add_buffer dotBuf_Vars dotBuf_Ops;*)
-    Buffer.add_string dotBuf_Vars "\nshape = rectangle;];\n"; 
+    Buffer.add_string dotBuf_Vars "Operations:\n";
+    Buffer.add_string dotBuf_Vars (Buffer.contents dotBuf_OpsCollect);
+    Buffer.add_string dotBuf_Vars "\";\nshape = rectangle;];\n"; 
     Buffer.add_string dotBuf_Vars dot_varBottomSyntax;
     Buffer.add_buffer dotBuf dotBuf_Vars;
     Buffer.add_string dotBuf dot_bottomSyntax;

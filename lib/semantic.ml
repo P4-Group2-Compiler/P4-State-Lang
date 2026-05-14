@@ -88,7 +88,7 @@ let rec stmt_to_string (s : stmt) =
 let op_to_string (o : operation) =
   let op_string =
     match o with
-    | Do (id, expr) -> ident_to_string id ^ " " ^ expr_to_string expr
+    | Do (id, expr) -> Printf.sprintf "(%s)" (ident_to_string id ^ " " ^ expr_to_string expr)
   in  
   op_string
 
