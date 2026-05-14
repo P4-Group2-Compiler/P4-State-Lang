@@ -98,10 +98,7 @@ let op_to_string (o : operation) =
 let collect_states (p : program) : state list =
   List.map (fun state_decl -> state_decl.name) p.states
 
-let check_number_of_states (statemachine : statemachine) : warning list =
-  let stateNum = List.length statemachine.states in
-  if stateNum > maxStates then [TooManyStates (stateNum)]
-  else []
+
 
 
 (* Get a list of all start states then checks the list to see if there is more than one *)
@@ -116,7 +113,7 @@ let get_start_states (p: program) : state =
       p.states
     in
     if List.length start_states > 1 then error "Multiple Start states declared"
-      else if List.length start_states = 0 then error "Missing Start state decleration"
+      else if List.length start_states = 0 then error "Missing Start state declaration"
       else List.hd start_states
 
 (* Get a list of all Finals states in the program *)
@@ -159,7 +156,12 @@ let create_state_machine (p: program) : statemachine =
 
 (*----------------------------(* VALIDATING THE STATEMACHINE *)---------------------------*)
 
-let check_valid_transition (statemachine : statemachine) : unit=
+let check_number_of_states (statemachine : statemachine) : warning list =
+  let stateNum = List.length statemachine.states in
+  if stateNum > maxStates then [TooManyStates (stateNum)]
+  else []
+
+let check_valid_transition (statemachine : statemachine) : unit =
   List.iter (fun (src, _, _, dest, _) -> 
     if not (List.mem dest statemachine.states)
       then error (Printf.sprintf
@@ -219,7 +221,7 @@ let check_start_reaches_final (statemachine : statemachine) : warning list =
   else []
 
 (* Returns a list of states that cannot reach Final state (dead-ends) might use for warnings later? *)
-let get_unreachable_states (statemachine : statemachine) : state list =
+let get_dead_end_states (statemachine : statemachine) : state list =
   List.filter
     (fun state ->
       not (List.mem state statemachine.final_state) &&

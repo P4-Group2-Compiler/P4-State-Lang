@@ -122,16 +122,9 @@ let ast =
       exit 1
 in
 
-    (* Typecheck the program *)
-begin
-  try
-    Typechecker.type_program ast
-  with Typechecker.Type_error msg ->
-    Printf.printf "Type error: %s\n" msg;
-    exit 1
-end;    
 
-  (**************************************************************************************************)
+
+(**************************************************************************************************)
   (*Collect functions in a functions, to use on the statemachine*)
   let statemachine, warnings =
     try Semantic.analyse ast with Semantic.Semantic_error msg ->
@@ -139,6 +132,15 @@ end;
       exit 1
   in
     Printf.printf "This is statemachine ---> %s <---!\n" statemachine.statemachine_name;
+        
+    (* Typecheck the program *)
+        begin
+        try
+            Typechecker.type_program statemachine
+        with Typechecker.Type_error msg ->
+            Printf.printf "Type error: %s\n" msg;
+            exit 1
+        end;
     Codegen.generate_c_code statemachine;
     Dottest.graphFromStatemachine statemachine;
   
