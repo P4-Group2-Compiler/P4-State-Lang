@@ -887,6 +887,137 @@ let test_check_start_reaches_final_sad () =
       result
 
 (* *********************************************************** *)
+(*                  FUN GET_DEAD_END_STATES                    *)
+(* *********************************************************** *)
+(* *********************************************************** *)
+(*                        HAPPY TESTS                          *)
+(* *********************************************************** *)
+
+let test_get_dead_end_states_happy () =
+  let open P4.Ast in
+  let open Test_helper in
+  let transA = 
+      [
+      (Transition (Event "e1", None, State "B", []));
+      (Transition (Event "e2", None, State "D", []))
+      ] in
+  let transB = 
+      [
+      (Transition (Event "e2", None, State "C", []))
+      ] in
+  let transC = 
+      [
+      (Transition (Event "e1", None, State "A", []))
+      ] in
+  let transD =
+      [
+      (Transition (Event "e2", None, State "G", []))  
+      ] in
+  let transE = 
+      [
+      (Transition (Event "e1", None, State "F", []))
+      ] in
+  let transF = 
+      [
+      (Transition (Event "e1", None, State "E", []))
+      ] in
+  let transG = 
+      [
+      (Transition (Event "e2", None, State "G", []));
+      (Transition (Event "e1", None, State "H", []))
+      ] in
+  let transH = 
+      [] in  
+  let prog = {
+    machine_name = "M";
+    variables = [];
+    inputs = [];
+    states = [
+      { kind = Start; name = State "A"; transitions = transA};
+      { kind = Normal; name = State "B"; transitions = transB};
+      { kind = Normal; name = State "C"; transitions = transC};
+      { kind = Normal; name = State "D"; transitions = transD};
+      { kind = Normal; name = State "E"; transitions = transE};
+      { kind = Normal; name = State "F"; transitions = transF};
+      { kind = Normal; name = State "G"; transitions = transG};
+      { kind = Final; name = State "H"; transitions = transH}
+    ]
+  } in
+
+  let sm = P4.Semantic.create_state_machine prog in
+  let result = P4.Semantic.get_dead_end_states sm in
+  let expected = [(State "E"); (State "F")] in
+  Alcotest.(check (list state_testable))
+    "Returns the dead end states, that cannot reach final state"
+    expected
+    result
+
+(* *********************************************************** *)
+(*                          SAD TESTS                          *)
+(* *********************************************************** *)
+
+let test_get_dead_end_states_sad () =
+  let open P4.Ast in
+  let open Test_helper in
+  let transA = 
+      [
+      (Transition (Event "e1", None, State "B", []));
+      (Transition (Event "e2", None, State "D", []))
+      ] in
+  let transB = 
+      [
+      (Transition (Event "e2", None, State "C", []))
+      ] in
+  let transC = 
+      [
+      (Transition (Event "e1", None, State "A", []));
+      (Transition (Event "e2", None, State "E", []))
+      ] in
+  let transD =
+      [
+      (Transition (Event "e2", None, State "G", []))  
+      ] in
+  let transE = 
+      [
+      (Transition (Event "e1", None, State "F", []))
+      ] in
+  let transF = 
+      [
+      (Transition (Event "e1", None, State "E", []));
+      (Transition (Event "e2", None, State "A", []))
+      ] in
+  let transG = 
+      [
+      (Transition (Event "e2", None, State "G", []));
+      (Transition (Event "e1", None, State "H", []))
+      ] in
+  let transH = 
+      [] in  
+  let prog = {
+    machine_name = "M";
+    variables = [];
+    inputs = [];
+    states = [
+      { kind = Start; name = State "A"; transitions = transA};
+      { kind = Normal; name = State "B"; transitions = transB};
+      { kind = Normal; name = State "C"; transitions = transC};
+      { kind = Normal; name = State "D"; transitions = transD};
+      { kind = Normal; name = State "E"; transitions = transE};
+      { kind = Normal; name = State "F"; transitions = transF};
+      { kind = Normal; name = State "G"; transitions = transG};
+      { kind = Final; name = State "H"; transitions = transH}
+    ]
+  } in
+
+  let sm = P4.Semantic.create_state_machine prog in
+  let result = P4.Semantic.get_dead_end_states sm in
+  let expected = [] in
+  Alcotest.(check (list state_testable))
+    "Returns empty list, when all states can reach final state"
+    expected
+    result
+
+(* *********************************************************** *)
 (*                          RUN TESTS                          *)
 (* *********************************************************** *)
 
@@ -920,5 +1051,7 @@ let () =
       Alcotest.test_case "check_start_reaches_final"    `Quick test_check_start_reaches_startfinal_happy;
       Alcotest.test_case "check_start_reaches_final"    `Quick test_check_start_reaches_final_no_final_sad;
       Alcotest.test_case "check_start_reaches_final"    `Quick test_check_start_reaches_final_sad;
+      Alcotest.test_case "get_dead_end_states"          `Quick test_get_dead_end_states_happy;
+      Alcotest.test_case "get_dead_end_states"          `Quick test_get_dead_end_states_sad;
       ];
 ]

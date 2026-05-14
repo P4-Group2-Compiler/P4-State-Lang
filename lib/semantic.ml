@@ -231,7 +231,7 @@ let check_start_reaches_final (statemachine : statemachine) : warning list =
   else []
 
 (* Returns a list of states that cannot reach Final state (dead-ends) might use for warnings later? *)
-let get_unreachable_states (statemachine : statemachine) : state list =
+let get_dead_end_states (statemachine : statemachine) : state list =
   List.filter
     (fun state ->
       not (List.mem state statemachine.final_state) &&
