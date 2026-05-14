@@ -507,32 +507,351 @@ let test_check_duplicate_transitions_sad () =
 let test_successors_happy () =
   let open P4.Ast in
   let open Test_helper in
-  let prog = {
-    machine_name = "M";
+  let transA = 
+        [
+        (Transition (Event "e1", None, State "B", []));
+        (Transition (Event "e2", None, State "C", []))
+        ] in
+    let transB = 
+        [
+        (Transition (Event "e1", None, State "B", []));
+        (Transition (Event "e2", None, State "A", []))
+        ] in
+    let transC = 
+        [
+        (Transition (Event "e1", None, State "A", []));
+        (Transition (Event "e2", None, State "C", []))
+        ] in
+     
+    let prog = {
+      machine_name = "M";
       variables = [];
       inputs = [];
       states = [
-        { kind = Start; name = State "A"; transitions = []};
-        { kind = Normal; name = State "A"; transitions = []};
-        { kind = Final; name = State "C"; transitions = []}
+        { kind = Start; name = State "A"; transitions = transA};
+        { kind = Normal; name = State "B"; transitions = transB};
+        { kind = Final; name = State "C"; transitions = transC}
       ]
     } in
-
     let sm = P4.Semantic.create_state_machine prog in
-    let result = P4.Semantic.successors sm State "A" in
-
-    let expected = (state_to_string sm.states)
-
-    Alcotest.(check (list string))
-    expected
-    result
     
+    let result_A = P4.Semantic.successors sm (State "A") in
+    let expected_A = [State "C"; State "B"] in
+    Alcotest.(check (list state_testable))
+      "Successors of state A"
+      expected_A
+      result_A;
+    
+    let result_B = P4.Semantic.successors sm (State "B") in
+    let expected_B = [State "A"; State "B"] in
+    Alcotest.(check (list state_testable))
+      "Successors of state B"
+      expected_B
+      result_B;  
 
-
+    let result_C = P4.Semantic.successors sm (State "C") in
+    let expected_C = [State "C"; State "A"] in
+    Alcotest.(check (list state_testable))
+      "Successors of state C"
+      expected_C
+      result_C
 
 (* ********************************************************* *)
-(*                         RUN TESTS                         *)
-(* ********************************************************* *)
+(*                         SAD TEST                          *)
+(* ********************************************************* *)  
+
+let test_successors_sad () =
+  let open P4.Ast in
+  let open Test_helper in
+  let transA = 
+        [] in
+  let transB = 
+      [
+      (Transition (Event "e1", None, State "B", []));
+      (Transition (Event "e2", None, State "A", []))
+      ] in
+  let transC = 
+      [
+      (Transition (Event "e1", None, State "A", []));
+      (Transition (Event "e2", None, State "C", []))
+      ] in
+    
+  let prog = {
+    machine_name = "M";
+    variables = [];
+    inputs = [];
+    states = [
+      { kind = Start; name = State "A"; transitions = transA};
+      { kind = Normal; name = State "B"; transitions = transB};
+      { kind = Final; name = State "C"; transitions = transC}
+    ]
+  } in
+  let sm = P4.Semantic.create_state_machine prog in
+  
+  let result_A = P4.Semantic.successors sm (State "A") in
+  let expected_A = [] in
+  Alcotest.(check (list state_testable))
+    "Successors of state A"
+    expected_A
+    result_A
+
+(* *********************************************************** *)
+(*                  FUN CAN_REACH_FINAL_STATE                  *)
+(* *********************************************************** *)
+
+(* *********************************************************** *)
+(*                         HAPPY TEST                          *)
+(* *********************************************************** *)
+
+let test_can_reach_final_state_happy () =
+  let open P4.Ast in
+  let open Test_helper in
+  let transA = 
+      [
+      (Transition (Event "e1", None, State "B", []));
+      ] in
+  let transB = 
+      [
+      (Transition (Event "e2", None, State "C", []))
+      ] in
+  let transC = 
+      [] in
+    
+  let prog = {
+    machine_name = "M";
+    variables = [];
+    inputs = [];
+    states = [
+      { kind = Start; name = State "A"; transitions = transA};
+      { kind = Normal; name = State "B"; transitions = transB};
+      { kind = Final; name = State "C"; transitions = transC}
+    ]
+  } in
+  
+  let sm = P4.Semantic.create_state_machine prog in
+  let result = P4.Semantic.can_reach_final_state sm [] (State "A") in
+  let expected = true in
+  Alcotest.(check (bool))
+    "Start state A reaches the final state C"
+  expected
+  result
+
+let test_can_reach_final_state_cycle_happy () =
+    let open P4.Ast in
+  let open Test_helper in
+  let transA = 
+      [
+      (Transition (Event "e1", None, State "B", []));
+      ] in
+  let transB = 
+      [
+      (Transition (Event "e2", None, State "C", []))
+      ] in
+  let transC = 
+      [
+      (Transition (Event "e3", None, State "A", []));
+      (Transition (Event "e4", None, State "D", []))
+      ] in
+  let transD =
+      [] in
+    
+  let prog = {
+    machine_name = "M";
+    variables = [];
+    inputs = [];
+    states = [
+      { kind = Start; name = State "A"; transitions = transA};
+      { kind = Normal; name = State "B"; transitions = transB};
+      { kind = Normal; name = State "C"; transitions = transC};
+      { kind = Final; name = State "D"; transitions = transD}
+    ]
+  } in
+  
+  let sm = P4.Semantic.create_state_machine prog in
+  let result = P4.Semantic.can_reach_final_state sm [] (State "A") in
+  let expected = true in
+  Alcotest.(check (bool))
+    "Start state A reaches the final state D, exits infinite transition loop"
+  expected
+  result
+
+let test_can_reach_final_state_startfinal_happy () =
+  let open P4.Ast in
+  let prog = {
+    machine_name = "M";
+    variables = [];
+    inputs = [];
+    states = [
+      { kind = StartFinal; name = State "A"; transitions = []}]
+  } in
+
+  let sm = P4.Semantic.create_state_machine prog in
+  let result = P4.Semantic.can_reach_final_state sm [] (State "A") in
+  let expected = true in
+  Alcotest.(check (bool))
+    "StartFinal state A is reached"
+  expected
+  result
+
+(* *********************************************************** *)
+(*                          SAD TESTS                          *)
+(* *********************************************************** *)
+
+let test_can_reach_final_state_sad () =
+  let open P4.Ast in
+  let open Test_helper in
+  let transA = 
+      [
+      (Transition (Event "e1", None, State "B", []));
+      ] in
+  let transB = 
+      [
+      (Transition (Event "e2", None, State "A", []))
+      ] in
+  let transC = 
+      [] in
+    
+  let prog = {
+    machine_name = "M";
+    variables = [];
+    inputs = [];
+    states = [
+      { kind = Start; name = State "A"; transitions = transA};
+      { kind = Normal; name = State "B"; transitions = transB};
+      { kind = Final; name = State "C"; transitions = transC}
+    ]
+  } in
+  
+  let sm = P4.Semantic.create_state_machine prog in
+  let result = P4.Semantic.can_reach_final_state sm [] (State "A") in
+  let expected = false in
+  Alcotest.(check (bool))
+    "Start state A never reaches the final state C"
+  expected
+  result
+
+let test_can_reach_final_state_cycle_sad () =
+  let open P4.Ast in
+  let open Test_helper in
+  let transA = 
+      [
+      (Transition (Event "e1", None, State "B", []))
+      ] in
+  let transB = 
+      [
+      (Transition (Event "e2", None, State "C", []))
+      ] in
+  let transC = 
+      [
+      (Transition (Event "e3", None, State "A", []))
+      ] in
+  let transD =
+      [] in
+    
+  let prog = {
+    machine_name = "M";
+    variables = [];
+    inputs = [];
+    states = [
+      { kind = Start; name = State "A"; transitions = transA};
+      { kind = Normal; name = State "B"; transitions = transB};
+      { kind = Normal; name = State "C"; transitions = transC};
+      { kind = Final; name = State "D"; transitions = transD}
+    ]
+  } in
+  
+  let sm = P4.Semantic.create_state_machine prog in
+  let result = P4.Semantic.can_reach_final_state sm [] (State "A") in
+  let expected = false in
+  Alcotest.(check (bool))
+    "Start state A never reaches the final state C"
+  expected
+  result
+
+(* *********************************************************** *)
+(*                FUN CHECK_START_REACHES_FINAL                *)
+(* *********************************************************** *)
+
+(* *********************************************************** *)
+(*                         HAPPY TEST                          *)
+(* *********************************************************** *)
+
+let test_check_start_reaches_final_happy () =
+  let open P4.Ast in
+  let open Test_helper in
+  let transA = 
+        [
+        (Transition (Event "e1", None, State "B", []));
+        (Transition (Event "e2", None, State "C", []))
+        ] in
+  let prog = {
+      machine_name = "M";
+      variables = [];
+      inputs = [];
+      states = [
+        { kind = Start; name = State "A"; transitions = transA };
+        { kind = Final; name = State "B"; transitions = [] };
+        { kind = Normal; name = State "C"; transitions = [] }
+      ]
+  } in
+    let sm = P4.Semantic.create_state_machine prog in
+    let result = P4.Semantic.check_start_reaches_final sm in
+ 
+    Alcotest.(check (list warning_testable))
+      "Returns empty warning list if start state reaches final state"
+      []
+      result
+  
+let test_check_start_reaches_startfinal_happy () =
+  let open P4.Ast in
+  let open Test_helper in
+  let transA = 
+        [] in
+  let prog = {
+      machine_name = "M";
+      variables = [];
+      inputs = [];
+      states = [
+        { kind = StartFinal; name = State "A"; transitions = transA };
+        ]
+  } in
+    let sm = P4.Semantic.create_state_machine prog in
+    let result = P4.Semantic.check_start_reaches_final sm in
+ 
+    Alcotest.(check (list warning_testable))
+      "Returns empty warning list if start state reaches final state"
+      []
+      result
+  
+
+(* *********************************************************** *)
+(*                          SAD TEST                           *)
+(* *********************************************************** *)
+
+let test_check_start_reaches_final_sad () =
+  let open P4.Ast in
+  let open Test_helper in
+  let transA = 
+        [] in
+  let prog = {
+      machine_name = "M";
+      variables = [];
+      inputs = [];
+      states = [
+        { kind = Start; name = State "A"; transitions = transA };
+        ]
+  } in
+    let sm = P4.Semantic.create_state_machine prog in
+    let result = P4.Semantic.check_start_reaches_final sm in
+ 
+    Alcotest.(check (list warning_testable))
+      "Returns empty warning list if start state reaches final state"
+      []
+      result
+
+(* *********************************************************** *)
+(*                          RUN TESTS                          *)
+(* *********************************************************** *)
 
 let () =
   Alcotest.run "Semantic Tests" [
@@ -553,5 +872,14 @@ let () =
       Alcotest.test_case "check_duplicate_state_names"  `Quick test_check_duplicate_state_names_sad;
       Alcotest.test_case "check_duplicate_transitions"  `Quick test_check_duplicate_transitions_happy;
       Alcotest.test_case "check_duplicate_transitions"  `Quick test_check_duplicate_transitions_sad;
+      Alcotest.test_case "successors"                   `Quick test_successors_happy;
+      Alcotest.test_case "successors"                   `Quick test_successors_sad;
+      Alcotest.test_case "can_reach_final_state"        `Quick test_can_reach_final_state_happy;
+      Alcotest.test_case "can_reach_final_state"        `Quick test_can_reach_final_state_cycle_happy;
+      Alcotest.test_case "can_reach_final_state"        `Quick test_can_reach_final_state_startfinal_happy;
+      Alcotest.test_case "can_reach_final_state"        `Quick test_can_reach_final_state_sad;
+      Alcotest.test_case "can_reach_final_state"        `Quick test_can_reach_final_state_cycle_sad;
+      Alcotest.test_case "check_start_reaches_final"    `Quick test_check_start_reaches_final_happy;
+      Alcotest.test_case "check_start_reaches_final"    `Quick test_check_start_reaches_startfinal_happy;
       ];
 ]
