@@ -38,7 +38,9 @@ let pp_warning fmt = function
         (Semantic.state_to_string src)
         (Semantic.event_to_string evt)
         (Semantic.state_to_string dst)
-
+  | NoFinalState ->
+      Format.fprintf fmt "No Final State declared"
+  
 let equal_warning w1 w2 =
   match w1, w2 with
   | TooManyStates n1, TooManyStates n2 ->
@@ -50,6 +52,9 @@ let equal_warning w1 w2 =
   | DuplicateTransitions (s1, e1, d1),
     DuplicateTransitions (s2, e2, d2) ->
       s1 = s2 && e1 = e2 && d1 = d2
+  
+  | NoFinalState, NoFinalState ->
+    true
 
   | _ -> false
 

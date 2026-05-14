@@ -828,7 +828,7 @@ let test_check_start_reaches_startfinal_happy () =
 (*                          SAD TEST                           *)
 (* *********************************************************** *)
 
-let test_check_start_reaches_final_sad () =
+let test_check_start_reaches_final_no_final_sad () =
   let open P4.Ast in
   let open Test_helper in
   let transA = 
@@ -845,8 +845,45 @@ let test_check_start_reaches_final_sad () =
     let result = P4.Semantic.check_start_reaches_final sm in
  
     Alcotest.(check (list warning_testable))
-      "Returns empty warning list if start state reaches final state"
-      []
+      "Returns NoFinalState warning, when no final state is declared"
+      [P4.Semantic.NoFinalState]
+      result
+
+let test_check_start_reaches_final_sad () =
+  let open P4.Ast in
+  let open Test_helper in
+  let transA = 
+      [
+      (Transition (Event "e1", None, State "B", []))
+      ] in
+  let transB = 
+      [
+      (Transition (Event "e2", None, State "C", []))
+      ] in
+  let transC = 
+      [
+      (Transition (Event "e3", None, State "A", []))
+      ] in
+  let transD =
+      [] in
+    
+  let prog = {
+    machine_name = "M";
+    variables = [];
+    inputs = [];
+    states = [
+      { kind = Start; name = State "A"; transitions = transA};
+      { kind = Normal; name = State "B"; transitions = transB};
+      { kind = Normal; name = State "C"; transitions = transC};
+      { kind = Final; name = State "D"; transitions = transD}
+    ]
+  } in
+  
+  let sm = P4.Semantic.create_state_machine prog in
+  let result = P4.Semantic.check_start_reaches_final sm in
+  Alcotest.(check (list warning_testable))
+      "Returns UnreachableFinalState, when final state cannot be reached"
+      [UnreachableFinalState (State "A")]
       result
 
 (* *********************************************************** *)
@@ -881,5 +918,7 @@ let () =
       Alcotest.test_case "can_reach_final_state"        `Quick test_can_reach_final_state_cycle_sad;
       Alcotest.test_case "check_start_reaches_final"    `Quick test_check_start_reaches_final_happy;
       Alcotest.test_case "check_start_reaches_final"    `Quick test_check_start_reaches_startfinal_happy;
+      Alcotest.test_case "check_start_reaches_final"    `Quick test_check_start_reaches_final_no_final_sad;
+      Alcotest.test_case "check_start_reaches_final"    `Quick test_check_start_reaches_final_sad;
       ];
 ]
