@@ -25,8 +25,7 @@ let stringify_trans (s1, e, expr_option, s2, ops) =
     let s2_str = state_to_string s2 in
 
     ops_to_strings ops;  
-    Printf.sprintf "%s -> %s [label=\"%s%s\"];\n" s1_str s2_str e_str eo_str 
-    
+    Printf.sprintf "%s -> %s [label=\"%s%s\"];\n" s1_str s2_str e_str eo_str     
 
 (*Outputs a list of DOT transition as strings, using above function*)
 let trans_string_list (t : (state * event * _ * state * operation list) list) =

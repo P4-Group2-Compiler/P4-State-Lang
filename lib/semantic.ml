@@ -62,7 +62,7 @@ let rec expr_to_string (e : expr) =
     match e with
     | Ecst e -> constant_to_string e
     | Ebinop (b, e1, e2) -> 
-        Printf.sprintf " (%s %s %s)"
+        Printf.sprintf "(%s %s %s)"
         (expr_to_string e1)
         (binop_to_string b)
         (expr_to_string e2)
@@ -88,7 +88,7 @@ let rec stmt_to_string (s : stmt) =
 let op_to_string (o : operation) =
   let op_string =
     match o with
-    | Do (id, expr) -> Printf.sprintf "(%s)" (ident_to_string id ^ " " ^ expr_to_string expr)
+    | Do (id, expr) -> Printf.sprintf "%s" (ident_to_string id ^ " = " ^ expr_to_string expr)
   in  
   op_string
 
