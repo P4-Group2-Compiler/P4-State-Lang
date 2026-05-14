@@ -110,22 +110,7 @@ let get_start_states (p: program) : state =
     if List.length start_states > 1 then error "Multiple Start states declared"
       else if List.length start_states = 0 then error "Missing Start state decleration"
       else List.hd start_states
-(*
-(* Get a list of fall states which are both start and final*)
-let get_start_final_states (p: program) : state =
-  let start_final_states = 
-    List.fold_left (fun list state_decl ->
-      match state_decl.kind with
-      | StartFinal -> state_decl.name :: list
-      | Start | Normal | Final -> list)
-      []
-      p.states
-    in
-    (*Gør så den tjekker begge typer start states*)
-    if List.length start_final_states > 1 then error "Multiple StartFinal states declared"
-      else if List.length start_final_states = 0 && List.length start_states = 0 then error "Missing StartFinal state decleration"
-      else List.hd start_final_states
-*)
+
 (* Get a list of all Finals states in the program *)
 let get_final_states (p: program) : state list = 
   List.fold_left (fun list state_decl ->
@@ -160,7 +145,6 @@ let create_state_machine (p: program) : statemachine =
     states = collect_states p;
     start_state = get_start_states p;
     final_state = get_final_states p;
-    (*start_final_state = get_start_final_states p;*)
     transitions = collect_transitions p;
     g_variables = collect_g_variables p;
   }
