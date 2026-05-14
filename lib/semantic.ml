@@ -170,7 +170,6 @@ let check_valid_transition (statemachine : statemachine) : unit=
       () )
   statemachine.transitions
 
-
 (* Recursive function to check if state names are repeated *)
 let check_duplicate_state_names (statemachine : statemachine) : unit =
   let rec checker seen = function
@@ -236,7 +235,6 @@ let collect_warnings (statemachine : statemachine) : warning list =
     @ (check_duplicate_transistions statemachine)
     @ (check_number_of_states statemachine)
     @ (check_start_reaches_final statemachine)
-
 
   (* let TooManyStates = check_number_of_states statemachine; *)
 
