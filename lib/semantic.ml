@@ -50,7 +50,6 @@ let constant_to_string (c : constant) =
   let const_string =
     match c with
     | Cbool c -> string_of_bool c
-    | Cstring c -> c
     | Cint c -> string_of_int c
   in
   const_string

@@ -42,7 +42,6 @@ let type_error ?(loc : (Lexing.position * Lexing.position) option = None) s =
 type ty =
 | Tint
 | Tbool
-| Tstring
 
 (*
 Type environment for handling typechecking 
@@ -56,7 +55,6 @@ since we dont care about the value, only the type
 let type_const = function
   | Cint _ -> Tint
   | Cbool _ -> Tbool
-  | Cstring _ -> Tstring
 
 (* Checking expressions. Derived from WHILE, may or may not be appropriate *)
 let rec type_expr (env : type_env) = function
@@ -70,7 +68,7 @@ let rec type_expr (env : type_env) = function
       let t2 = type_expr env e2 in
       begin match binop, t1, t2 with
       | (Band | Bor), Tbool, Tbool -> Tbool
-      | (Badd | Bsub | Bdiv | Bmul), Tint, Tint -> Tint
+      | (Badd | Bsub | Bmul), Tint, Tint -> Tint
       | (Beq | Bneq | Blt | Ble | Bgt | Bge), Tint, Tint -> Tbool
       | _ -> type_error "Comparisons expects 'int : int'"
       end
