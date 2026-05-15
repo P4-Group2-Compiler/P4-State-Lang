@@ -4,8 +4,10 @@ open Ast
 (*1) Take the first instance of a transition, with operations attached*)
 (*2) Replace it with a string of the same length for the rest of that same instance of transition*)
 (*3) In DOT, the length should then be the same in the operations table, resulting in
-A -> B: x = (x + 1)
-        y = (y + 2)
+A -> B: 
+x = (x + 1)
+y = (y + 2)
+
 Instead of 
 A -> B: x = (x + 1)
 A -> B: y = (y + 2)*)
@@ -13,17 +15,26 @@ A -> B: y = (y + 2)*)
 (**************************************************************************************************************************************************)
 let dotBuf_OpsCollect = Buffer.create 1064
 
-  let rec ops_to_strings (s1 : state) (s2 : state) (ops : operation list) = 
-    match ops with
-      | [] -> ()
-      | h :: t -> Buffer.add_string dotBuf_OpsCollect (state_to_string s1);
-                  Buffer.add_string dotBuf_OpsCollect " → ";
-                  Buffer.add_string dotBuf_OpsCollect (state_to_string s2);
-                  Buffer.add_string dotBuf_OpsCollect ": ";
-                  Buffer.add_string dotBuf_OpsCollect (op_to_string h);
-                  Buffer.add_string dotBuf_OpsCollect "\n"; 
-                  ops_to_strings s1 s2 t
+let rec ops_to_strings (s1 : state) (s2 : state) (ops : operation list) = 
+  match ops with
+  | [] -> ()
+  | h :: t -> let instance_of_trans = 
+              (state_to_string s1 ^ " → " ^ state_to_string s2 ^ ": ") in
 
+              Buffer.add_string dotBuf_OpsCollect (instance_of_trans);
+              Buffer.add_string dotBuf_OpsCollect "\n"; 
+    
+              let rec opsGet = function
+              | [] -> ()
+              | h :: t -> 
+              Buffer.add_string dotBuf_OpsCollect (op_to_string h);
+              Buffer.add_string dotBuf_OpsCollect "\n";
+              opsGet t
+              
+            in
+          opsGet ops;
+      Buffer.add_string dotBuf_OpsCollect "\n"
+  
 (*Strings of transitions*)
 let stringify_trans (s1, e, expr_option, s2, ops) =
     let s1_str = state_to_string s1 in
