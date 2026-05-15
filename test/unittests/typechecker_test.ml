@@ -256,7 +256,7 @@ let test_type_operation_mistype_sad () =
     let open Typechecker in
 
     let env = Hashtbl.create 10 in
-    Hashtbl.add env "x" Tint;
+    Hashtbl.add env "x" Tbool;
 
     let expr = Ecst (Cint 42) in
     let dummy_pos = {
@@ -308,6 +308,7 @@ let test_type_transition_guard_happy () =
 
     let env = Hashtbl.create 10 in
     Hashtbl.add env "x" Tint;
+    Hashtbl.add env "y" Tint;
 
     let expr = Ecst (Cint 42) in
     let dummy_pos = {
