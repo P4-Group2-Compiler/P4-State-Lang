@@ -1,19 +1,10 @@
 open Semantic
 open Ast
 
-(*1) Take the first instance of a transition, with operations attached*)
-(*2) Replace it with a string of the same length for the rest of that same instance of transition*)
-(*3) In DOT, the length should then be the same in the operations table, resulting in
-A -> B: 
-x = (x + 1)
-y = (y + 2)
-
-Instead of 
-A -> B: x = (x + 1)
-A -> B: y = (y + 2)*)
-
 (**************************************************************************************************************************************************)
+(*Collects each individual transition, and collects their operations if there are any*)
 let dotBuf_OpsCollect = Buffer.create 1064
+let operations_title = "Operations: \n" (*Insert title only if there are operations*)
 
 let rec ops_to_strings (s1 : state) (s2 : state) (ops : operation list) = 
   match ops with
@@ -33,7 +24,7 @@ let rec ops_to_strings (s1 : state) (s2 : state) (ops : operation list) =
               
             in
           opsGet ops;
-      Buffer.add_string dotBuf_OpsCollect "\n"
+    Buffer.add_string dotBuf_OpsCollect "\n"
   
 (*Strings of transitions*)
 let stringify_trans (s1, e, expr_option, s2, ops) =
@@ -114,7 +105,7 @@ let graphFromStatemachine (sm : (statemachine)) =
 
   if someVars varsList then
     let dotBuf_Vars = Buffer.create 16 in
-    let dot_varTopSyntax = "Variables [label = \"Variables: \n" in
+    let dot_varTopSyntax = "Variables [label = \n\"Variables: \n" in
     let dot_varBottomSyntax = "Variables -> null [style = invis;];\n" in
 
     let rec addEachVar = function
@@ -124,14 +115,17 @@ let graphFromStatemachine (sm : (statemachine)) =
     Buffer.add_string dotBuf_Vars dot_varTopSyntax;
     addEachVar varsList;
     Buffer.add_string dotBuf_Vars "\n";
-    Buffer.add_string dotBuf_Vars "Operations:\n";
-    Buffer.add_string dotBuf_Vars (Buffer.contents dotBuf_OpsCollect);
+
+      if Buffer.length dotBuf_OpsCollect <> 0 then
+         Buffer.add_string dotBuf_Vars operations_title;
+         Buffer.add_string dotBuf_Vars (Buffer.contents dotBuf_OpsCollect);
+                
     Buffer.add_string dotBuf_Vars "\";\nshape = rectangle;];\n"; 
     Buffer.add_string dotBuf_Vars dot_varBottomSyntax;
     Buffer.add_buffer dotBuf dotBuf_Vars;
     Buffer.add_string dotBuf dot_bottomSyntax;
   else
-    Buffer.add_string dotBuf dot_bottomSyntax;
+    Buffer.add_string dotBuf dot_bottomSyntax;  
 
 (**************************************************************************************************************************************************)
   let oc = open_out "../output/DOT/graph.gv" in

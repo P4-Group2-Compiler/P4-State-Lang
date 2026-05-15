@@ -13,6 +13,6 @@ dune build
 cd bin
 dune exec ./main.exe -- test.sm
 
-#cd ../output/c
-#gcc generated_state_machine.c -o StateMachine
-#./StateMachine
+cd ../output/c
+gcc generated_state_machine.c -o StateMachine
+./StateMachine
