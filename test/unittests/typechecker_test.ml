@@ -200,21 +200,178 @@ let test_type_expr_ebinop_bge_happy () =
     Alcotest.(check bool) "Ebinop Bge expr"
         true (type_expr env expr = Tbool)
 
+(* *********************************************************** *)
+(*                      FUN TYPE_OPERATION                     *)
+(* *********************************************************** *)
+(* *********************************************************** *)
+(*                         HAPPY TESTS                         *)
+(* *********************************************************** *)
+let test_type_operation_happy () =
+    let open P4.Ast in
+    let open Typechecker in
+
+    let env = Hashtbl.create 10 in
+    Hashtbl.add env "x" Tint;
+
+    let expr = Ecst (Cint 42) in
+    let dummy_pos = {
+        Lexing.pos_fname = "";
+        pos_lnum = 1;
+        pos_bol = 0;
+        pos_cnum = 0;
+    } in
+    let dummy_loc = (dummy_pos, dummy_pos) in
+    let id = { id = "x"; loc = dummy_loc } in
+    let op = Do (id, expr) in
+
+    Alcotest.(check bool) "type operation"
+        true (type_operation env op; true)
+
+(* *********************************************************** *)
+(*                          SAD TESTS                          *)
+(* *********************************************************** *)
+let test_type_operation_unbound_sad () =
+    let open P4.Ast in
+    let open Typechecker in
+
+    let env = Hashtbl.create 10 in
+
+    let expr = Ecst (Cint 42) in
+    let dummy_pos = {
+        Lexing.pos_fname = "<test>"; (* <test> is some dummy file name needed for not breaking ocaml *)
+        pos_lnum = 1;
+        pos_bol = 0;
+        pos_cnum = 0;
+    } in
+    let dummy_loc = (dummy_pos, dummy_pos) in
+    let id = { id = "x"; loc = dummy_loc } in
+    let op = Do (id, expr) in
+
+    Alcotest.check_raises "unbound variable"
+        (Type_error "Unbound variable in operation: x")
+        (fun () -> type_operation env op)
+
+let test_type_operation_mistype_sad () =
+    let open P4.Ast in
+    let open Typechecker in
+
+    let env = Hashtbl.create 10 in
+    Hashtbl.add env "x" Tint;
+
+    let expr = Ecst (Cint 42) in
+    let dummy_pos = {
+        Lexing.pos_fname = "<test>";
+        pos_lnum = 1;
+        pos_bol = 0;
+        pos_cnum = 0;
+    } in
+    let dummy_loc = (dummy_pos, dummy_pos) in
+    let id = { id = "x"; loc = dummy_loc } in
+    let op = Do (id, expr) in
+
+    Alcotest.check_raises "mistyped variable"
+        (Type_error "Type mismatch in operation assignment to variable: x")
+        (fun () -> type_operation env op)
+
+(* *********************************************************** *)
+(*                     FUN TYPE_TRANSITION                     *)
+(* *********************************************************** *)
+(* *********************************************************** *)
+(*                        HAPPY TESTS                          *)
+(* *********************************************************** *)
+
+let test_type_transition_no_guard_happy () =
+    let open P4.Ast in
+    let open Typechecker in
+
+    let env = Hashtbl.create 10 in
+    Hashtbl.add env "x" Tint;
+
+    let expr = Ecst (Cint 42) in
+    let dummy_pos = {
+        Lexing.pos_fname = "<test>";
+        pos_lnum = 1;
+        pos_bol = 0;
+        pos_cnum = 0;
+    } in
+    let dummy_loc = (dummy_pos, dummy_pos) in
+    let id = { id = "x"; loc = dummy_loc } in
+    let op = Do (id, expr) in
+    let tr = Transition (Event "ev", None, State "A", [op]) in
+
+    Alcotest.(check bool) "transition without guard succeeds"
+        true (type_transition env tr; true)
+
+let test_type_transition_guard_happy () =
+    let open P4.Ast in
+    let open Typechecker in
+
+    let env = Hashtbl.create 10 in
+    Hashtbl.add env "x" Tint;
+
+    let expr = Ecst (Cint 42) in
+    let dummy_pos = {
+        Lexing.pos_fname = "<test>";
+        pos_lnum = 1;
+        pos_bol = 0;
+        pos_cnum = 0;
+    } in
+    let dummy_loc = (dummy_pos, dummy_pos) in
+    let id_x = { id = "x"; loc = dummy_loc } in
+    let id_y = { id = "y"; loc = dummy_loc } in
+    
+    let op = Do (id_x, expr) in
+    let guard = Ebinop (Bgt, Eident id_x, Eident id_y) in
+    let tr = Transition (Event "ev", Some guard , State "A", [op]) in
+
+    Alcotest.(check bool) "transition with guard succeeds"
+        true (type_transition env tr; true)
+
+(* *********************************************************** *)
+(*                          SAD TESTS                          *)
+(* *********************************************************** *)
+
+let test_type_transition_no_guard_ops_sad () =
+    let open P4.Ast in
+    let open Typechecker in
+
+    let env = Hashtbl.create 10 in
+    Hashtbl.add env "x" Tint;
+
+    let expr = Ecst (Cint 42) in
+    let dummy_pos = {
+        Lexing.pos_fname = "";
+        pos_lnum = 1;
+        pos_bol = 0;
+        pos_cnum = 0;
+    } in
+    let dummy_loc = (dummy_pos, dummy_pos) in
+    let id = { id = "x"; loc = dummy_loc } in
+    let op = Do (id, expr) in
+    let tr = Transition (Event "ev", None, State "A", [op]) in
+
+    Alcotest.(check bool) "transition without guard succeeds"
+        true (type_transition env tr; true)
+
 let () =
   Alcotest.run "Typechecking Tests" [
     "Typechecking", [
-    Alcotest.test_case "type_const"     `Quick test_type_const_happy;
-    Alcotest.test_case "type_expr"      `Quick test_type_expr_const_happy;
-    Alcotest.test_case "type_expr"      `Quick test_type_expr_ebinop_band_happy;
-    Alcotest.test_case "type_expr"      `Quick test_type_expr_ebinop_bor_happy;
-    Alcotest.test_case "type_expr"      `Quick test_type_expr_ebinop_badd_happy;
-    Alcotest.test_case "type_expr"      `Quick test_type_expr_ebinop_bsub_happy;
-    Alcotest.test_case "type_expr"      `Quick test_type_expr_ebinop_bmul_happy;
-    Alcotest.test_case "type_expr"      `Quick test_type_expr_ebinop_beq_happy;
-    Alcotest.test_case "type_expr"      `Quick test_type_expr_ebinop_bneq_happy;
-    Alcotest.test_case "type_expr"      `Quick test_type_expr_ebinop_blt_happy;
-    Alcotest.test_case "type_expr"      `Quick test_type_expr_ebinop_ble_happy;
-    Alcotest.test_case "type_expr"      `Quick test_type_expr_ebinop_bgt_happy;
-    Alcotest.test_case "type_expr"      `Quick test_type_expr_ebinop_bge_happy;
+    Alcotest.test_case "type_const"      `Quick test_type_const_happy;
+    Alcotest.test_case "type_expr"       `Quick test_type_expr_const_happy;
+    Alcotest.test_case "type_expr"       `Quick test_type_expr_ebinop_band_happy;
+    Alcotest.test_case "type_expr"       `Quick test_type_expr_ebinop_bor_happy;
+    Alcotest.test_case "type_expr"       `Quick test_type_expr_ebinop_badd_happy;
+    Alcotest.test_case "type_expr"       `Quick test_type_expr_ebinop_bsub_happy;
+    Alcotest.test_case "type_expr"       `Quick test_type_expr_ebinop_bmul_happy;
+    Alcotest.test_case "type_expr"       `Quick test_type_expr_ebinop_beq_happy;
+    Alcotest.test_case "type_expr"       `Quick test_type_expr_ebinop_bneq_happy;
+    Alcotest.test_case "type_expr"       `Quick test_type_expr_ebinop_blt_happy;
+    Alcotest.test_case "type_expr"       `Quick test_type_expr_ebinop_ble_happy;
+    Alcotest.test_case "type_expr"       `Quick test_type_expr_ebinop_bgt_happy;
+    Alcotest.test_case "type_operation"  `Quick test_type_operation_happy;
+    Alcotest.test_case "type_operation"  `Quick test_type_operation_unbound_sad;
+    Alcotest.test_case "type_operation"  `Quick test_type_operation_mistype_sad;
+    Alcotest.test_case "type_transition" `Quick test_type_transition_guard_happy;
+    Alcotest.test_case "type_transition" `Quick test_type_transition_no_guard_happy;
     ];
   ]

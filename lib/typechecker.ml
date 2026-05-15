@@ -24,6 +24,26 @@ let type_error ?(loc : (Lexing.position * Lexing.position) option = None) s =
   match loc with
   | None ->
       raise (Type_error s)
+  | Some (startpos, endpos) ->
+      let source =
+        match open_in startpos.Lexing.pos_fname with
+        | exception Sys_error _ -> None
+        | chan ->
+            let len = in_channel_length chan in
+            let text = really_input_string chan len in
+            close_in chan;
+            Some text
+      in
+      (match source with
+      | None -> raise (Type_error s)
+      | Some src ->
+          let pretty_error = highlight src (startpos, endpos) s in
+          raise (Type_error pretty_error))
+    
+(* let type_error ?(loc : (Lexing.position * Lexing.position) option = None) s =
+  match loc with
+  | None ->
+      raise (Type_error s)
 
   | Some (startpos, endpos) ->
       let source =
@@ -37,7 +57,7 @@ let type_error ?(loc : (Lexing.position * Lexing.position) option = None) s =
       (* Use s directly as the message *)
       let pretty_error = highlight source (startpos, endpos) s in
       raise (Type_error pretty_error)
-
+*)
 (* primary/primitive(?) types *)
 type ty =
 | Tint
