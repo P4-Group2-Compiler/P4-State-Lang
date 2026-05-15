@@ -1,8 +1,14 @@
 open Semantic
 open Ast
 
-(*Do? Body? Back to square one!*)
-(*1) Need to add the names of the transitions belonging to the operation*)
+(*1) Take the first instance of a transition, with operations attached*)
+(*2) Replace it with a string of the same length for the rest of that same instance of transition*)
+(*3) In DOT, the length should then be the same in the operations table, resulting in
+A -> B: x = (x + 1)
+        y = (y + 2)
+Instead of 
+A -> B: x = (x + 1)
+A -> B: y = (y + 2)*)
 
 (**************************************************************************************************************************************************)
 let dotBuf_OpsCollect = Buffer.create 1064
