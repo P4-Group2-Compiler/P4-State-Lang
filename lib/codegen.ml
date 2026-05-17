@@ -13,7 +13,6 @@ let rec convert_expr_to_string = function
   | Ecst (Cint n) -> string_of_int n
   | Ecst (Cbool true)  -> "1"
   | Ecst (Cbool false) -> "0"
-  | Ecst (Cstring string) -> string
   | Eident { id } -> id
 
   (* And the groups of different binop composite expressions that string-convert-recurses down to their atoms: *)

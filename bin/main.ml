@@ -24,7 +24,6 @@ let string_of_binop = function
 
 let string_of_constant = function
   | Cbool b -> string_of_bool b
-  | Cstring s -> s
   | Cint i -> string_of_int i
 
 let rec string_of_expr = function

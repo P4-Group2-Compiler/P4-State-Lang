@@ -7,3 +7,8 @@
  (name semantic_test)
  (modules semantic_test)
  (libraries P4 test_helper alcotest))
+
+(test
+ (name typechecker_test)
+ (modules typechecker_test)
+ (libraries P4 test_helper alcotest))
