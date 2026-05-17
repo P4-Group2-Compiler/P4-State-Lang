@@ -337,7 +337,7 @@ let test_type_transition_no_guard_ops_sad () =
     let open Typechecker in
 
     let env = Hashtbl.create 10 in
-    Hashtbl.add env "x" Tint;
+    (*Hashtbl.add env "x" Tint;*) (* x is unbound, hence the sad path *)
 
     let expr = Ecst (Cint 42) in
     let dummy_pos = {
@@ -351,8 +351,64 @@ let test_type_transition_no_guard_ops_sad () =
     let op = Do (id, expr) in
     let tr = Transition (Event "ev", None, State "A", [op]) in
 
-    Alcotest.(check bool) "transition without guard succeeds"
-        true (type_transition env tr; true)
+    Alcotest.check_raises "transition without guard and invalid ops fail"
+        (Type_error "Unbound variable in operation: x")
+        (fun () -> type_transition env tr)
+
+let test_type_transition_guard_ops_sad () =
+    let open P4.Ast in
+    let open Typechecker in
+
+    let env = Hashtbl.create 10 in
+    Hashtbl.add env "x" Tint;
+    Hashtbl.add env "y" Tint;
+
+    let expr = Ecst (Cint 42) in
+    let dummy_pos = {
+        Lexing.pos_fname = "<test>";
+        pos_lnum = 1;
+        pos_bol = 0;
+        pos_cnum = 0;
+    } in
+    let dummy_loc = (dummy_pos, dummy_pos) in
+    let id_x = { id = "x"; loc = dummy_loc } in
+    let id_y = { id = "y"; loc = dummy_loc } in
+    let id_z = { id = "z"; loc = dummy_loc } in
+    
+
+    let op = Do (id_z, expr) in
+    let guard = Ebinop (Bgt, Eident id_x, Eident id_y) in
+    let tr = Transition (Event "ev", Some guard , State "A", [op]) in
+
+    Alcotest.check_raises "transition with guard and invalid ops fail"
+        (Type_error "Unbound variable in operation: z")
+        (fun () -> type_transition env tr)
+
+let test_type_transition_invalid_guard_sad () =
+    let open P4.Ast in
+    let open Typechecker in
+
+    let env = Hashtbl.create 10 in
+    Hashtbl.add env "x" Tint;
+
+    let expr = Ecst (Cint 42) in
+    let dummy_pos = {
+        Lexing.pos_fname = "<test>";
+        pos_lnum = 1;
+        pos_bol = 0;
+        pos_cnum = 0;
+    } in
+    let dummy_loc = (dummy_pos, dummy_pos) in
+    let id = { id = "x"; loc = dummy_loc } in
+
+    let op = Do (id, expr) in
+    let guard = Ecst (Cint 43) in
+    let tr = Transition (Event "ev", Some guard , State "A", [op]) in
+
+    Alcotest.check_raises "transition with non-boolean guard fail"
+        (Type_error "Guard expression must have type bool")
+        (fun () -> type_transition env tr)
+
 
 let () =
   Alcotest.run "Typechecking Tests" [
@@ -374,5 +430,8 @@ let () =
     Alcotest.test_case "type_operation"  `Quick test_type_operation_mistype_sad;
     Alcotest.test_case "type_transition" `Quick test_type_transition_guard_happy;
     Alcotest.test_case "type_transition" `Quick test_type_transition_no_guard_happy;
+    Alcotest.test_case "type_transition" `Quick test_type_transition_no_guard_ops_sad;
+    Alcotest.test_case "type_transition" `Quick test_type_transition_guard_ops_sad;
+    Alcotest.test_case "type_transition" `Quick test_type_transition_invalid_guard_sad;
     ];
   ]
