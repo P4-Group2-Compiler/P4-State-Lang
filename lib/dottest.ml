@@ -2,25 +2,50 @@ open Semantic
 open Ast
 
 (**************************************************************************************************************************************************)
-(*Strings of transitions*)
-let stringify_trans (s1, e, expr_option, s2, _ops) =
-  let s1_str = state_to_string s1 in
-  let e_str = event_to_string e in
-  let eo_str = expr_option_to_string expr_option in
-  let s2_str = state_to_string s2 in
-  Printf.sprintf "%s -> %s [label=\"%s%s\"];\n" s1_str s2_str e_str eo_str
+(*Collects each individual transition, and collects their operations if there are any*)
+let dotBuf_OpsCollect = Buffer.create 1064
+let operations_title = "Operations: \n" (*Insert title only if there are operations*)
+
+let rec ops_to_strings (s1 : state) (s2 : state) (ops : operation list) = 
+  match ops with
+  | [] -> ()
+  | h :: t -> let instance_of_trans = 
+              (state_to_string s1 ^ " → " ^ state_to_string s2 ^ ": ") in
+
+              Buffer.add_string dotBuf_OpsCollect (instance_of_trans);
+              Buffer.add_string dotBuf_OpsCollect "\n"; 
+    
+              let rec opsGet = function
+              | [] -> ()
+              | h :: t -> 
+              Buffer.add_string dotBuf_OpsCollect (op_to_string h);
+              Buffer.add_string dotBuf_OpsCollect "\n";
+              opsGet t
+              
+            in
+          opsGet ops;
+    Buffer.add_string dotBuf_OpsCollect "\n"
   
+(*Strings of transitions*)
+let stringify_trans (s1, e, expr_option, s2, ops) =
+    let s1_str = state_to_string s1 in
+    let e_str = event_to_string e in
+    let eo_str = expr_option_to_string expr_option in
+    let s2_str = state_to_string s2 in
+
+    ops_to_strings s1 s2 ops;  
+    Printf.sprintf "%s -> %s [label=\"%s%s\"];\n" s1_str s2_str e_str eo_str     
+
 (*Outputs a list of DOT transition as strings, using above function*)
 let trans_string_list (t : (state * event * _ * state * operation list) list) =
   List.map stringify_trans t
 
 (*Prints string lists*)
 let string_list_printer (t : (string) list) = 
-  List.iter print_endline t
+  List.iter print_endline t 
 
 (**************************************************************************************************************************************************)
 (*Strings of start states*)
-
 let stringify_start s =
   let start_s = state_to_string s in
   Printf.sprintf "null -> %s;\n" start_s
@@ -30,7 +55,6 @@ let start_string (t : (state)) =
 
 (**************************************************************************************************************************************************)
 (*Strings of final states*)
-
 let stringify_final s =
   let final_s = state_to_string s in
   Printf.sprintf "%s [shape = doublecircle;];\n" final_s
@@ -49,7 +73,6 @@ let var_string_list (v : (var_decl) list) =
 
 (**************************************************************************************************************************************************)
 (*Function that takes the entire statemachine*)
-
 let graphFromStatemachine (sm : (statemachine)) =
 
   let smName = sm.statemachine_name in
@@ -74,7 +97,6 @@ let graphFromStatemachine (sm : (statemachine)) =
 
 (**************************************************************************************************************************************************)
 (*Adds variables as a list, if there are any. Otherwise finishes the DOT-syntax.*)
-
   let someVars lst =
     match lst with
     | [] -> false
@@ -83,7 +105,7 @@ let graphFromStatemachine (sm : (statemachine)) =
 
   if someVars varsList then
     let dotBuf_Vars = Buffer.create 16 in
-    let dot_varTopSyntax = "Variables [label = \"Variables: \n" in
+    let dot_varTopSyntax = "Variables [label = \n\"Variables: \n" in
     let dot_varBottomSyntax = "Variables -> null [style = invis;];\n" in
 
     let rec addEachVar = function
@@ -92,13 +114,18 @@ let graphFromStatemachine (sm : (statemachine)) =
 
     Buffer.add_string dotBuf_Vars dot_varTopSyntax;
     addEachVar varsList;
-    Buffer.add_string dotBuf_Vars "\"";
-    Buffer.add_string dotBuf_Vars "\nshape = rectangle;];\n"; 
+    Buffer.add_string dotBuf_Vars "\n";
+
+      if Buffer.length dotBuf_OpsCollect <> 0 then
+         Buffer.add_string dotBuf_Vars operations_title;
+         Buffer.add_string dotBuf_Vars (Buffer.contents dotBuf_OpsCollect);
+                
+    Buffer.add_string dotBuf_Vars "\";\nshape = rectangle;];\n"; 
     Buffer.add_string dotBuf_Vars dot_varBottomSyntax;
     Buffer.add_buffer dotBuf dotBuf_Vars;
     Buffer.add_string dotBuf dot_bottomSyntax;
   else
-    Buffer.add_string dotBuf dot_bottomSyntax;
+    Buffer.add_string dotBuf dot_bottomSyntax;  
 
 (**************************************************************************************************************************************************)
   let oc = open_out "../output/DOT/graph.gv" in

@@ -1,0 +1,14 @@
+(library
+ (name test_helper)
+ (modules test_helper)
+ (libraries P4 alcotest))
+
+(test
+ (name semantic_test)
+ (modules semantic_test)
+ (libraries P4 test_helper alcotest))
+
+(test
+ (name typechecker_test)
+ (modules typechecker_test)
+ (libraries P4 test_helper alcotest))

@@ -17,7 +17,6 @@ type binop =
 (* Constants. *)
 type constant =
   | Cbool of bool
-  | Cstring of string
   | Cint of int
 
 (* Expressions. *)
@@ -47,7 +46,6 @@ type operation =
 
 type transition =
   | Transition of event * expr option * state * operation list
-(*| GuardTrans of event * expr * state *)
 
 type state_kind =
   | Normal

@@ -5,8 +5,6 @@ open Dottest
 open Ast
 open Semantic
 
-
-
 let string_of_state = function
   | State s -> s
 
@@ -27,7 +25,6 @@ let string_of_binop = function
 
 let string_of_constant = function
   | Cbool b -> string_of_bool b
-  | Cstring s -> s
   | Cint i -> string_of_int i
 
 let rec string_of_expr = function
@@ -94,6 +91,8 @@ let print_warning (statemachine, warning) =
   | UnreachableFinalState state ->
       Printf.printf "WARNING {UnreachableFinalState}:\n\tStart State: \"%s\" is unable to reach any Final State\n"
         (string_of_state state)
+  | NoFinalState ->
+      Printf.printf "WARNING {NoFinalState}:\n\tNo Final State has been declared - No input sequence will be accepted\n"
   end
 
 (***)
@@ -130,16 +129,9 @@ let ast =
       exit 1
 in
 
-    (* Typecheck the program *)
-begin
-  try
-    Typechecker.type_program ast
-  with Typechecker.Type_error msg ->
-    Printf.printf "Type error: %s\n" msg;
-    exit 1
-end;    
 
-  (**************************************************************************************************)
+
+(**************************************************************************************************)
   (*Collect functions in a functions, to use on the statemachine*)
   let statemachine, warnings =
     try Semantic.analyse ast with Semantic.Semantic_error msg ->
@@ -147,6 +139,15 @@ end;
       exit 1
   in
     Printf.printf "This is statemachine ---> %s <---!\n" statemachine.statemachine_name;
+        
+    (* Typecheck the program *)
+        begin
+        try
+            Typechecker.type_program statemachine
+        with Typechecker.Type_error msg ->
+            Printf.printf "Type error: %s\n" msg;
+            exit 1
+        end;
     Codegen.generate_c_code statemachine;
     Dottest.graphFromStatemachine statemachine;
   
