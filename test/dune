@@ -1,0 +1,5 @@
+(test
+ (name acceptance_runner)
+ (modules acceptance_runner)
+ (libraries P4 alcotest)
+ (deps (source_tree acceptance)))
