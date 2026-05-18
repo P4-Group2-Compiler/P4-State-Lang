@@ -65,7 +65,7 @@ let rec expr_to_string (e : expr) =
     match e with
     | Ecst e -> constant_to_string e
     | Ebinop (b, e1, e2) -> 
-        Printf.sprintf "(%s %s %s)"
+        Printf.sprintf " (%s %s %s)"
         (expr_to_string e1)
         (binop_to_string b)
         (expr_to_string e2)
@@ -99,9 +99,6 @@ let op_to_string (o : operation) =
 
 let collect_states (p : program) : state list =
   List.map (fun state_decl -> state_decl.name) p.states
-
-
-
 
 (* Get a list of all start states then checks the list to see if there is more than one *)
 (* TODO: Fix the if statement in the end of this function, might mess up later development *)
