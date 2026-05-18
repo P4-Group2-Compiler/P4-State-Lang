@@ -1,7 +1,7 @@
 open Lexing
 open Parsing
 open P4
-open Dottest
+open Dotgen
 open Ast
 open Semantic
 
@@ -149,7 +149,7 @@ in
             exit 1
         end;
     Codegen.generate_c_code statemachine;
-    Dottest.graphFromStatemachine statemachine;
+    Dotgen.graphFromStatemachine statemachine;
   
   close_in chan;
   (* print_program ast; *)
