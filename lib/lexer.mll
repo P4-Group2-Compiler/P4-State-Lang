@@ -37,19 +37,16 @@ rule token = parse
 | "Statemachine"                        { STATEMACHINE }
 | "Start"                               { START }
 | "Final"                               { FINAL }
+| "StartFinal"                          { STARTFINAL }
 | "State"                               { STATE }
 | "ON"                                  { ON }
 | "GO"                                  { GO }
 | "IF"                                  { IF }
 | "#"                                   { HASH }
 | "VAR"                                 { VAR }
-
-(* Identifiers *)
-| (Letter IdentifierChars*) as id       { IDENTIFIER id }
-
-(* Numbers *)
-| ['0'-'9']+ as n                       { INT n }
-
+| "INPUT"                               { INPUT }
+| "DO"                                  { DO }
+| "AUTO"                                { AUTO }
 
 (* Binops *)
 | '+'                                   { PLUS }
@@ -58,14 +55,20 @@ rule token = parse
 | "/"                                   { DIV }
 | '%'                                   { MOD } 
 | '='                                   { EQUAL }
-(*| "=="                                { BEQUAL }
-| "!="                                  { BNEQUAL }*)
+| "=="                                  { BEQUAL }
+| "!="                                  { BNEQUAL }
 | "<"                                   { LT }
 | "<="                                  { LTE }
 | ">"                                   { GT }
 | ">="                                  { GTE }
 | "AND"                                 { AND }
 | "OR"                                  { OR }
+
+(* Identifiers *)
+| (Letter IdentifierChars*) as id       { IDENTIFIER id }
+
+(* Numbers *)
+| ['0'-'9']+ as n                       { INT n }
 
 (* Seperators *)
 | '{'                                   { LEFTTUBORG }

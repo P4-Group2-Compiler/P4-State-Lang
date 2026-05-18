@@ -25,6 +25,7 @@
 %token STATE
 %token START
 %token FINAL
+%token STARTFINAL
 %token ON
 %token GO
 %token IF
@@ -32,11 +33,14 @@
 %token VAR
 %token AND
 %token OR
+%token INPUT
 (*%token ELSE
 %token ELIF*)
+%token DO
+%token AUTO
 
 (* Operators *)
-%token (* BEQUAL BNEQUAL*) LTE GT GTE LT  
+%token BEQUAL BNEQUAL LTE GT GTE LT  
 %token PLUS MINUS TIMES DIV MOD
 
 // Punctuators
@@ -44,8 +48,12 @@
 %token LP RP (* COMMA *) EQUAL (* "("     ")"     ","     "="  *)
 (*%token PRINT*)
 
-%left PLUS
-%nonassoc LT
+%left OR
+%left AND
+%nonassoc BEQUAL BNEQUAL LT LTE GT GTE
+%left PLUS MINUS
+%left TIMES DIV MOD
+
 
 // Grammatical starting point
 %start prog
@@ -59,7 +67,7 @@
 // Grammar Rules
 
 prog:
-| STATEMACHINE IDENTIFIER LEFTTUBORG variables states RIGHTTUBORG EOF  { {machine_name = $2; variables = $4; states = $5} }
+| STATEMACHINE IDENTIFIER LEFTTUBORG variables inputs states RIGHTTUBORG EOF  { {machine_name = $2; variables = $4; inputs = $5; states = $6} }
 ;
 
 states:
@@ -72,9 +80,10 @@ state:
 ;
 
 state_kind:
-| START { Start }
-| FINAL { Final }
-|       { Normal } // Empty means that there is no State Kind
+| START      { Start }
+| FINAL      { Final }
+| STARTFINAL { StartFinal }
+|            { Normal } // Empty means that there is no State Kind
 ;
 
 variables:
@@ -86,6 +95,89 @@ variable:
 | HASH VAR id = IDENTIFIER EQUAL n = INT { Var_decl (id, int_of_string n) }
 ;
 
+inputs:
+| { [] }
+| input inputs { $1 :: $2 }
+;
+
+input:
+| INPUT identifier_list { Input_decl $2 }
+
+identifier_list:
+| id = IDENTIFIER { [id] }
+| id = IDENTIFIER identifier_list { id :: $2 }
+
+transitions:
+| { [] }
+| transition transitions    { $1 :: $2 }
+;
+
+transition:
+| ON event_name GO IDENTIFIER operation_block_opt
+    { Transition (Event $2, None, State $4, $5) }
+| ON event_name IF expr GO IDENTIFIER operation_block_opt
+    { Transition (Event $2, Some $4, State $6, $7) }
+| AUTO GO IDENTIFIER operation_block_opt
+    { Transition (Auto, None, State $3, $4) }
+| AUTO IF expr GO IDENTIFIER operation_block_opt
+    { Transition (Auto, Some $3, State $5, $6) }
+(*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE GO IDENTIFIER*)
+(*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE expr GO IDENTIFIER*)
+(*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE stmt GO IDENTIFIER*)
+(*| ON IDENTIFIER IF expr GO IDENTIFIER ELIF expr GO IDENTIFIER ELSE*)
+;
+
+event_name:
+| IDENTIFIER { $1 }
+| INT { $1 }
+
+operation_block_opt:
+  | { [] }
+  | LEFTTUBORG operations RIGHTTUBORG { $2 }
+  ;
+
+operations:
+  | operation { [$1] }    
+  | operation operations { $1 :: $2 }
+  ;
+
+operation:
+  | DO ident EQUAL expr { Do ($2, $4) }
+  ; 
+
+expr:
+  | id = ident
+      { Eident id }
+  | INT
+      { Ecst (Cint (int_of_string $1)) }
+  | e1 = expr o = binop e2 = expr
+      { Ebinop (o, e1, e2) }
+  | LP e = expr RP
+      { e }
+;
+
+%inline binop:
+  | PLUS    { Badd }
+  | MINUS   { Bsub }
+  | TIMES   { Bmul }
+  | DIV     { Bdiv }
+  | MOD     { Bmod }
+  | LT      { Blt }
+  | LTE     { Ble }
+  | GT      { Bgt }
+  | GTE     { Bge }
+  | BEQUAL  { Beq }
+  | BNEQUAL { Bneq }
+  | AND     { Band }
+  | OR      { Bor }
+;
+
+ 
+ident:
+  IDENTIFIER { { loc = ($startpos, $endpos); id = $1 } }
+;
+
+(*
 expr:
   | id = ident          
       { Eident id }
@@ -113,26 +205,15 @@ expr:
     { Ebinop (Band, e1, e2) }
   | e1 = expr OR  e2 = expr 
     { Ebinop (Bor,  e1, e2) }
+  | e1 = expr BEQUAL  e2 = expr 
+    { Ebinop (Beq,  e1, e2) }
+  | e1 = expr BNEQUAL  e2 = expr 
+    { Ebinop (Bneq,  e1, e2) }
 
   | LP e = expr RP
       { e }
 ;
-
-transitions:
-  {[]}
-| transition transitions    { $1 :: $2 }
-;
-
-transition:
-| ON IDENTIFIER GO IDENTIFIER
-    { Transition (Event $2, None, State $4) }
-| ON IDENTIFIER IF expr GO IDENTIFIER
-    { Transition (Event $2, Some $4, State $6) }
-(*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE GO IDENTIFIER*)
-(*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE expr GO IDENTIFIER*)
-(*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE stmt GO IDENTIFIER*)
-(*| ON IDENTIFIER IF expr GO IDENTIFIER ELIF expr GO IDENTIFIER ELSE*)
-;
+*)
 
 
 
@@ -144,22 +225,3 @@ transition:
 | PRINT LP el = separated_list(COMMA, expr) RP
     { Sprint el }
 ;*)
-
-(*binop:
-| PLUS           { Badd }
-(*| MINUS        { Bsub }
-| TIMES          { Bmul }
-| DIV            { Bdiv }
-| MOD            { Bmod }
-| BEQUAL         { Beq }
-| BNEQUAL        { Bneq } *)
-| LT             { Blt }
-(*| LTE          { Ble }
-| GT             { Bgt }
-| GTE            { Bge }*)*)
-;
-
- 
-ident:
-  IDENTIFIER { { loc = ($startpos, $endpos); id = $1 } }
-;

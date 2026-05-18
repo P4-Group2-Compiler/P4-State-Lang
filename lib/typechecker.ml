@@ -1,4 +1,5 @@
 open Ast
+open Semantic
 
 (* Error handling and setup using location for debugging *)
 exception Type_error of string
@@ -23,6 +24,26 @@ let type_error ?(loc : (Lexing.position * Lexing.position) option = None) s =
   match loc with
   | None ->
       raise (Type_error s)
+  | Some (startpos, endpos) ->
+      let source =
+        match open_in startpos.Lexing.pos_fname with
+        | exception Sys_error _ -> None
+        | chan ->
+            let len = in_channel_length chan in
+            let text = really_input_string chan len in
+            close_in chan;
+            Some text
+      in
+      (match source with
+      | None -> raise (Type_error s)
+      | Some src ->
+          let pretty_error = highlight src (startpos, endpos) s in
+          raise (Type_error pretty_error))
+    
+(* let type_error ?(loc : (Lexing.position * Lexing.position) option = None) s =
+  match loc with
+  | None ->
+      raise (Type_error s)
 
   | Some (startpos, endpos) ->
       let source =
@@ -36,12 +57,11 @@ let type_error ?(loc : (Lexing.position * Lexing.position) option = None) s =
       (* Use s directly as the message *)
       let pretty_error = highlight source (startpos, endpos) s in
       raise (Type_error pretty_error)
-
+*)
 (* primary/primitive(?) types *)
 type ty =
 | Tint
 | Tbool
-| Tstring
 
 (*
 Type environment for handling typechecking 
@@ -55,7 +75,6 @@ since we dont care about the value, only the type
 let type_const = function
   | Cint _ -> Tint
   | Cbool _ -> Tbool
-  | Cstring _ -> Tstring
 
 (* Checking expressions. Derived from WHILE, may or may not be appropriate *)
 let rec type_expr (env : type_env) = function
@@ -68,27 +87,47 @@ let rec type_expr (env : type_env) = function
       let t1 = type_expr env e1 in
       let t2 = type_expr env e2 in
       begin match binop, t1, t2 with
-      | (Blt | Ble | Bgt | Bge) ,Tint, Tint -> Tbool
+      | (Band | Bor), Tbool, Tbool -> Tbool
+      | (Badd | Bsub | Bmul), Tint, Tint -> Tint
+      | (Beq | Bneq | Blt | Ble | Bgt | Bge), Tint, Tint -> Tbool
       | _ -> type_error "Comparisons expects 'int : int'"
       end
 
+(* Checking transition operations *)
+let type_operation env = function
+  | Do (id, expr) ->
+      let var_type =
+        try Hashtbl.find env id.id
+        with Not_found ->
+          type_error ~loc:(Some id.loc) ("Unbound variable in operation: " ^ id.id)
+      in
+
+      let expr_type = type_expr env expr in
+
+      if var_type <> expr_type then
+        type_error ~loc:(Some id.loc)
+          ("Type mismatch in operation assignment to variable: " ^ id.id)
+
 (* Checking transitions *)
 let type_transition env = function
-  | Transition (_ev, None, _st) -> ()
-  | Transition (_ev, Some guard, _st) ->
-      match type_expr env guard with
+  | Transition (_ev, None, _st, ops) ->
+      List.iter (type_operation env) ops
+
+  | Transition (_ev, Some guard, _st, ops) ->
+      begin
+        match type_expr env guard with
         | Tbool -> ()
         | _ -> type_error "Guard expression must have type bool"
+      end;
 
-(* Checking state declarations *)
-let type_state_decl env st =
-  List.iter (type_transition env) st.transitions
+      List.iter (type_operation env) ops
 
 (* Checking the program *)
 let initial_env () = Hashtbl.create 16
 
-let type_program p =
+let type_program statemachine =
   let env = initial_env () in
   List.iter (fun (Var_decl (name, _)) ->
-    Hashtbl.add env name Tint) p.variables;
-  List.iter (type_state_decl env) p.states
+    Hashtbl.add env name Tint) statemachine.g_variables;
+  List.iter (fun (src, event, guard, dest, op) ->
+    type_transition env (Transition (event, guard, dest, op))) statemachine.transitions
