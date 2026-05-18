@@ -11,10 +11,12 @@ let parse_and_check_file filename =
     let ast = Parser.prog Lexer.token lexbuf in
     close_in chan;
 
-    Typechecker.type_program ast;
+    (*Typechecker.type_program ast;
     ignore (Semantic.collect_transitions ast);
-    ignore (Semantic.analyse ast);
-
+    ignore (Semantic.analyse ast);*)
+    let (sm, _warnings) = Semantic.analyse ast in
+    Typechecker.type_program sm;
+    
     Accepted
   with
   | Lexer.Lexing_error msg ->

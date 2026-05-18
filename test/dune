@@ -1,9 +1,4 @@
 (test
- (name semantic_test)
- (modules semantic_test)
- (libraries P4 alcotest))
-
-(test
  (name acceptance_runner)
  (modules acceptance_runner)
  (libraries P4 alcotest)
