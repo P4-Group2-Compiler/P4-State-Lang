@@ -10,6 +10,7 @@ let string_of_state = function
 
 let string_of_event = function
   | Event e -> e
+  | Auto -> "AUTO"
 
 let string_of_state_kind = function
   | Normal -> "Normal"
@@ -40,13 +41,20 @@ let string_of_guard = function
   | None -> ""
 
 let print_transition = function
-  | Transition (event, None, target, _ops) ->
+  | Transition (Event event, None, target, _ops) ->
       Printf.printf "    ON %s GO %s\n"
-        (string_of_event event)
+        (event)
         (string_of_state target)
-  | Transition (event, Some guard, target, _ops) ->
+  | Transition (Event event, Some guard, target, _ops) ->
       Printf.printf "    ON %s IF %s GO %s\n"
-        (string_of_event event)
+        (event)
+        (string_of_expr guard)
+        (string_of_state target)
+  | Transition (Auto, None, target, _ops) ->
+      Printf.printf "    AUTO GO %s\n"
+        (string_of_state target)
+  | Transition (Auto, Some guard, target, _ops) ->
+      Printf.printf "    AUTO IF %s GO %s\n"
         (string_of_expr guard)
         (string_of_state target)
 

@@ -46,6 +46,7 @@ rule token = parse
 | "VAR"                                 { VAR }
 | "INPUT"                               { INPUT }
 | "DO"                                  { DO }
+| "AUTO"                                { AUTO }
 
 (* Binops *)
 | '+'                                   { PLUS }

@@ -37,6 +37,7 @@
 (*%token ELSE
 %token ELIF*)
 %token DO
+%token AUTO
 
 (* Operators *)
 %token BEQUAL BNEQUAL LTE GT GTE LT  
@@ -116,6 +117,10 @@ transition:
     { Transition (Event $2, None, State $4, $5) }
 | ON event_name IF expr GO IDENTIFIER operation_block_opt
     { Transition (Event $2, Some $4, State $6, $7) }
+| AUTO GO IDENTIFIER operation_block_opt
+    { Transition (Auto, None, State $3, $4) }
+| AUTO IF expr GO IDENTIFIER operation_block_opt
+    { Transition (Auto, Some $3, State $5, $6) }
 (*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE GO IDENTIFIER*)
 (*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE expr GO IDENTIFIER*)
 (*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE stmt GO IDENTIFIER*)

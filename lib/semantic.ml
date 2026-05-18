@@ -30,12 +30,15 @@ let state_to_string = function
   | State s -> s
 let event_to_string = function
   | Event e -> e
+  | Auto -> "AUTO"
 
 (*********************************************************************************************************)
 (*                                          STRING PRINTERS                                              *)
 (*********************************************************************************************************)
+(*
 let event_to_string (Event e) = e (*Base printer for event*)
 let state_to_string (State s) = s (*Base printer for state*)
+*)
 
 let binop_to_string = function
   | Badd -> "+" | Bsub -> "-"  | Bmul -> "*" | Bdiv -> "/" | Bmod -> "%" 
