@@ -229,7 +229,7 @@ let generate_c_code ir =
 
   emit_c "    default:\n";
   emit_c "        unrecognized_input_fallback:\n";
-  emit_c "        if (fired_event != \"AUTO\") {\n";
+  emit_c "        if (strcmp(fired_event, \"AUTO\") == 1) {\n";
   emit_c "            print_unrecognized_event_msg(fired_event);\n";
   emit_c "        }\n";
   emit_c "        break;\n";
