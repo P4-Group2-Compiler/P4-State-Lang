@@ -41,7 +41,7 @@ let expect_gcc_valid filename () =
     | Accepted ->
     let gcc_result = Sys.command "gcc -fsyntax-only output/c/generated_state_machine.c 2>/dev/null" in
     Alcotest.(check int) "GCC accepts emitted C" 0 gcc_result
-
+      
 let valid_tests =
   [
     Alcotest.test_case "AT-01 minimal valid state machine" `Quick
@@ -54,5 +54,5 @@ let valid_tests =
 let () =
   Alcotest.run "Integration tests"
     [
-      ("valid programs", valid_tests);
+      ("integration_gcc_happy", valid_tests);
     ]
