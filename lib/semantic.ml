@@ -184,7 +184,6 @@ let check_duplicate_vars vars =
   in
   loop [] vars
 
-
 (* Recursive function to check if state names are repeated *)
 let check_duplicate_state_names (statemachine : statemachine) : unit =
   let rec checker seen = function

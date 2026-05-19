@@ -1,6 +1,7 @@
 open Semantic
 open Ast
 
+
 (**************************************************************************************************************************************************)
 (*Collects each individual transition, and collects their operations if there are any*)
 let dotBuf_OpsCollect = Buffer.create 1064
@@ -128,8 +129,15 @@ let graphFromStatemachine (sm : (statemachine)) =
     Buffer.add_string dotBuf dot_bottomSyntax;  
 
 (**************************************************************************************************************************************************)
-  let oc = open_out "../output/DOT/graph.gv" in
+let () =
+  if not (Sys.file_exists "output") then
+    Unix.mkdir "output" 0o755;
+  if not (Sys.file_exists "output/DOT") then
+    Unix.mkdir "output/DOT" 0o755
+  in  
+
+let oc = open_out "output/DOT/graph.gv" in
   Buffer.output_buffer oc dotBuf;
   close_out oc;
-  ignore (Sys.command "cd ../output/DOT && dot -Tpng graph.gv -o graph.png");
+  ignore (Sys.command "cd output/DOT && dot -Tpng graph.gv -o graph.png");
 ;
