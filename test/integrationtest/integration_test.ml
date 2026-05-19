@@ -5,6 +5,7 @@ type actual_result =
   | Rejected of string
 
 let parse_and_check_file filename =
+  Printf.printf "Working dir: %s\n" (Sys.getcwd ());
   let chan = open_in filename in
   let lexbuf = Lexing.from_channel chan in
   try
@@ -41,7 +42,7 @@ let expect_gcc_valid filename () =
     | Accepted ->
     let gcc_result = Sys.command "gcc -fsyntax-only output/c/generated_state_machine.c 2>/dev/null" in
     Alcotest.(check int) "GCC accepts emitted C" 0 gcc_result
-      
+
 let valid_tests =
   [
     Alcotest.test_case "AT-01 minimal valid state machine" `Quick
