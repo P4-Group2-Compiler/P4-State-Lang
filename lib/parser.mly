@@ -95,6 +95,7 @@ variable:
 | HASH VAR id = IDENTIFIER EQUAL n = INT { Var_decl (id, int_of_string n) }
 ;
 
+(* Orginal list-of-lists version: (I think the idea was to be able to define multiple INPUT lists???)
 inputs:
 | { [] }
 | input inputs { $1 :: $2 }
@@ -102,6 +103,12 @@ inputs:
 
 input:
 | INPUT identifier_list { Input_decl $2 }
+*)
+
+inputs:
+| { Input_decl [] }
+| INPUT identifier_list { Input_decl $2 }
+;
 
 identifier_list:
 | id = IDENTIFIER { [id] }

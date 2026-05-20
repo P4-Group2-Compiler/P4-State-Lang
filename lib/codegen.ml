@@ -70,6 +70,7 @@ let generate_c_code ir =
   (* Includes: *)
   emit_c "#include <stdio.h>\n";
   emit_c "#include <string.h>\n";
+  emit_c "\n\n";
 (*-------------------------------------------------------------------------------------*)
   (* Macros to color and format the terminals print-output (PURELY COSMETIC, no "functional" use) *)
   (* The codes are called "ANSI Escape Codes". More info here: https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797 *)
@@ -100,6 +101,22 @@ let generate_c_code ir =
     emit_c " \"%s\"," (get_state_name_literal state)
   ) ir.states;
   emit_c " };\n\n";
+(*-------------------------------------------------------------------------------------*)
+
+
+  (* INPUT-string array *)
+  (* Technically empty arrays are not allowed in the C standard, but GCC has some extension that does allow them;
+    so we still do a list.length > 0 check, and do not codegen the array if its empty, to make the C code "correct" across compilers *)
+  let (Input_decl symbols) = ir.input_string in (* "symbols" is the unwrapped input string list that is in the input_decl type *)
+    if List.length symbols > 0 then begin
+    emit_c "const char* input_string[] = {";
+    List.iter (fun str ->
+      emit_c " \"%s\"," str
+    ) symbols;
+    emit_c " };\n\n"
+  end;
+
+
 (*-------------------------------------------------------------------------------------*)
   (* Global variables: *)
   List.iter (fun var ->
@@ -233,21 +250,44 @@ let generate_c_code ir =
   (* main() + the main state machine loop that takes the users input: *)
   emit_c "int main(void) {\n";
   emit_c "    #define STATE_MACHINE_RUNNING 1\n";
-  emit_c "    state_machine_check(\"AUTO\");\n";
-  emit_c "    while (STATE_MACHINE_RUNNING) {\n";
+  emit_c "    state_machine_check(\"AUTO\");\n\n";
 
+  (* We skip printing this if there is no input string defined by the user: *)
+  let (Input_decl symbols) = ir.input_string in (* "symbols" is the unwrapped input string list in the input_decl type *)
+    if List.length symbols > 0 then begin
+      emit_c "    int input_string_length = sizeof(input_string) / sizeof(input_string[0]);\n";
+      emit_c "    for (int i = 0; i < input_string_length; i++) {\n";
+      emit_c "        printf(YELLOW BOLD \"\\nCurrent state: \" TEXT_RESET \"(\" BOLD \"%%s\" UN_BOLD \")\\n\", state_names[global_current_state]);\n";
+      emit_c "        printf(YELLOW BOLD \"Event: \" TEXT_RESET \"%%s\\n\", input_string[i]);\n";
+      emit_c "        state_machine_check(input_string[i]);\n";
+      emit_c "    }\n\n";
+    end;
+
+  emit_c "    while (STATE_MACHINE_RUNNING) {\n\n";
   emit_c "        printf(YELLOW BOLD\"\\nCurrent state: \"TEXT_RESET\"(\"BOLD\"%%s\"UN_BOLD\")\\n\", state_names[global_current_state]);\n";
   List.iter (fun (Var_decl (name, _)) ->
     emit_c "        printf(\"%s = %%d\\n\", VAR_%s);\n"
       name
       name
   ) ir.g_variables;
-  emit_c "        printf(YELLOW BOLD\"Event: \"TEXT_RESET);\n";
+  emit_c "        printf(YELLOW BOLD\"Event: \"TEXT_RESET);\n\n";
 
   emit_c "        char entered_event[256];\n";
-  emit_c "        scanf(\"%%255s\", entered_event);\n";
+  emit_c "        scanf(\"%%255s\", entered_event);\n\n";
 
-  emit_c "        if (!event_match(entered_event, \"AUTO\")) {\n";
+  emit_c "        if (event_match(entered_event, \"exit\") || event_match(entered_event, \"EXIT\")) {\n";
+  emit_c "            int in_accept_state = 0;\n";
+  List.iter (fun state ->
+    emit_c "            if (global_current_state == %s) in_accept_state = 1;\n"
+      (get_state_name_prefixed state)
+  ) ir.final_state;
+  emit_c "            if (in_accept_state) {\n";
+  emit_c "                printf(GREEN BOLD\"| Exiting state machine in an accept state: (%%s)\\n\"TEXT_RESET, state_names[global_current_state]);\n";
+  emit_c "            } else {\n";
+  emit_c "                printf(RED BOLD\"| Exiting state machine NOT in an accept state: (%%s)\\n\"TEXT_RESET, state_names[global_current_state]);\n";
+  emit_c "            }\n";
+  emit_c "            return 0;\n";
+  emit_c "        } else if (!event_match(entered_event, \"AUTO\")) {\n";
   emit_c "            state_machine_check(entered_event);\n";
   emit_c "        } else {\n";
   emit_c "            printf(RED BOLD\"| \\\"AUTO\\\" is a reserved event-keyword -- It is not allowed as manual input\\n\"TEXT_RESET);\n";

@@ -19,7 +19,7 @@ let test_collect_states_happy () =
   let prog = {
     machine_name = "M";
     variables = [];
-    inputs = [];
+    inputs = Input_decl [];
     states = [ state "A"; state "B" ];
   } in
 
@@ -50,7 +50,7 @@ let test_get_start_states_start_happy () =
   let prog = {
       machine_name = "M";
       variables = [];
-      inputs = [];
+      inputs = Input_decl [];
       states = [
         { kind = Start; name = State "A"; transitions = [] };
         { kind = Final; name = State "B"; transitions = [] }
@@ -73,7 +73,7 @@ let test_get_start_states_startfinal_happy () =
   let prog = {
       machine_name = "M";
       variables = [];
-      inputs = [];
+      inputs = Input_decl [];
       states = [
         { kind = StartFinal; name = State "A"; transitions = [] };
         { kind = Final; name = State "B"; transitions = [] }
@@ -103,7 +103,7 @@ let startfinal_state name =
     let prog = {
     machine_name = "M";
     variables = [];
-    inputs = [];
+    inputs = Input_decl [];
     states = [ start_state "A"; startfinal_state "B" ]
 } in
 Alcotest.check_raises
@@ -120,7 +120,7 @@ let state name =
 let prog = {
     machine_name = "M";
     variables = [];
-    inputs = [];
+    inputs = Input_decl [];
     states = [ state "A"; state "B"]
  } in
  Alcotest.check_raises
@@ -142,7 +142,7 @@ let test_get_final_states_happy () =
   let prog = {
       machine_name = "M";
       variables = [];
-      inputs = [];
+      inputs = Input_decl [];
       states = [
         { kind = Final; name = State "A"; transitions = [] };
         { kind = StartFinal; name = State "B"; transitions = [] };
@@ -170,7 +170,7 @@ let test_collect_transitions_happy () =
   let prog = {
     machine_name = "M";
     variables = [];
-    inputs = [];
+    inputs = Input_decl [];
     states = [
       { kind = Start; name = State "A"; transitions = [
           Transition (Event "e1", None, State "B", [])
@@ -212,7 +212,7 @@ let test_collect_g_variables_happy () =
       Var_decl ("y", 3);
       Var_decl ("incomeTax", 456)
     ];
-    inputs = [];
+    inputs = Input_decl [];
     states = [];
   } in
 
@@ -243,7 +243,7 @@ let test_check_number_of_states_happy () =
   let prog = {
       machine_name = "M";
       variables = [];
-      inputs = [];
+      inputs = Input_decl [];
       states = [
         { kind = Final; name = State "A"; transitions = [] };
         { kind = Final; name = State "B"; transitions = [] };
@@ -268,7 +268,7 @@ let test_check_number_of_states_sad () =
     let prog = {
       machine_name = "M";
       variables = [];
-      inputs = [];
+      inputs = Input_decl [];
       states = [
         { kind = Final; name = State "A"; transitions = [] };
         { kind = Normal; name = State "B"; transitions = [] };
@@ -333,7 +333,7 @@ let test_check_valid_transition_happy () =
     let prog = {
       machine_name = "M";
       variables = [];
-      inputs = [];
+      inputs = Input_decl [];
       states = [
         { kind = Start; name = State "A"; transitions = transA};
         { kind = Normal; name = State "B"; transitions = transB};
@@ -370,7 +370,7 @@ let test_check_valid_transition_sad () =
     let prog = {
       machine_name = "M";
       variables = [];
-      inputs = [];
+      inputs = Input_decl [];
       states = [
         { kind = Start; name = State "A"; transitions = transA};
         { kind = Normal; name = State "B"; transitions = transB};
@@ -398,7 +398,7 @@ let test_check_duplicate_state_names_happy () =
   let prog = {
       machine_name = "M";
       variables = [];
-      inputs = [];
+      inputs = Input_decl [];
       states = [
         { kind = Start; name = State "A"; transitions = []};
         { kind = Normal; name = State "B"; transitions = []};
@@ -419,7 +419,7 @@ let test_check_duplicate_state_names_sad () =
   let prog = {
     machine_name = "M";
       variables = [];
-      inputs = [];
+      inputs = Input_decl [];
       states = [
         { kind = Start; name = State "A"; transitions = []};
         { kind = Normal; name = State "A"; transitions = []};
@@ -451,7 +451,7 @@ let test_check_duplicate_transitions_happy () =
   let prog = {
       machine_name = "M";
       variables = [];
-      inputs = [];
+      inputs = Input_decl [];
       states = [
         { kind = Final; name = State "A"; transitions = transA };
         { kind = Final; name = State "B"; transitions = [] };
@@ -481,7 +481,7 @@ let test_check_duplicate_transitions_sad () =
   let prog = {
       machine_name = "M";
       variables = [];
-      inputs = [];
+      inputs = Input_decl [];
       states = [
         { kind = Final; name = State "A"; transitions = transA };
         { kind = Final; name = State "B"; transitions = [] };
@@ -526,7 +526,7 @@ let test_successors_happy () =
     let prog = {
       machine_name = "M";
       variables = [];
-      inputs = [];
+      inputs = Input_decl [];
       states = [
         { kind = Start; name = State "A"; transitions = transA};
         { kind = Normal; name = State "B"; transitions = transB};
@@ -579,7 +579,7 @@ let test_successors_sad () =
   let prog = {
     machine_name = "M";
     variables = [];
-    inputs = [];
+    inputs = Input_decl [];
     states = [
       { kind = Start; name = State "A"; transitions = transA};
       { kind = Normal; name = State "B"; transitions = transB};
@@ -620,7 +620,7 @@ let test_can_reach_final_state_happy () =
   let prog = {
     machine_name = "M";
     variables = [];
-    inputs = [];
+    inputs = Input_decl [];
     states = [
       { kind = Start; name = State "A"; transitions = transA};
       { kind = Normal; name = State "B"; transitions = transB};
@@ -658,7 +658,7 @@ let test_can_reach_final_state_cycle_happy () =
   let prog = {
     machine_name = "M";
     variables = [];
-    inputs = [];
+    inputs = Input_decl [];
     states = [
       { kind = Start; name = State "A"; transitions = transA};
       { kind = Normal; name = State "B"; transitions = transB};
@@ -680,7 +680,7 @@ let test_can_reach_final_state_startfinal_happy () =
   let prog = {
     machine_name = "M";
     variables = [];
-    inputs = [];
+    inputs = Input_decl [];
     states = [
       { kind = StartFinal; name = State "A"; transitions = []}]
   } in
@@ -714,7 +714,7 @@ let test_can_reach_final_state_sad () =
   let prog = {
     machine_name = "M";
     variables = [];
-    inputs = [];
+    inputs = Input_decl [];
     states = [
       { kind = Start; name = State "A"; transitions = transA};
       { kind = Normal; name = State "B"; transitions = transB};
@@ -751,7 +751,7 @@ let test_can_reach_final_state_cycle_sad () =
   let prog = {
     machine_name = "M";
     variables = [];
-    inputs = [];
+    inputs = Input_decl [];
     states = [
       { kind = Start; name = State "A"; transitions = transA};
       { kind = Normal; name = State "B"; transitions = transB};
@@ -787,7 +787,7 @@ let test_check_start_reaches_final_happy () =
   let prog = {
       machine_name = "M";
       variables = [];
-      inputs = [];
+      inputs = Input_decl [];
       states = [
         { kind = Start; name = State "A"; transitions = transA };
         { kind = Final; name = State "B"; transitions = [] };
@@ -810,7 +810,7 @@ let test_check_start_reaches_startfinal_happy () =
   let prog = {
       machine_name = "M";
       variables = [];
-      inputs = [];
+      inputs = Input_decl [];
       states = [
         { kind = StartFinal; name = State "A"; transitions = transA };
         ]
@@ -836,7 +836,7 @@ let test_check_start_reaches_final_no_final_sad () =
   let prog = {
       machine_name = "M";
       variables = [];
-      inputs = [];
+      inputs = Input_decl [];
       states = [
         { kind = Start; name = State "A"; transitions = transA };
         ]
@@ -870,7 +870,7 @@ let test_check_start_reaches_final_sad () =
   let prog = {
     machine_name = "M";
     variables = [];
-    inputs = [];
+    inputs = Input_decl [];
     states = [
       { kind = Start; name = State "A"; transitions = transA};
       { kind = Normal; name = State "B"; transitions = transB};
@@ -931,7 +931,7 @@ let test_get_dead_end_states_happy () =
   let prog = {
     machine_name = "M";
     variables = [];
-    inputs = [];
+    inputs = Input_decl [];
     states = [
       { kind = Start; name = State "A"; transitions = transA};
       { kind = Normal; name = State "B"; transitions = transB};
@@ -996,7 +996,7 @@ let test_get_dead_end_states_sad () =
   let prog = {
     machine_name = "M";
     variables = [];
-    inputs = [];
+    inputs = Input_decl [];
     states = [
       { kind = Start; name = State "A"; transitions = transA};
       { kind = Normal; name = State "B"; transitions = transB};
