@@ -19,6 +19,8 @@ StateLang is a small, visual language for modelling state machines into C code a
 
 3) Install Graphviz locally on your system.
 	- https://graphviz.org/download/
+
+4) GCC needs to be installed on your system.
 	
 This project was made in VS Code, with the help of the Graphviz Interactive Preview extension for immediate visualization of DOT-files. The extension can be found here:
 	- https://marketplace.visualstudio.com/items?itemName=tintinweb.graphviz-interactive-preview
