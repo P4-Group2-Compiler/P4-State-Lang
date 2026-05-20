@@ -84,16 +84,14 @@ in
       Printf.printf "Semantic error: %s\n" msg;
       exit 1
   in
-    (*Printf.printf "This is statemachine ---> %s <---!\n" statemachine.statemachine_name;*)
-        
     (* Typecheck the program *)
-        begin
-        try
-            Typechecker.type_program statemachine
-        with Typechecker.Type_error msg ->
-            Printf.printf "Type error: %s\n" msg;
-            exit 1
-        end;
+      begin
+      try
+          Typechecker.type_program statemachine
+      with Typechecker.Type_error msg ->
+          Printf.printf "Type error: %s\n" msg;
+          exit 1
+      end;
     if ensure_graphviz () then 
         let dot_file = "output/DOT/graph.png" in
       (Dotgen.graphFromStatemachine statemachine; 
@@ -101,8 +99,7 @@ in
       Printf.printf "\n\nCreated .png at: %s\n" dot_file;);
     Codegen.generate_c_code statemachine;
   close_in chan;
-  (* print_program ast; *)
+
+  (* Printing out the warnings collected by the semantic analysis *)
   List.iter (fun warning -> print_warning (statemachine, warning)) warnings
   
-  (* let transitions = Semantic.collect_transitions ast in
-  Semantic.print_iter_trans transitions; *)
