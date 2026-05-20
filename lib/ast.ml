@@ -1,11 +1,10 @@
-(* Mega pasted from WHILE language, seems like we need to make a mini-arith-while language
-if we want guards to work with generic expressions and not tailor made state guards *)
 
+(* Information passed from Lexer to include position tracking for errors *)
 type location = Lexing.position * Lexing.position
 type ident = { loc: location; id: string; }
 
 (* ******************************************************************************** *) 
-(*  BOOLEAN SHENANIGANS IN RELATION TO GUARDS --- EG: ON EVENT IF (x < 4) GO STATE  *)
+(*  BOOLEAN DEFINITIONS IN RELATION TO GUARDS --- EG: ON EVENT IF (x < 4) GO STATE  *)
 (* ******************************************************************************** *)
 
 (* Binary operators. *)
@@ -21,7 +20,6 @@ type constant =
 
 (* Expressions. *)
 type expr =
-  (*| Evar of variable*)
   | Ecst of constant                   (* constant *)
   | Ebinop of binop * expr * expr      (* binary operation *)
   | Eident of ident                    (* variable *)
@@ -35,11 +33,11 @@ type stmt =
 (* ************************************************************************** *)
 
 type event =
-  | Event of string (* Might be better to have simply 'type event = string' *)
+  | Event of string
   | Auto
 
 type state =
-  | State of string (* Might be better to have simply 'type state = string' *)
+  | State of string
 
 type operation =
   | Do of ident * expr
