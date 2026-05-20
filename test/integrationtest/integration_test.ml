@@ -77,7 +77,9 @@ let sad_tests =
     Alcotest.test_case "No start state sad" `Quick
       (expect_gcc_rejected "sadtest/no_start_state_sad.sm");
     Alcotest.test_case "No state name sad" `Quick
-      (expect_gcc_rejected "sadtest/no_state_name_sad.sm");
+    (expect_gcc_rejected "sadtest/no_state_name_sad.sm");
+    Alcotest.test_case "Duplicate state names sad" `Quick
+      (expect_gcc_rejected "sadtest/duplicate_state_names_sad.sm");
     Alcotest.test_case "Non int variable sad" `Quick
       (expect_gcc_rejected "sadtest/non_int_variable_sad.sm");
     Alcotest.test_case "Non bool IF sad" `Quick
@@ -88,8 +90,6 @@ let sad_tests =
       (expect_gcc_rejected "sadtest/state_keyword_name_sad.sm");
     Alcotest.test_case "No states sad" `Quick
       (expect_gcc_rejected "sadtest/no_state_sad.sm");
-    Alcotest.test_case "Duplicate state names sad" `Quick
-      (expect_gcc_rejected "sadtest/duplicate_state_names_sad.sm");
 ]
 
 let () =
