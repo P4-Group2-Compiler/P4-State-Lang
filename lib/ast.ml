@@ -10,7 +10,7 @@ type ident = { loc: location; id: string; }
 
 (* Binary operators. *)
 type binop =
-  | Badd | Bsub | Bmul | Bdiv | Bmod   (* + - * / % *)
+  | Badd | Bsub | Bmul   (* + - * *)
   | Beq | Bneq | Blt | Ble | Bgt | Bge  (* == != < <= > >= *)
   | Band | Bor  (* and or *)
 

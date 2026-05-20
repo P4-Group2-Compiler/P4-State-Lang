@@ -41,7 +41,7 @@
 
 (* Operators *)
 %token BEQUAL BNEQUAL LTE GT GTE LT  
-%token PLUS MINUS TIMES DIV MOD
+%token PLUS MINUS TIMES
 
 // Punctuators
 %token LEFTTUBORG RIGHTTUBORG (* '{' and '}' *)
@@ -52,7 +52,7 @@
 %left AND
 %nonassoc BEQUAL BNEQUAL LT LTE GT GTE
 %left PLUS MINUS
-%left TIMES DIV MOD
+%left TIMES
 
 
 // Grammatical starting point
@@ -167,8 +167,6 @@ expr:
   | PLUS    { Badd }
   | MINUS   { Bsub }
   | TIMES   { Bmul }
-  | DIV     { Bdiv }
-  | MOD     { Bmod }
   | LT      { Blt }
   | LTE     { Ble }
   | GT      { Bgt }

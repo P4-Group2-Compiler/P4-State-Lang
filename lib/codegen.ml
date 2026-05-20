@@ -33,8 +33,6 @@ let rec convert_expr_to_string = function
   | Ebinop (Badd, expr1, expr2) -> Printf.sprintf "(%s + %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
   | Ebinop (Bsub, expr1, expr2) -> Printf.sprintf "(%s - %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
   | Ebinop (Bmul, expr1, expr2) -> Printf.sprintf "(%s * %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
-  | Ebinop (Bdiv, expr1, expr2) -> Printf.sprintf "(%s / %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
-  | Ebinop (Bmod, expr1, expr2) -> Printf.sprintf "(%s %% %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
 
   (*[ ==, != ]*)
   | Ebinop (Beq,  expr1, expr2) -> Printf.sprintf "(%s == %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)

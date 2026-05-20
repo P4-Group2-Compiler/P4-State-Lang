@@ -52,8 +52,6 @@ rule token = parse
 | '+'                                   { PLUS }
 | '-'                                   { MINUS }
 | '*'                                   { TIMES }
-| "/"                                   { DIV }
-| '%'                                   { MOD } 
 | '='                                   { EQUAL }
 | "=="                                  { BEQUAL }
 | "!="                                  { BNEQUAL }

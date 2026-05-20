@@ -42,7 +42,7 @@ let state_to_string (State s) = s (*Base printer for state*)
 *)
 
 let binop_to_string = function
-  | Badd -> "+" | Bsub -> "-"  | Bmul -> "*" | Bdiv -> "/" | Bmod -> "%" 
+  | Badd -> "+" | Bsub -> "-"  | Bmul -> "*"
   | Beq -> "==" | Bneq -> "!=" | Blt -> "<"  | Ble -> "<=" | Bgt -> ">"  
   | Bge -> ">=" | Band -> "AND"| Bor -> "OR" 
 

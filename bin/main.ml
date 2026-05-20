@@ -29,7 +29,7 @@ let string_of_state_kind = function
   | StartFinal -> "StartFinal"
 
 let string_of_binop = function
-  | Badd -> "+" | Bsub -> "-" | Bmul -> "*" | Bdiv -> "/" | Bmod -> "%"
+  | Badd -> "+" | Bsub -> "-" | Bmul -> "*"
   | Beq -> "==" | Bneq -> "!=" | Blt -> "<" | Ble -> "<=" | Bgt -> ">" | Bge -> ">="
   | Band -> "AND" | Bor -> "OR"
 
