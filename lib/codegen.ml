@@ -48,7 +48,6 @@ let rec convert_expr_to_string = function
   | Ebinop (Band,  expr1, expr2) -> Printf.sprintf "(%s && %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
   | Ebinop (Bor,  expr1, expr2) -> Printf.sprintf "(%s || %s)" (convert_expr_to_string expr1) (convert_expr_to_string expr2)
 
-  (* | _ -> "NOT MATCHED" *)
 (*--------------------------------------------------------------------------------------*)
 let rec convert_var_to_string = function
   | Var_decl (string, int) -> Printf.sprintf "int VAR_%s = %d" (string) (int)
@@ -59,8 +58,7 @@ let operation_to_c = function
         (id.id)
         (convert_expr_to_string expr)
 
-
-(*======================================================================================*)
+(*-------------------------------------------------------------------------------------*)
 let generate_c_code ir =
 
   let start_state_name = get_state_name_prefixed ir.start_state in
@@ -106,8 +104,6 @@ let generate_c_code ir =
   ) ir.states;
   emit_c " };\n\n";
 (*-------------------------------------------------------------------------------------*)
-
-
   (* INPUT-string array *)
   (* Technically empty arrays are not allowed in the C standard, but GCC has some extension that does allow them;
     so we still do a list.length > 0 check, and do not codegen the array if its empty, to make the C code "correct" across compilers *)
@@ -119,7 +115,6 @@ let generate_c_code ir =
     ) symbols;
     emit_c " };\n\n"
   end;
-
 
 (*-------------------------------------------------------------------------------------*)
   (* Global variables: *)
@@ -135,9 +130,11 @@ let generate_c_code ir =
   (* Print GUARD BLOCK message: *)
   emit_c "void print_guard_block_msg(const char* transition, const char* guard) {\n";
   emit_c "    printf(ORANGE BOLD\"| Event \\\"%%s\\\" was blocked by the guard: %%s \\n\"TEXT_RESET, transition, guard);\n}\n";
+
   (* Print UNRECOGNIZED EVENT message: *)
   emit_c "void print_unrecognized_event_msg(const char* event) {\n";
   emit_c "    printf(RED BOLD\"| Event \\\"%%s\\\" is unrecognized in state (%%s)\\n\"TEXT_RESET, event, state_names[global_current_state]);\n}\n";
+
   (* Print the GREEN "[src]--->[dst]" message: *)
   emit_c "void pretty_print_transition(State src_state, State dst_state) {\n";
   emit_c "    printf(GREEN BOLD\"| (%%s) ---> (%%s)\\n\"TEXT_RESET, state_names[src_state], state_names[dst_state]);\n";
@@ -146,7 +143,6 @@ let generate_c_code ir =
 (*-------------------------------------------------------------------------------------*)
   emit_c "/*================================================================================================*/\n";  
   (* The event_match() and transition_to() helper functions: *)
-
   (* MATCH EVENT strings: *)
   emit_c "int event_match(const char* input, const char* event) {\n";
   emit_c "    return (strcmp(input, event) == 0);\n}\n";

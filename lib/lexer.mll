@@ -5,7 +5,7 @@
     exception Lexing_error of string
 }
 
-(* Define chars for the identifier (name of state) *)
+(* Define chars for the identifier *)
 let Letter = ['a'-'z' 'A'-'Z']
 let IdentifierChars = ['a'-'z' 'A'-'Z' '0'-'9' '_']
 
