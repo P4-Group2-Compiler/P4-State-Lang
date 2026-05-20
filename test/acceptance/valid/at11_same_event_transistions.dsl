@@ -1,12 +1,15 @@
-Statemachine M{ 
-    Start State A{
-        ON a GO C
-        ON a GO B
-    } 
-    Final State B{
+Statemachine M {
+  # VAR x = 5
 
-    }
-    State C{
+  Start State A {
+    ON Push IF x > 10 GO B
+    ON Pull IF x < 10 GO C
+  }
 
-    }
+  Final State B {
+  }
+  
+  State C {
+    
+  }
 }

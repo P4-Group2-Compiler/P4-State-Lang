@@ -59,8 +59,27 @@ let valid_tests =
     Alcotest.test_case "AT-02 valid machine with guard and variable" `Quick
       (expect_accepted "acceptance/valid/at02_guard_and_variable.dsl");
 
-    (* Alcotest.test_case "AT-03 implicit transition behavior" `Quick
-      (expect_accepted "test/acceptance/valid/at03_implicit_transition.dsl"); Needs ELSE functionality in guards to work *) 
+     Alcotest.test_case "AT-03 implicit transition behavior" `Quick
+      (expect_accepted "acceptance/valid/at03_implicit_transition.dsl"); 
+
+    Alcotest.test_case "AT-11 Same Event Transitions" `Quick
+      (expect_accepted "acceptance/valid/at11_same_event_transistions.dsl");
+
+    Alcotest.test_case "AT-12" `Quick
+      (expect_accepted "acceptance/valid/at12_guard_and_variable_railroaded.dsl");
+
+    (*Alcotest.test_case "AT-13" `Quick
+      (expect_accepted "acceptance/valid/at13_binop.dsl");*)
+
+    Alcotest.test_case "AT-14" `Quick
+      (expect_accepted "acceptance/valid/at14_DO.dsl");
+
+    Alcotest.test_case "AT-15" `Quick
+      (expect_accepted "acceptance/valid/at15_AUTO.dsl");
+
+    Alcotest.test_case "AT-16" `Quick
+      (expect_accepted "acceptance/valid/at16_Input.dsl");
+      
   ]
 
 let invalid_tests =
