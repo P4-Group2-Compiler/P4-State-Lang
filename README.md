@@ -5,6 +5,15 @@
 # Welcome to your organization's demo respository
 This code repository (or "repo") is designed to demonstrate the best GitHub has to offer with the least amount of noise.
 
+--------------------------- DEN SPRØDE START TIL EN README ---------------------------
+
+(*WIP*)
+
+Install Graphviz (System package, not specific to Ocaml
+Install opam . (OPAM package contains Ocaml tools like Menhir, etc.)
+
+(*WIP*)
+
 --------------------------- INSTRUCTIONS FOR PROJECT WORKFLOW ----------------------------
 
 - MOST files (parser, lexer, AST, etc) belongs under /lib (libraries)
