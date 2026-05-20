@@ -115,19 +115,7 @@ let () =
     };
   
   (* 'Run' the compiler *)
-(*let ast =
-  try
-    Parser.prog Lexer.token lexbuf
-  with
-  | Lexer.Lexing_error msg ->
-      Printf.printf "Lexing error: %s\n" msg;
-      close_in chan;
-      exit 1
-  | Parser.Error ->
-      Printf.printf "Parse error\n";
-      close_in chan;
-      exit 1
-in*)
+
 let ast =
   try
     Parser.prog Lexer.token lexbuf
