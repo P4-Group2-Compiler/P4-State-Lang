@@ -1,12 +1,11 @@
 Statemachine M {
+  #VAR x = 5
+  INPUT open close lock unlock
   Start State A {
-    ON a GO B
-  }
+    ON open GO C
 
-  State B {
   }
 
   Final State C {
-    ON b GO B
   }
 }
