@@ -5,6 +5,15 @@ open Dotgen
 open Ast
 open Semantic
 
+(**************************************************************************************************************************************************)
+(*Checking if user has Graphviz installed on their system.*)
+let ensure_graphviz () =
+   if Sys.command "dot -V > /dev/null 2>&1" <> 0 then (
+    prerr_endline "Graphviz ('dot') is not installed. You will not be able to create graphs from your state machines.\nVisit https://graphviz.org/download/ to find a version of Graphviz for your OS.";
+    exit 1
+    )
+(**************************************************************************************************************************************************)
+
 let string_of_state = function
   | State s -> s
 
@@ -95,11 +104,12 @@ let print_warning (statemachine, warning) =
       Printf.printf "WARNING {NoFinalState}:\n\tNo Final State has been declared - No input sequence will be accepted\n"
   end
 
-(***)
-
-(***)
 
 let () =
+
+  ensure_graphviz ();
+  print_endline "Generating image and C-code ...";
+
   if Array.length Sys.argv <> 2 then begin
     Printf.printf "Usage: %s <file>\n" Sys.argv.(0);
     exit 1
@@ -158,7 +168,5 @@ in
   (* print_program ast; *)
   List.iter (fun warning -> print_warning (statemachine, warning)) warnings
   
-
-
   (* let transitions = Semantic.collect_transitions ast in
   Semantic.print_iter_trans transitions; *)
