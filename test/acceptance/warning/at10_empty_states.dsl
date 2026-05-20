@@ -3,9 +3,8 @@ Statemachine M {
   }
   
   State B {
-
   }
-  Final state C {
+  Final State C {
     
   }
 }

@@ -3,7 +3,7 @@ Statemachine M {
     ON a GO B
   }
 
-  Final State B {
+  State B {
   }
 
   Final State C {
