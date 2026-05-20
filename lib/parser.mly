@@ -111,8 +111,8 @@ inputs:
 ;
 
 identifier_list:
-| id = IDENTIFIER { [id] }
-| id = IDENTIFIER identifier_list { id :: $2 }
+| id = event_name { [id] }
+| id = event_name identifier_list { id :: $2 }
 
 transitions:
 | { [] }
