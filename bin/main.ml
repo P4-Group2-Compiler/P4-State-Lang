@@ -10,7 +10,7 @@ open Semantic
 let ensure_graphviz () =
    if Sys.command "dot -V > /dev/null 2>&1" <> 0 then (
     prerr_endline 
-    "Graphviz ('dot') is not installed. You will not be able to create graphs from your state machines.\nVisit https://graphviz.org/download/ to find a version of Graphviz for your OS.";
+    "Graphviz ('dot') is not installed. You will not be able to create images of your state machine.\nVisit https://graphviz.org/download/ to find a version of Graphviz for your OS.\n\nGenerating C-code ...";
    false
     ) else true
 (**************************************************************************************************************************************************)
@@ -159,8 +159,11 @@ in
             Printf.printf "Type error: %s\n" msg;
             exit 1
         end;
-    if ensure_graphviz () then (Dotgen.graphFromStatemachine statemachine; 
-    print_endline "Generating image and C-code ...");
+    if ensure_graphviz () then 
+        let dot_file = "output/DOT/graph.png" in
+      (Dotgen.graphFromStatemachine statemachine; 
+      print_endline "Generating image and C-code ...";
+      Printf.printf "\n\nCreated .png at: %s\n" dot_file;);
     Codegen.generate_c_code statemachine;
   close_in chan;
   (* print_program ast; *)
