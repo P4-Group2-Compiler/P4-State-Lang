@@ -40,43 +40,23 @@ let type_error ?(loc : (Lexing.position * Lexing.position) option = None) s =
           let pretty_error = highlight src (startpos, endpos) s in
           raise (Type_error pretty_error))
     
-(* let type_error ?(loc : (Lexing.position * Lexing.position) option = None) s =
-  match loc with
-  | None ->
-      raise (Type_error s)
 
-  | Some (startpos, endpos) ->
-      let source =
-        let chan = open_in startpos.Lexing.pos_fname in
-        let len = in_channel_length chan in
-        let text = really_input_string chan len in
-        close_in chan;
-        text
-      in
-
-      (* Use s directly as the message *)
-      let pretty_error = highlight source (startpos, endpos) s in
-      raise (Type_error pretty_error)
-*)
-(* primary/primitive(?) types *)
+(* primary/primitive types *)
 type ty =
 | Tint
 | Tbool
 
-(*
-Type environment for handling typechecking 
-like ctx (context) in WHILE lang
-*)
+(* Type environment for handling typechecking 
+like ctx (context) in WHILE lang *)
 type type_env = (string, ty) Hashtbl.t
 
 (* Checking constants. We check for arbitrary values _,
-since we dont care about the value, only the type
-*)
+since we dont care about the value, only the type *)
 let type_const = function
   | Cint _ -> Tint
   | Cbool _ -> Tbool
 
-(* Checking expressions. Derived from WHILE, may or may not be appropriate *)
+(* Checking expressions*)
 let rec type_expr (env : type_env) = function
   | Ecst const -> type_const const
   | Eident {id; loc} -> 
