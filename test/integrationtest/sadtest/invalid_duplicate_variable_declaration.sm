@@ -1,0 +1,8 @@
+Statemachine A {
+    # VAR x = 3
+    # VAR x = 4
+
+    StartFinal State B {
+        
+    }
+}

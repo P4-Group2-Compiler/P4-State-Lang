@@ -68,6 +68,6 @@ type state_decl = {
 type program = {
   machine_name : string;
   variables : var_decl list;
-  inputs : input_decl list;
+  inputs : input_decl;
   states : state_decl list;
 }
