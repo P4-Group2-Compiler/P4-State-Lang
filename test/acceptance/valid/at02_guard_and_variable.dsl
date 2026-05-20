@@ -1,13 +1,15 @@
 Statemachine M {
-  int x = 5;
+  # VAR x = 5
 
   Start State A {
-    ON 1 IF x > 10 GO B ELSE GO C;
+    ON Push IF x > 10 GO B
+    ON Pull IF x < 10 GO C
   }
 
-  State B {
+  Final State B {
   }
-
-  Final State C {
+  
+  State C {
+    
   }
 }

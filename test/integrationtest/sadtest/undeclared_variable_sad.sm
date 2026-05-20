@@ -1,0 +1,14 @@
+Statemachine A {
+    
+    Start State Happy {
+        ON smile IF x > 4 GO HappyAgain
+    }
+
+    State Sad {
+        ON smile GO HappyAgain
+    }
+    
+    Final State HappyAgain {
+        
+    }
+}

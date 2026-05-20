@@ -1,10 +1,13 @@
 Statemachine M {
-  # VAR x = 5
+  #VAR x = 5
 
   Start State A {
-    ON Push IF x < 10 GO C
+    ON push GO C {
+      DO x = x + 1
+    }
   }
 
   Final State C {
   }
+
 }

@@ -1,0 +1,4 @@
+Statemachine A {
+    StartFinal State Start {
+    }
+}

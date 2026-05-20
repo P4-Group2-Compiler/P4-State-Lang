@@ -4,27 +4,20 @@
     open Ast
 %}
 
-// Token Decleration
-
-// WHILE lang tokens
-
-// %token ELSE PRINT AND OR NOT
-
-
-// WHILE lang tokens end
+// Token Declaration
 
 %token EOF
 
-(* Identifiers and integers *)
+// Identifiers and integers
 %token <string> IDENTIFIER
 %token <string> INT
-(*%token <string> IDENT*)
 
-(* Keywords *)
+// Keywords
 %token STATEMACHINE
 %token STATE
 %token START
 %token FINAL
+%token STARTFINAL
 %token ON
 %token GO
 %token IF
@@ -32,23 +25,24 @@
 %token VAR
 %token AND
 %token OR
-(*%token ELSE
-%token ELIF*)
+%token INPUT
+%token DO
+%token AUTO
 
-(* Operators *)
+// Operators
 %token BEQUAL BNEQUAL LTE GT GTE LT  
-%token PLUS MINUS TIMES DIV MOD
+%token PLUS MINUS TIMES
 
 // Punctuators
 %token LEFTTUBORG RIGHTTUBORG (* '{' and '}' *)
 %token LP RP (* COMMA *) EQUAL (* "("     ")"     ","     "="  *)
-(*%token PRINT*)
 
+// Precedence rules
 %left OR
 %left AND
 %nonassoc BEQUAL BNEQUAL LT LTE GT GTE
 %left PLUS MINUS
-%left TIMES DIV MOD
+%left TIMES
 
 
 // Grammatical starting point
@@ -58,12 +52,11 @@
 %type <Ast.program> prog
 %type <Ast.expr> expr
 
+// Grammar Rules
 %%
 
-// Grammar Rules
-
 prog:
-| STATEMACHINE IDENTIFIER LEFTTUBORG variables states RIGHTTUBORG EOF  { {machine_name = $2; variables = $4; states = $5} }
+| STATEMACHINE IDENTIFIER LEFTTUBORG variables inputs states RIGHTTUBORG EOF  { {machine_name = $2; variables = $4; inputs = $5; states = $6} }
 ;
 
 states:
@@ -76,9 +69,10 @@ state:
 ;
 
 state_kind:
-| START { Start }
-| FINAL { Final }
-|       { Normal } // Empty means that there is no State Kind
+| START      { Start }
+| FINAL      { Final }
+| STARTFINAL { StartFinal }
+|            { Normal }     // Empty means that there is no State Kind
 ;
 
 variables:
@@ -90,21 +84,48 @@ variable:
 | HASH VAR id = IDENTIFIER EQUAL n = INT { Var_decl (id, int_of_string n) }
 ;
 
+inputs:
+| { Input_decl [] }
+| INPUT identifier_list { Input_decl $2 }
+;
+
+identifier_list:
+| id = event_name { [id] }
+| id = event_name identifier_list { id :: $2 }
+
 transitions:
-  {[]}
+| { [] }
 | transition transitions    { $1 :: $2 }
 ;
 
 transition:
-| ON IDENTIFIER GO IDENTIFIER
-    { Transition (Event $2, None, State $4) }
-| ON IDENTIFIER IF expr GO IDENTIFIER
-    { Transition (Event $2, Some $4, State $6) }
-(*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE GO IDENTIFIER*)
-(*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE expr GO IDENTIFIER*)
-(*| ON IDENTIFIER IF expr GO IDENTIFIER ELSE stmt GO IDENTIFIER*)
-(*| ON IDENTIFIER IF expr GO IDENTIFIER ELIF expr GO IDENTIFIER ELSE*)
+| ON event_name GO IDENTIFIER operation_block_opt
+    { Transition (Event $2, None, State $4, $5) }
+| ON event_name IF expr GO IDENTIFIER operation_block_opt
+    { Transition (Event $2, Some $4, State $6, $7) }
+| AUTO GO IDENTIFIER operation_block_opt
+    { Transition (Auto, None, State $3, $4) }
+| AUTO IF expr GO IDENTIFIER operation_block_opt
+    { Transition (Auto, Some $3, State $5, $6) }
 ;
+
+event_name:
+| IDENTIFIER { $1 }
+| INT { $1 }
+
+operation_block_opt:
+  | { [] }
+  | LEFTTUBORG operations RIGHTTUBORG { $2 }
+  ;
+
+operations:
+  | operation { [$1] }    
+  | operation operations { $1 :: $2 }
+  ;
+
+operation:
+  | DO ident EQUAL expr { Do ($2, $4) }
+  ; 
 
 expr:
   | id = ident
@@ -117,61 +138,10 @@ expr:
       { e }
 ;
 
-(*
-expr:
-  | id = ident          
-      { Eident id }
-  | INT
-      { Ecst (Cint (int_of_string $1)) }
-  | e1 = expr PLUS e2 = expr
-      { Ebinop (Badd, e1, e2) }
-  | e1 = expr MINUS e2 = expr
-      { Ebinop (Bsub, e1, e2) }
-  | e1 = expr TIMES e2 = expr
-      { Ebinop (Bmul, e1, e2) }
-  | e1 = expr DIV e2 = expr
-      { Ebinop (Bdiv, e1, e2) }
-  | e1 = expr MOD e2 = expr
-      { Ebinop (Bmod, e1, e2) }
-  | e1 = expr LT e2 = expr
-      { Ebinop (Blt, e1, e2) }
-  | e1 = expr LTE e2 = expr
-      { Ebinop (Ble, e1, e2) }
-  | e1 = expr GT e2 = expr
-      { Ebinop (Bgt, e1, e2) }
-  | e1 = expr GTE e2 = expr
-      { Ebinop (Bge, e1, e2) }
-  | e1 = expr AND e2 = expr 
-    { Ebinop (Band, e1, e2) }
-  | e1 = expr OR  e2 = expr 
-    { Ebinop (Bor,  e1, e2) }
-  | e1 = expr BEQUAL  e2 = expr 
-    { Ebinop (Beq,  e1, e2) }
-  | e1 = expr BNEQUAL  e2 = expr 
-    { Ebinop (Bneq,  e1, e2) }
-
-  | LP e = expr RP
-      { e }
-;
-*)
-
-
-
-(*simple_stmt:
-| id = ident EQUAL e = expr
-    { Sassign (id, e) }
-| id = ident PLUS EQUAL e = expr
-    { Sassign (id, Ebinop (Badd, Eident id, e)) }
-| PRINT LP el = separated_list(COMMA, expr) RP
-    { Sprint el }
-;*)
-
 %inline binop:
   | PLUS    { Badd }
   | MINUS   { Bsub }
   | TIMES   { Bmul }
-  | DIV     { Bdiv }
-  | MOD     { Bmod }
   | LT      { Blt }
   | LTE     { Ble }
   | GT      { Bgt }

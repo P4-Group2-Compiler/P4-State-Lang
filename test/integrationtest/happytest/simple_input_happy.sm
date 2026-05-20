@@ -1,0 +1,16 @@
+Statemachine A {
+    INPUT smile cry
+    
+    Start State Happy {
+        ON smile GO HappyAgain
+        ON cry GO Sad
+    }
+
+    State Sad {
+        ON smile GO HappyAgain
+    }
+    
+    Final State HappyAgain {
+        
+    }
+}

@@ -5,7 +5,7 @@
     exception Lexing_error of string
 }
 
-(* Define chars for the identifier (name of state) *)
+(* Define chars for the identifier *)
 let Letter = ['a'-'z' 'A'-'Z']
 let IdentifierChars = ['a'-'z' 'A'-'Z' '0'-'9' '_']
 
@@ -37,19 +37,21 @@ rule token = parse
 | "Statemachine"                        { STATEMACHINE }
 | "Start"                               { START }
 | "Final"                               { FINAL }
+| "StartFinal"                          { STARTFINAL }
 | "State"                               { STATE }
 | "ON"                                  { ON }
 | "GO"                                  { GO }
 | "IF"                                  { IF }
 | "#"                                   { HASH }
 | "VAR"                                 { VAR }
+| "INPUT"                               { INPUT }
+| "DO"                                  { DO }
+| "AUTO"                                { AUTO }
 
 (* Binops *)
 | '+'                                   { PLUS }
 | '-'                                   { MINUS }
 | '*'                                   { TIMES }
-| "/"                                   { DIV }
-| '%'                                   { MOD } 
 | '='                                   { EQUAL }
 | "=="                                  { BEQUAL }
 | "!="                                  { BNEQUAL }
@@ -65,8 +67,6 @@ rule token = parse
 
 (* Numbers *)
 | ['0'-'9']+ as n                       { INT n }
-
-
 
 (* Seperators *)
 | '{'                                   { LEFTTUBORG }

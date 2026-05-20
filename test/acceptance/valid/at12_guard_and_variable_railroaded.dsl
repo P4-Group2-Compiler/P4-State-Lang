@@ -2,9 +2,9 @@ Statemachine M {
   # VAR x = 5
 
   Start State A {
-    ON Push IF x < 10 GO C
+    ON Push IF x < 10 GO B
   }
 
-  Final State C {
+  Final State B {
   }
 }

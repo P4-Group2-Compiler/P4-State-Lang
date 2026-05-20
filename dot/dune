@@ -1,3 +1,0 @@
-(executable
- (name dotsyntax)
- (libraries P4))

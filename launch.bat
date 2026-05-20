@@ -1,0 +1,1 @@
+start cmd /c "dune build && cd bin && dune exec ./main.exe -- test.sm && cd .. && cd output\c && gcc generated_state_machine.c -o StateMachine && StateMachine"

@@ -1,4 +1,5 @@
 (test
- (name semantic_test)
- (modules semantic_test)
- (libraries P4 alcotest))
+ (name acceptance_runner)
+ (modules acceptance_runner)
+ (libraries P4 alcotest)
+ (deps (source_tree acceptance)))

@@ -1,76 +1,48 @@
 open Lexing
 open Parsing
 open P4
-open Dottest
+open Dotgen
 open Ast
 open Semantic
 
-
-
+(**************************************************************************************************************************************************)
+(*Checking if user has Graphviz installed on their system.*)
+let ensure_graphviz () =
+   if Sys.command "dot -V > /dev/null 2>&1" <> 0 then (
+    prerr_endline 
+    "Graphviz ('dot') is not installed. You will not be able to create images of your state machine.\nVisit https://graphviz.org/download/ to find a version of Graphviz for your OS.\n\nGenerating C-code ...";
+   false
+    ) else true
+(**************************************************************************************************************************************************)
 let string_of_state = function
-  | State s -> s
+| State s -> s
 
 let string_of_event = function
-  | Event e -> e
+| Event e -> e
+| Auto -> "AUTO"
 
-let string_of_state_kind = function
-  | Normal -> "Normal"
-  | Start -> "Start"
-  | Final -> "Final"
-
-let string_of_binop = function
-  | Badd -> "+" | Bsub -> "-" | Bmul -> "*" | Bdiv -> "/" | Bmod -> "%"
-  | Beq -> "==" | Bneq -> "!=" | Blt -> "<" | Ble -> "<=" | Bgt -> ">" | Bge -> ">="
-  | Band -> "AND" | Bor -> "OR"
-
-let string_of_constant = function
-  | Cbool b -> string_of_bool b
-  | Cstring s -> s
-  | Cint i -> string_of_int i
-
-let rec string_of_expr = function
-  | Ecst c -> string_of_constant c
-  | Eident id -> id.id
-  | Ebinop (op, e1, e2) ->
-      Printf.sprintf "(%s %s %s)"
-        (string_of_expr e1)
-        (string_of_binop op)
-        (string_of_expr e2)
-
-let string_of_guard = function
-  | Some expr -> string_of_expr expr
-  | None -> ""
-
-let print_transition = function
-  | Transition (event, None, target) ->
-      Printf.printf "    ON %s GO %s\n"
+(* Pattern matches the Warnings to print them in the correct form *)
+let print_warning (statemachine, warning) =
+  begin match warning with
+  | DuplicateTransitions (src, event, dest) ->
+      Printf.printf "WARNING {DuplicateTransition}:\n\tTransition: {FROM %s ON %s GO %s} is declared more than once\n"
+        (string_of_state src)
         (string_of_event event)
-        (string_of_state target)
-  | Transition (event, Some guard, target) ->
-      Printf.printf "    ON %s IF %s GO %s\n"
-        (string_of_event event)
-        (string_of_expr guard)
-        (string_of_state target)
+        (string_of_state dest)
+  | TooManyStates stateNum ->
+      Printf.printf "WARNING {AmountOfStates}:\n\tLarge amount of states declared (%i > %i); output graph may become difficult to read\n"
+        stateNum
+        maxStates
+  | UnreachableFinalState state ->
+      Printf.printf "WARNING {UnreachableFinalState}:\n\tStart State: \"%s\" is unable to reach any Final State\n"
+        (string_of_state state)
+  | NoFinalState ->
+      Printf.printf "WARNING {NoFinalState}:\n\tNo Final State has been declared - No input sequence will be accepted\n"
+  end
 
-let print_state st =
-  Printf.printf "   State Type: %s State: %s\n" 
-  (string_of_state_kind st.kind) 
-  (string_of_state st.name);
-  List.iter print_transition st.transitions
-
-let string_of_var = function
-  | Var_decl (name, value) -> Printf.sprintf "%s = %d" name value
-
-let print_vars vars =
-  Printf.printf "Variables:\n";
-  List.iter (fun v -> Printf.printf "  %s\n" (string_of_var v)) vars
-
-let print_program p =
-  Printf.printf "Machine: %s\n" p.machine_name;
-  print_vars p.variables;
-  List.iter print_state p.states
 
 let () =
+
   if Array.length Sys.argv <> 2 then begin
     Printf.printf "Usage: %s <file>\n" Sys.argv.(0);
     exit 1
@@ -86,6 +58,7 @@ let () =
     };
   
   (* 'Run' the compiler *)
+
 let ast =
   try
     Parser.prog Lexer.token lexbuf
@@ -94,37 +67,39 @@ let ast =
       Printf.printf "Lexing error: %s\n" msg;
       close_in chan;
       exit 1
-  | Parser.Error ->
-      Printf.printf "Parse error\n";
-      close_in chan;
-      exit 1
+| Parser.Error ->
+    let pos = Lexing.lexeme_start_p lexbuf in
+    Printf.printf "Parse error at %s, line %d, position %d\n"
+        pos.Lexing.pos_fname
+        pos.Lexing.pos_lnum
+        (pos.Lexing.pos_cnum - pos.Lexing.pos_bol);
+    close_in chan;
+    exit 1
 in
 
-    (* Typecheck the program *)
-begin
-  try
-    Typechecker.type_program ast
-  with Typechecker.Type_error msg ->
-    Printf.printf "Type error: %s\n" msg;
-    exit 1
-end;    
-
-  (**************************************************************************************************)
+(**************************************************************************************************)
   (*Collect functions in a functions, to use on the statemachine*)
-  let statemachine = Semantic.analyse ast in
-    Printf.printf "This is statemachine ---> %s <---!\n" statemachine.statemachine_name;
-  
+  let statemachine, warnings =
+    try Semantic.analyse ast with Semantic.Semantic_error msg ->
+      Printf.printf "Semantic error: %s\n" msg;
+      exit 1
+  in
+    (* Typecheck the program *)
+      begin
+      try
+          Typechecker.type_program statemachine
+      with Typechecker.Type_error msg ->
+          Printf.printf "Type error: %s\n" msg;
+          exit 1
+      end;
+    if ensure_graphviz () then 
+        let dot_file = "output/DOT/graph.png" in
+      (Dotgen.graphFromStatemachine statemachine; 
+      print_endline "Generating image and C-code ...";
+      Printf.printf "\n\nCreated .png at: %s\n" dot_file;);
+    Codegen.generate_c_code statemachine;
   close_in chan;
-  (*print_program ast;*)
 
-  (* Debugging print statement - TODO remove later *)
-  let statemachine = Semantic.analyse ast in
-  (*Printf.printf "--> StateMachine Analysed! <--\n--> Machine name = %s <--" statemachine.statemachine_name*)
-
-  (*Creating the .gv file from statemachine*)
-  Dottest.graphFromStatemachine statemachine;
-
-  Codegen.generate_c_code statemachine;
-
-  (* let transitions = Semantic.collect_transitions ast in
-  Semantic.print_iter_trans transitions; *)
+  (* Printing out the warnings collected by the semantic analysis *)
+  List.iter (fun warning -> print_warning (statemachine, warning)) warnings
+  

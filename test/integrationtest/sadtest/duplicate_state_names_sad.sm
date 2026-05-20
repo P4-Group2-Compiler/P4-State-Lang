@@ -1,0 +1,13 @@
+Statemachine A {
+    Start State Open {
+        ON push GO Closed
+    }
+
+    State Open {
+        
+    }
+
+    Final State Closed {
+
+    }
+}

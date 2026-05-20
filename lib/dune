@@ -1,6 +1,7 @@
 (library
  (name P4)
- (modules test_lexer ast lexer parser semantic codegen dottest typechecker))
+ (modules ast lexer parser semantic codegen dotgen typechecker)
+ (libraries unix))
 
 (ocamllex lexer)
 

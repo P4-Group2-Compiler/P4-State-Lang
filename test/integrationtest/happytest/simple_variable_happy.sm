@@ -1,0 +1,12 @@
+Statemachine A {
+    # VAR x = 5
+    # VAR Some_varName = 69420
+    
+    Start State Happy {
+        ON smile GO MoreHappy
+    }
+
+    Final State MoreHappy {
+        
+    }
+}
