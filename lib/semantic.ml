@@ -196,7 +196,7 @@ let check_duplicate_state_names (statemachine : statemachine) : unit =
     | head :: tail ->
       let name = state_to_string head in
       if List.mem name seen then
-        error "Duplicate state names declared" 
+        raise (Semantic_error ("State " ^ name ^ " is declared more than once")) 
       else
         checker (name :: seen) tail
   in checker [] statemachine.states
