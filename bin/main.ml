@@ -14,77 +14,12 @@ let ensure_graphviz () =
    false
     ) else true
 (**************************************************************************************************************************************************)
-
 let string_of_state = function
-  | State s -> s
+| State s -> s
 
 let string_of_event = function
-  | Event e -> e
-  | Auto -> "AUTO"
-
-let string_of_state_kind = function
-  | Normal -> "Normal"
-  | Start -> "Start"
-  | Final -> "Final"
-  | StartFinal -> "StartFinal"
-
-let string_of_binop = function
-  | Badd -> "+" | Bsub -> "-" | Bmul -> "*"
-  | Beq -> "==" | Bneq -> "!=" | Blt -> "<" | Ble -> "<=" | Bgt -> ">" | Bge -> ">="
-  | Band -> "AND" | Bor -> "OR"
-
-let string_of_constant = function
-  | Cbool b -> string_of_bool b
-  | Cint i -> string_of_int i
-
-let rec string_of_expr = function
-  | Ecst c -> string_of_constant c
-  | Eident id -> id.id
-  | Ebinop (op, e1, e2) ->
-      Printf.sprintf "(%s %s %s)"
-        (string_of_expr e1)
-        (string_of_binop op)
-        (string_of_expr e2)
-
-let string_of_guard = function
-  | Some expr -> string_of_expr expr
-  | None -> ""
-
-let print_transition = function
-  | Transition (Event event, None, target, _ops) ->
-      Printf.printf "    ON %s GO %s\n"
-        (event)
-        (string_of_state target)
-  | Transition (Event event, Some guard, target, _ops) ->
-      Printf.printf "    ON %s IF %s GO %s\n"
-        (event)
-        (string_of_expr guard)
-        (string_of_state target)
-  | Transition (Auto, None, target, _ops) ->
-      Printf.printf "    AUTO GO %s\n"
-        (string_of_state target)
-  | Transition (Auto, Some guard, target, _ops) ->
-      Printf.printf "    AUTO IF %s GO %s\n"
-        (string_of_expr guard)
-        (string_of_state target)
-
-let print_state st =
-  Printf.printf "   State Type: %s State: %s\n" 
-  (string_of_state_kind st.kind) 
-  (string_of_state st.name);
-  List.iter print_transition st.transitions
-
-let string_of_var = function
-  | Var_decl (name, value) -> Printf.sprintf "%s = %d" name value
-
-let print_vars vars =
-  Printf.printf "Variables:\n";
-  List.iter (fun v -> Printf.printf "  %s\n" (string_of_var v)) vars
-
-let print_program p =
-  Printf.printf "Machine: %s\n" p.machine_name;
-  print_vars p.variables;
-  List.iter print_state p.states
+| Event e -> e
+| Auto -> "AUTO"
 
 (* Pattern matches the Warnings to print them in the correct form *)
 let print_warning (statemachine, warning) =
