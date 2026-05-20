@@ -1,5 +1,7 @@
 (lang dune 3.21)
+
 (using menhir 3.0)
+
 (name P4)
 
 (generate_opam_files true)
@@ -8,6 +10,7 @@
  (github P4-Group2-Compiler/P4-State-Lang))
 
 (authors "P4 Group 2")
+
 (maintainers "P4 Group 2")
 
 (license MIT)
@@ -19,9 +22,12 @@
  (synopsis "State-based DSL compiler")
  (description "A small compiler/interpreter for a state-based DSL.")
  (depends
-  (ocaml (>= 4.14))
+  (ocaml
+   (>= 4.14))
   dune
   alcotest
   menhir)
- (tags ("compiler" "dsl" "state-machine")))
+ (tags
+  ("compiler" "dsl" "state-machine")))
+
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/reference/dune-project/index.html
