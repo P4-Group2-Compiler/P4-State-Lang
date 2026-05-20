@@ -1,6 +1,12 @@
 open Ast
 open Semantic
 
+let () =
+  if not (Sys.file_exists "output") then
+    Unix.mkdir "output" 0o755;
+  if not (Sys.file_exists "output/c") then
+    Unix.mkdir "output/c" 0o755
+
 (* Naming states as reserved C-keywords (if, for, int, while, switch etc.) would cause problems
   if they are not prefixed with something like "STATE_" so that is done here: *)
 let get_state_name_prefixed = function
@@ -61,7 +67,7 @@ let generate_c_code ir =
 
   let start_state_name = get_state_name_prefixed ir.start_state in
 
-  let c_file = "../output/c/generated_state_machine.c" in
+  let c_file = "output/c/generated_state_machine.c" in
   let c_out_channel = open_out c_file in
 
   (* This is just a wrapper for the "fprint"-function: *)
@@ -240,7 +246,7 @@ let generate_c_code ir =
 
   emit_c "    default:\n";
   emit_c "        unrecognized_input_fallback:\n";
-  emit_c "        if (fired_event != \"AUTO\") {\n";
+  emit_c "        if (strcmp(fired_event, \"AUTO\") == 1) {\n";
   emit_c "            print_unrecognized_event_msg(fired_event);\n";
   emit_c "        }\n";
   emit_c "        break;\n";

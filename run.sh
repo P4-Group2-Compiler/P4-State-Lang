@@ -10,9 +10,8 @@ rm -f output/DOT/graph.png
 dune clean
 dune build
 
-cd bin
-dune exec ./main.exe -- test.sm
+dune exec bin/main.exe -- bin/test.sm
 
-cd ../output/c
+cd output/c
 gcc generated_state_machine.c -o StateMachine
 ./StateMachine

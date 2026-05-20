@@ -1,7 +1,7 @@
 open Lexing
 open Parsing
 open P4
-open Dottest
+open Dotgen
 open Ast
 open Semantic
 
@@ -115,6 +115,7 @@ let () =
     };
   
   (* 'Run' the compiler *)
+
 let ast =
   try
     Parser.prog Lexer.token lexbuf
@@ -123,13 +124,15 @@ let ast =
       Printf.printf "Lexing error: %s\n" msg;
       close_in chan;
       exit 1
-  | Parser.Error ->
-      Printf.printf "Parse error\n";
-      close_in chan;
-      exit 1
+| Parser.Error ->
+    let pos = Lexing.lexeme_start_p lexbuf in
+    Printf.printf "Parse error at %s, line %d, position %d\n"
+        pos.Lexing.pos_fname
+        pos.Lexing.pos_lnum
+        (pos.Lexing.pos_cnum - pos.Lexing.pos_bol);
+    close_in chan;
+    exit 1
 in
-
-
 
 (**************************************************************************************************)
   (*Collect functions in a functions, to use on the statemachine*)
@@ -149,7 +152,7 @@ in
             exit 1
         end;
     Codegen.generate_c_code statemachine;
-    Dottest.graphFromStatemachine statemachine;
+    Dotgen.graphFromStatemachine statemachine;
   
   close_in chan;
   (* print_program ast; *)

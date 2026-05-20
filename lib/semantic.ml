@@ -66,7 +66,7 @@ let rec expr_to_string (e : expr) =
     match e with
     | Ecst e -> constant_to_string e
     | Ebinop (b, e1, e2) -> 
-        Printf.sprintf "(%s %s %s)"
+        Printf.sprintf " (%s %s %s)"
         (expr_to_string e1)
         (binop_to_string b)
         (expr_to_string e2)
@@ -100,9 +100,6 @@ let op_to_string (o : operation) =
 
 let collect_states (p : program) : state list =
   List.map (fun state_decl -> state_decl.name) p.states
-
-
-
 
 (* Get a list of all start states then checks the list to see if there is more than one *)
 (* TODO: Fix the if statement in the end of this function, might mess up later development *)
@@ -180,6 +177,18 @@ let check_valid_transition (statemachine : statemachine) : unit =
       () )
   statemachine.transitions
 
+(* check for duplicate variables *)
+let check_duplicate_vars vars =
+  let rec loop seen = function
+    | [] -> ()
+    | Var_decl (name, _) :: rest ->
+        if List.mem name seen then
+          raise (Semantic_error ("Duplicate variable: " ^ name))
+        else
+          loop (name :: seen) rest
+  in
+  loop [] vars
+
 (* Recursive function to check if state names are repeated *)
 let check_duplicate_state_names (statemachine : statemachine) : unit =
   let rec checker seen = function
@@ -238,7 +247,8 @@ let get_dead_end_states (statemachine : statemachine) : state list =
 (* Function to run through all of the validation checks - add all new checks into this function *)
 let validate_state_machine (statemachine : statemachine) : unit =
   check_duplicate_state_names statemachine;
-  check_valid_transition statemachine
+  check_valid_transition statemachine;
+  check_duplicate_vars statemachine.g_variables
 
 let collect_warnings (statemachine : statemachine) : warning list =
   let warnings = [] in
