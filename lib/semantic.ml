@@ -36,13 +36,10 @@ let event_to_string = function
 (*********************************************************************************************************)
 (*                                          STRING PRINTERS                                              *)
 (*********************************************************************************************************)
-(*
-let event_to_string (Event e) = e (*Base printer for event*)
-let state_to_string (State s) = s (*Base printer for state*)
-*)
+
 
 let binop_to_string = function
-  | Badd -> "+" | Bsub -> "-"  | Bmul -> "*" | Bdiv -> "/" | Bmod -> "%" 
+  | Badd -> "+" | Bsub -> "-"  | Bmul -> "*"
   | Beq -> "==" | Bneq -> "!=" | Blt -> "<"  | Ble -> "<=" | Bgt -> ">"  
   | Bge -> ">=" | Band -> "AND"| Bor -> "OR" 
 
@@ -70,7 +67,7 @@ let rec expr_to_string (e : expr) =
         (expr_to_string e1)
         (binop_to_string b)
         (expr_to_string e2)
-    | Eident e -> ident_to_string e (*idk what this is useful for, but it's here*)
+    | Eident e -> ident_to_string e
   in
   expr_string
 
@@ -102,7 +99,6 @@ let collect_states (p : program) : state list =
   List.map (fun state_decl -> state_decl.name) p.states
 
 (* Get a list of all start states then checks the list to see if there is more than one *)
-(* TODO: Fix the if statement in the end of this function, might mess up later development *)
 let get_start_states (p: program) : state =
   let start_states = 
     List.fold_left (fun list state_decl -> 
@@ -257,8 +253,6 @@ let collect_warnings (statemachine : statemachine) : warning list =
     @ (check_number_of_states statemachine)
     @ (check_start_reaches_final statemachine)
 
-  (* let TooManyStates = check_number_of_states statemachine; *)
-
 (*---------------------------(* ANALYSE THE STATEMACHINE *)---------------------------*)
 
 (* This function is the one called by other files. It build the statemachine and runs through all the
@@ -268,16 +262,3 @@ let analyse (p : program) : statemachine * warning list =
       validate_state_machine machine;
   let warnings = collect_warnings machine in
       (machine, warnings)
-
-(*---------------------------(* PRINT FUNCTIONS FOR DEBUGGIN *)---------------------------*)
-
-(* Un-comment those that you need when testing *)
-
-(* let print_transition (src, event, dest) =
-  Printf.printf "%s --%s--> %s\n" 
-  (state_to_string src)
-  (event_to_string event)
-  (state_to_string dest)
-
-let print_iter_trans (t: (state * event * state) list) = 
-  List.iter print_transition t; *)
