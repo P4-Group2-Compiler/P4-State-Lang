@@ -1,7 +1,6 @@
 open Semantic
 open Ast
 
-
 (**************************************************************************************************************************************************)
 (*Collects each individual transition, and collects their operations if there are any*)
 let dotBuf_OpsCollect = Buffer.create 1064
@@ -41,10 +40,6 @@ let stringify_trans (s1, e, expr_option, s2, ops) =
 let trans_string_list (t : (state * event * _ * state * operation list) list) =
   List.map stringify_trans t
 
-(*Prints string lists*)
-let string_list_printer (t : (string) list) = 
-  List.iter print_endline t 
-
 (**************************************************************************************************************************************************)
 (*Strings of start states*)
 let stringify_start s =
@@ -73,7 +68,7 @@ let var_string_list (v : (var_decl) list) =
   List.map stringify_var v
 
 (**************************************************************************************************************************************************)
-(*Function that takes the entire statemachine*)
+(*Function that takes the entire statemachine and creates the DOT syntax*)
 let graphFromStatemachine (sm : (statemachine)) =
 
   let smName = sm.statemachine_name in
@@ -140,4 +135,3 @@ let oc = open_out "output/DOT/graph.gv" in
   Buffer.output_buffer oc dotBuf;
   close_out oc;
   ignore (Sys.command "cd output/DOT && dot -Tpng graph.gv -o graph.png");
-;
