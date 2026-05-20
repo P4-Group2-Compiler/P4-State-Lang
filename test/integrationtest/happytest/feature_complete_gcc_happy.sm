@@ -1,0 +1,25 @@
+Statemachine M {
+  # VAR x = 3
+  # VAR y = 4
+  
+  INPUT 1 a 3 
+ 
+  Start State A {
+    ON 1 IF x < y GO B {
+      DO x = x + 1
+      }
+  }
+  State B {
+    ON a GO B
+    ON 1 GO C
+  }
+
+  State C {
+    AUTO GO D
+    ON 3 GO C
+  }
+
+  Final State D {
+
+  }
+}

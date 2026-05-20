@@ -1,0 +1,16 @@
+Statemachine A {
+    # VAR Charm = 10
+
+    Start State Happy {
+        ON smile IF Charm > 5 GO HappyAgain
+        ON cry GO Sad
+    }
+
+    State Sad {
+        ON smile GO HappyAgain
+    }
+    
+    Final State HappyAgain {
+        
+    }
+}
