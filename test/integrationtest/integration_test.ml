@@ -39,21 +39,34 @@ let expect_gcc_valid filename () =
   match parse_and_check_file filename with
   | Rejected msg ->
     Alcotest.failf "Pipeline rejected %s: %s" filename msg
-    | Accepted ->
+  | Accepted ->
     let gcc_result = Sys.command "gcc -fsyntax-only output/c/generated_state_machine.c 2>/dev/null" in
     Alcotest.(check int) "GCC accepts emitted C" 0 gcc_result
 
-let valid_tests =
-  [
-    Alcotest.test_case "AT-01 minimal valid state machine" `Quick
-      (expect_gcc_valid "valid_gcc.sm");
+let expect_gcc_rejected filename () =
+  match parse_and_check_file filename with
+  | Accepted ->
+      Alcotest.failf "Expected %s to be rejected, but pipeline accepted it" filename
+  | Rejected _ ->
+      ()
 
-    Alcotest.test_case "AT-02 valid machine with guard and variable" `Quick
+
+
+
+let happy_tests =
+  [
+    Alcotest.test_case "Feature complete statemachine" `Quick
       (expect_gcc_valid "valid_gcc.sm");
+  ]
+let sad_tests =
+  [
+    Alcotest.test_case "Duplicate variable assigned" `Quick
+      (expect_gcc_rejected "invalid_duplicate_variable_declaration.sm")
   ]
 
 let () =
   Alcotest.run "Integration tests"
     [
-      ("integration_gcc_happy", valid_tests);
+      ("integration_gcc_happy", happy_tests);
+      ("integration_gcc_sad", sad_tests)
     ]
