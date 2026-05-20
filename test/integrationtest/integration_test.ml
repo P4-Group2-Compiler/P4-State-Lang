@@ -1,6 +1,6 @@
 open P4
 
-type actual_result =
+type actual_result = 
   | Accepted
   | Rejected of string
 
@@ -62,15 +62,35 @@ let happy_tests =
       (expect_gcc_happy "happytest/simple_input_happy.sm");
     Alcotest.test_case "Simple IF statemachine" `Quick
       (expect_gcc_happy "happytest/simple_IF_happy.sm");
-    Alcotest.test_case "Simple IF statemachine" `Quick
+    Alcotest.test_case "Simple DO statemachine" `Quick
       (expect_gcc_happy "happytest/simple_DO_happy.sm");
+    Alcotest.test_case "Simple AUTO statemachine" `Quick
+      (expect_gcc_happy "happytest/simple_AUTO_happy.sm")
   ]
 
 let sad_tests =
   [
     Alcotest.test_case "Duplicate variable assigned" `Quick
-      (expect_gcc_rejected "sadtest/invalid_duplicate_variable_declaration.sm")
-  ]
+      (expect_gcc_rejected "sadtest/invalid_duplicate_variable_declaration.sm");
+    Alcotest.test_case "Undeclared variable sad" `Quick
+      (expect_gcc_rejected "sadtest/undeclared_variable_sad.sm");  
+    Alcotest.test_case "No start state sad" `Quick
+      (expect_gcc_rejected "sadtest/no_start_state_sad.sm");
+    Alcotest.test_case "No state name sad" `Quick
+      (expect_gcc_rejected "sadtest/no_state_name_sad.sm");
+    Alcotest.test_case "Non int variable sad" `Quick
+      (expect_gcc_rejected "sadtest/non_int_variable_sad.sm");
+    Alcotest.test_case "Non bool IF sad" `Quick
+      (expect_gcc_rejected "sadtest/non_bool_IF_sad.sm");
+    Alcotest.test_case "Empty IF sad" `Quick
+      (expect_gcc_rejected "sadtest/empty_IF_sad.sm");
+    Alcotest.test_case "State keyword name sad" `Quick
+      (expect_gcc_rejected "sadtest/state_keyword_name_sad.sm");
+    Alcotest.test_case "No states sad" `Quick
+      (expect_gcc_rejected "sadtest/no_state_sad.sm");
+    Alcotest.test_case "Duplicate state names sad" `Quick
+      (expect_gcc_rejected "sadtest/duplicate_state_names_sad.sm");
+]
 
 let () =
   Alcotest.run "Integration tests"

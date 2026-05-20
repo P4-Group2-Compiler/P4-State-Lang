@@ -1,0 +1,8 @@
+Statemachine A {
+    # VAR x = 3
+    # VAR y = fybabab
+
+    StartFinal State B {
+        
+    }
+}
