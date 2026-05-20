@@ -1,0 +1,18 @@
+Statemachine A {
+    # VAR variable = 3
+
+    Start State Happy {
+        ON smile GO HappyAgain {
+            DO variable = 5
+        }
+        
+    }
+
+    State Sad {
+        ON smile GO HappyAgain
+    }
+    
+    Final State HappyAgain {
+        
+    }
+}

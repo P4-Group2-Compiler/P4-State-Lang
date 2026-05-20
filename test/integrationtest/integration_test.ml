@@ -35,7 +35,7 @@ let parse_and_check_file filename =
       close_in_noerr chan;
       Rejected (Printexc.to_string exn)
 
-let expect_gcc_valid filename () =
+let expect_gcc_happy filename () =
   match parse_and_check_file filename with
   | Rejected msg ->
     Alcotest.failf "Pipeline rejected %s: %s" filename msg
@@ -50,18 +50,26 @@ let expect_gcc_rejected filename () =
   | Rejected _ ->
       ()
 
-
-
-
 let happy_tests =
   [
     Alcotest.test_case "Feature complete statemachine" `Quick
-      (expect_gcc_valid "valid_gcc.sm");
+      (expect_gcc_happy "happytest/feature_complete_gcc_happy.sm");
+    Alcotest.test_case "Simple StartFinal statemachine" `Quick
+      (expect_gcc_happy "happytest/simple_startfinal_happy.sm");
+    Alcotest.test_case "Simple variable declaration statemachine" `Quick
+      (expect_gcc_happy "happytest/simple_variable_happy.sm");
+    Alcotest.test_case "Simple input declaration statemachine" `Quick
+      (expect_gcc_happy "happytest/simple_input_happy.sm");
+    Alcotest.test_case "Simple IF statemachine" `Quick
+      (expect_gcc_happy "happytest/simple_IF_happy.sm");
+    Alcotest.test_case "Simple IF statemachine" `Quick
+      (expect_gcc_happy "happytest/simple_DO_happy.sm");
   ]
+
 let sad_tests =
   [
     Alcotest.test_case "Duplicate variable assigned" `Quick
-      (expect_gcc_rejected "invalid_duplicate_variable_declaration.sm")
+      (expect_gcc_rejected "sadtest/invalid_duplicate_variable_declaration.sm")
   ]
 
 let () =
