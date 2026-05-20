@@ -9,9 +9,10 @@ open Semantic
 (*Checking if user has Graphviz installed on their system.*)
 let ensure_graphviz () =
    if Sys.command "dot -V > /dev/null 2>&1" <> 0 then (
-    prerr_endline "Graphviz ('dot') is not installed. You will not be able to create graphs from your state machines.\nVisit https://graphviz.org/download/ to find a version of Graphviz for your OS.";
-    exit 1
-    )
+    prerr_endline 
+    "Graphviz ('dot') is not installed. You will not be able to create graphs from your state machines.\nVisit https://graphviz.org/download/ to find a version of Graphviz for your OS.";
+   false
+    ) else true
 (**************************************************************************************************************************************************)
 
 let string_of_state = function
@@ -107,9 +108,6 @@ let print_warning (statemachine, warning) =
 
 let () =
 
-  ensure_graphviz ();
-  print_endline "Generating image and C-code ...";
-
   if Array.length Sys.argv <> 2 then begin
     Printf.printf "Usage: %s <file>\n" Sys.argv.(0);
     exit 1
@@ -151,7 +149,7 @@ in
       Printf.printf "Semantic error: %s\n" msg;
       exit 1
   in
-    Printf.printf "This is statemachine ---> %s <---!\n" statemachine.statemachine_name;
+    (*Printf.printf "This is statemachine ---> %s <---!\n" statemachine.statemachine_name;*)
         
     (* Typecheck the program *)
         begin
@@ -161,9 +159,9 @@ in
             Printf.printf "Type error: %s\n" msg;
             exit 1
         end;
+    if ensure_graphviz () then (Dotgen.graphFromStatemachine statemachine; 
+    print_endline "Generating image and C-code ...");
     Codegen.generate_c_code statemachine;
-    Dotgen.graphFromStatemachine statemachine;
-  
   close_in chan;
   (* print_program ast; *)
   List.iter (fun warning -> print_warning (statemachine, warning)) warnings
