@@ -54,59 +54,59 @@ let expect_warning filename () =
 let valid_tests =
   [
     Alcotest.test_case "AT-01 minimal valid state machine" `Quick
-      (expect_accepted "acceptance/valid/at01_start_final_state.dsl");
+      (expect_accepted "valid/at01_start_final_state.dsl");
 
     Alcotest.test_case "AT-02 valid machine with guard and variable" `Quick
-      (expect_accepted "acceptance/valid/at02_guard_and_variable.dsl");
+      (expect_accepted "valid/at02_guard_and_variable.dsl");
 
      Alcotest.test_case "AT-03 implicit transition behavior" `Quick
-      (expect_accepted "acceptance/valid/at03_implicit_transition.dsl"); 
+      (expect_accepted "valid/at03_implicit_transition.dsl"); 
 
     Alcotest.test_case "AT-11 Same Event Transitions" `Quick
-      (expect_accepted "acceptance/valid/at11_same_event_transistions.dsl");
+      (expect_accepted "valid/at11_same_event_transistions.dsl");
 
     Alcotest.test_case "AT-12 Guard Variable railroaded" `Quick
-      (expect_accepted "acceptance/valid/at12_guard_and_variable_railroaded.dsl");
+      (expect_accepted "valid/at12_guard_and_variable_railroaded.dsl");
 
     Alcotest.test_case "AT-13 Valid Binops" `Quick
-      (expect_accepted "acceptance/valid/at13_binop.dsl");
+      (expect_accepted "valid/at13_binop.dsl");
 
     Alcotest.test_case "AT-14 Valid DO" `Quick
-      (expect_accepted "acceptance/valid/at14_DO.dsl");
+      (expect_accepted "valid/at14_DO.dsl");
 
     Alcotest.test_case "AT-15 Valid AUTO" `Quick
-      (expect_accepted "acceptance/valid/at15_AUTO.dsl");
+      (expect_accepted "valid/at15_AUTO.dsl");
 
     Alcotest.test_case "AT-16 Valid Input" `Quick
-      (expect_accepted "acceptance/valid/at16_Input.dsl");
+      (expect_accepted "valid/at16_Input.dsl");
       
   ]
 
 let invalid_tests =
   [
     Alcotest.test_case "AT-04 missing start state" `Quick
-      (expect_rejected "acceptance/invalid/at04_missing_start.dsl");
+      (expect_rejected "invalid/at04_missing_start.dsl");
 
     Alcotest.test_case "AT-05 missing statemachine block" `Quick
-      (expect_rejected "acceptance/invalid/at05_missing_statemachine_block.dsl");
+      (expect_rejected "invalid/at05_missing_statemachine_block.dsl");
 
     Alcotest.test_case "AT-06 transition to undefined state" `Quick
-      (expect_rejected "acceptance/invalid/at06_transition_to_undefined_state.dsl");
+      (expect_rejected "invalid/at06_transition_to_undefined_state.dsl");
   ]
 
 let warning_tests =
   [
      Alcotest.test_case "AT-07 duplicate transition" `Quick
-      (expect_warning "acceptance/warning/at07_duplicate_transition.dsl"); 
+      (expect_warning "warning/at07_duplicate_transition.dsl"); 
 
     Alcotest.test_case "AT-08 unreachable final state" `Quick
-      (expect_warning "acceptance/warning/at08_unreachable_final_state.dsl");
+      (expect_warning "warning/at08_unreachable_final_state.dsl");
 
     Alcotest.test_case "AT-09 no final state" `Quick
-      (expect_warning "acceptance/warning/at09_no_final_state.dsl");
+      (expect_warning "warning/at09_no_final_state.dsl");
       
     Alcotest.test_case "AT-10 empty states" `Quick
-      (expect_warning "acceptance/warning/at10_empty_states.dsl");
+      (expect_warning "warning/at10_empty_states.dsl");
       
     
   ]  
