@@ -24,8 +24,16 @@ let parse_and_check_file filename =
       Rejected ("Lexing error: " ^ msg)
 
   | Parser.Error ->
+    let pos = Lexing.lexeme_start_p lexbuf in
+    let msg = Printf.sprintf "Parse error at line %d, position %d"
+        pos.Lexing.pos_lnum
+        (pos.Lexing.pos_cnum - pos.Lexing.pos_bol) in
+    close_in_noerr chan;
+    Rejected ("Parse error: " ^ msg)
+  
+  | Semantic.Semantic_error msg ->
       close_in_noerr chan;
-      Rejected "Parse error"
+      Rejected ("Semantic error: " ^ msg)
 
   | Typechecker.Type_error msg ->
       close_in_noerr chan;
@@ -43,7 +51,7 @@ let expect_gcc_happy filename () =
     let gcc_result = Sys.command "gcc -fsyntax-only output/c/generated_state_machine.c 2>/dev/null" in
     Alcotest.(check int) "GCC accepts emitted C" 0 gcc_result
 
-let expect_gcc_rejected filename () =
+let expect_gcc_sad filename () =
   match parse_and_check_file filename with
   | Accepted ->
       Alcotest.failf "Expected %s to be rejected, but pipeline accepted it" filename
@@ -71,25 +79,25 @@ let happy_tests =
 let sad_tests =
   [
     Alcotest.test_case "Duplicate variable assigned" `Quick
-      (expect_gcc_rejected "sadtest/invalid_duplicate_variable_declaration.sm");
+      (expect_gcc_sad "sadtest/invalid_duplicate_variable_declaration.sm");
     Alcotest.test_case "Undeclared variable sad" `Quick
-      (expect_gcc_rejected "sadtest/undeclared_variable_sad.sm");  
+      (expect_gcc_sad "sadtest/undeclared_variable_sad.sm");  
     Alcotest.test_case "No start state sad" `Quick
-      (expect_gcc_rejected "sadtest/no_start_state_sad.sm");
+      (expect_gcc_sad "sadtest/no_start_state_sad.sm");
     Alcotest.test_case "No state name sad" `Quick
-    (expect_gcc_rejected "sadtest/no_state_name_sad.sm");
+    (expect_gcc_sad "sadtest/no_state_name_sad.sm");
     Alcotest.test_case "Duplicate state names sad" `Quick
-      (expect_gcc_rejected "sadtest/duplicate_state_names_sad.sm");
+      (expect_gcc_sad "sadtest/duplicate_state_names_sad.sm");
     Alcotest.test_case "Non int variable sad" `Quick
-      (expect_gcc_rejected "sadtest/non_int_variable_sad.sm");
+      (expect_gcc_sad "sadtest/non_int_variable_sad.sm");
     Alcotest.test_case "Non bool IF sad" `Quick
-      (expect_gcc_rejected "sadtest/non_bool_IF_sad.sm");
+      (expect_gcc_sad "sadtest/non_bool_IF_sad.sm");
     Alcotest.test_case "Empty IF sad" `Quick
-      (expect_gcc_rejected "sadtest/empty_IF_sad.sm");
+      (expect_gcc_sad "sadtest/empty_IF_sad.sm");
     Alcotest.test_case "State keyword name sad" `Quick
-      (expect_gcc_rejected "sadtest/state_keyword_name_sad.sm");
+      (expect_gcc_sad "sadtest/state_keyword_name_sad.sm");
     Alcotest.test_case "No states sad" `Quick
-      (expect_gcc_rejected "sadtest/no_state_sad.sm");
+      (expect_gcc_sad "sadtest/no_state_sad.sm");
 ]
 
 let () =
