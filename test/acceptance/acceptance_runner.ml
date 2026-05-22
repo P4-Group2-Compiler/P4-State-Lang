@@ -21,8 +21,16 @@ let parse_and_check_file filename =
       Rejected ("Lexing error: " ^ msg)
 
   | Parser.Error ->
+    let pos = Lexing.lexeme_start_p lexbuf in
+    let msg = Printf.sprintf "Parse error at line %d, position %d"
+        pos.Lexing.pos_lnum
+        (pos.Lexing.pos_cnum - pos.Lexing.pos_bol) in
+    close_in_noerr chan;
+    Rejected ("Parse error: " ^ msg)
+  
+  | Semantic.Semantic_error msg ->
       close_in_noerr chan;
-      Rejected "Parse error"
+      Rejected ("Semantic error: " ^ msg)
 
   | Typechecker.Type_error msg ->
       close_in_noerr chan;
