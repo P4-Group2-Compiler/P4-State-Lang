@@ -281,7 +281,7 @@ let generate_c_code ir =
   emit_c "        char entered_event[256];\n";
   emit_c "        scanf(\"%%255s\", entered_event);\n\n";
 
-  emit_c "        if (event_match(entered_event, \"exit\") || event_match(entered_event, \"EXIT\")) {\n";
+  emit_c "        if (event_match(entered_event, \"/exit\") || event_match(entered_event, \"/EXIT\")) {\n";
   emit_c "            int in_accept_state = 0;\n";
   List.iter (fun state ->
     emit_c "            if (global_current_state == %s) in_accept_state = 1;\n"
