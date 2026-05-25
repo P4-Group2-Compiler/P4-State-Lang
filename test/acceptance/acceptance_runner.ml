@@ -1,7 +1,8 @@
 open P4
 
-type actual_result =
+type actual_result = 
   | Accepted
+  | AcceptedWithWarnings of P4.Semantic.warning list
   | Rejected of string
 
 let parse_and_check_file filename =
@@ -11,10 +12,13 @@ let parse_and_check_file filename =
     let ast = Parser.prog Lexer.token lexbuf in
     close_in chan;
 
-    let (sm, _warnings) = Semantic.analyse ast in
+    let (sm, warnings) = Semantic.analyse ast in
     Typechecker.type_program sm;
     
-    Accepted
+    if warnings = [] then Accepted
+    else AcceptedWithWarnings warnings
+
+    
   with
   | Lexer.Lexing_error msg ->
       close_in_noerr chan;
@@ -43,6 +47,8 @@ let parse_and_check_file filename =
 let expect_accepted filename () =
   match parse_and_check_file filename with
   | Accepted -> ()
+  | AcceptedWithWarnings _ -> 
+      Alcotest.failf "Expected %s to be accepted, but it was accepted with warning" filename 
   | Rejected msg ->
       Alcotest.failf "Expected %s to be accepted, but got: %s" filename msg
 
@@ -51,13 +57,16 @@ let expect_rejected filename () =
   | Rejected _ -> ()
   | Accepted ->
       Alcotest.failf "Expected %s to be rejected, but it was accepted" filename
+  | AcceptedWithWarnings _ ->
+      Alcotest.failf "Expected %s to be rejected, but it was accepted with warnings" filename
 
 let expect_warning filename () =
   match parse_and_check_file filename with
+  | AcceptedWithWarnings _ -> ()
   | Accepted ->
-      ()
+      Alcotest.failf "Expected %s to produce a warning, but none were produced" filename
   | Rejected msg ->
-      Alcotest.failf "Expected %s to be accepted with warning, but got: %s" filename msg      
+      Alcotest.failf "Expected %s to be accepted with warning, but got: %s" filename msg 
 
 let valid_tests =
   [
