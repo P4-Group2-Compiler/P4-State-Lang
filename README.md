@@ -1,4 +1,4 @@
-------------------------------------------------------------------- README ----------------------------------------------------------------------
+# README
 
 StateLang is a small, visual language for modelling state machines into C code and images using Graphviz, DOT and gcc. 
 
@@ -31,7 +31,7 @@ The extension can be found here:
 
 	
 	
------------------------------------------------------------- HOW TO USE THE COMPILER ------------------------------------------------------------
+# HOW TO USE THE COMPILER
 
 In the "test.sm" file, you can design any state machine you like with the syntax of StateLang.
 If you wish, you can run test.sm as it is to get a preview of what it looks like.
