@@ -1,0 +1,10 @@
+Statemachine TypeError {
+
+    Start State A {
+        ON 1 IF 0 AND 1 GO B (* <---- AND expects BOOL *)
+    }
+
+    Final State B {
+        ON 0 IF x < 0 GO A (* <--- x not declared as #VAR *)
+    }
+}

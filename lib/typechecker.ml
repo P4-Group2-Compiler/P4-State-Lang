@@ -64,15 +64,23 @@ let rec type_expr (env : type_env) = function
         with Not_found ->
       type_error ~loc:(Some loc) ("Unbound variable: " ^ id)) (* Added location for better debugging *)
   | Ebinop (binop, e1, e2) ->
-      let t1 = type_expr env e1 in
-      let t2 = type_expr env e2 in
-      begin match binop, t1, t2 with
-      | (Band | Bor), Tbool, Tbool -> Tbool
-      | (Badd | Bsub | Bmul), Tint, Tint -> Tint
-      | (Beq | Bneq | Blt | Ble | Bgt | Bge), Tint, Tint -> Tbool
-      | _ -> type_error "Comparisons expects 'int : int'"
-      end
-
+    let t1 = type_expr env e1 in
+    let t2 = type_expr env e2 in
+    begin match binop, t1, t2 with
+    | (Badd | Bsub | Bmul), Tint, Tint ->
+        Tint
+    | (Beq | Bneq | Blt | Ble | Bgt | Bge), Tint, Tint ->
+        Tbool
+    | (Band | Bor), Tbool, Tbool ->
+        Tbool
+    | (Band | Bor), _, _ ->
+        type_error "Boolean operators expect bool : bool"
+    | (Badd | Bsub | Bmul), _, _ ->
+        type_error "Arithmetic operators expect int : int"
+    | (Beq | Bneq | Blt | Ble | Bgt | Bge), _, _ ->
+        type_error "Comparison operators expect int : int"
+    end
+    
 (* Checking transition operations *)
 let type_operation env = function
   | Do (id, expr) ->
