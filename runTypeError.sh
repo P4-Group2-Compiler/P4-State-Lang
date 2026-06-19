@@ -10,7 +10,7 @@ rm -f output/DOT/graph.png
 dune clean
 dune build
 
-dune exec bin/main.exe -- bin/demoSemanticError.sm
+dune exec bin/main.exe -- bin/demoTypeError.sm
 
 cd output/c
 gcc generated_state_machine.c -o StateMachine

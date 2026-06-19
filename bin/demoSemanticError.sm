@@ -1,0 +1,25 @@
+Statemachine SemanticError {
+    #VAR x = 3
+    #VAR y = 5
+
+    INPUT 1 2 3
+
+    State A { (* <--- No start state *)
+        ON 0 GO B (* <--- state B not declared *)
+    }
+
+    Final State C { 
+    }
+
+    State D {
+        AUTO GO E
+    }
+
+    State E {
+        AUTO GO D
+    }
+
+    State E { (* <--- Duplicate State *)
+        ON 1 GO A
+    }
+}
