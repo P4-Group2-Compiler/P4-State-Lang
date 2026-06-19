@@ -1,0 +1,17 @@
+(* Simple Statemachine showing a Start state 
+and a final state, with simple transitions 
+and emulation input string*)
+
+
+Statemachine Simple {
+
+    INPUT 1 2 1 2 1
+
+    Start State A {
+        ON 1 GO B
+    }
+
+    Final State B {
+        ON 2 GO A
+    }
+}
