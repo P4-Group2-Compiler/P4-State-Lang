@@ -1,0 +1,151 @@
+Statemachine Warnings {
+    #VAR x = 3
+    #VAR y = 4
+
+    Start State A {
+        ON 1 GO B
+        ON 2 GO C
+        ON 1 GO B (* <--- Duplicate transition *)
+    }
+
+    State B {
+    }
+
+    State C {
+    }
+
+    Final State D { (* unreachable final state / no final state *)
+    }
+
+    State E {
+    ON 1 GO H
+    ON 2 GO Q
+    ON 3 GO M
+    }
+
+    State F {
+        ON 1 GO Z
+        ON 2 GO L
+        ON 3 GO R
+    }
+
+    State G {
+        ON 1 GO E
+        ON 2 GO W
+        ON 3 GO S
+    }
+
+    State H {
+        ON 1 GO L
+        ON 2 GO P
+        ON 3 GO X
+    }
+
+    State I {
+        ON 1 GO F
+        ON 2 GO U
+        ON 3 GO O
+    }
+
+    State J {
+        ON 1 GO R
+        ON 2 GO E
+        ON 3 GO V
+    }
+
+    State K {
+        ON 1 GO M
+        ON 2 GO T
+        ON 3 GO Y
+    }
+
+    State L {
+        ON 1 GO G
+        ON 2 GO Z
+        ON 3 GO N
+    }
+
+    State M {
+        ON 1 GO X
+        ON 2 GO J
+        ON 3 GO S
+    }
+
+    State N {
+        ON 1 GO K
+        ON 2 GO H
+        ON 3 GO U
+    }
+
+    State O {
+        ON 1 GO S
+        ON 2 GO Q
+        ON 3 GO F
+    }
+
+    State P {
+        ON 1 GO T
+        ON 2 GO G
+        ON 3 GO W
+    }
+
+    State Q {
+        ON 1 GO V
+        ON 2 GO I
+        ON 3 GO M
+    }
+
+    State R {
+        ON 1 GO J
+        ON 2 GO X
+        ON 3 GO E
+    }
+
+    State S {
+        ON 1 GO W
+        ON 2 GO P
+        ON 3 GO K
+    }
+
+    State T {
+        ON 1 GO O
+        ON 2 GO R
+        ON 3 GO Z
+    }
+
+    State U {
+        ON 1 GO Y
+        ON 2 GO L
+        ON 3 GO H
+    }
+
+    State V {
+        ON 1 GO Q
+        ON 2 GO S
+        ON 3 GO I
+    }
+
+    State W {
+        ON 1 GO U
+        ON 2 GO N
+        ON 3 GO J
+    }
+
+    State X {
+        ON 1 GO P
+        ON 2 GO V
+        ON 3 GO G
+    }
+
+    State Y {
+        ON 1 GO N
+        ON 2 GO O
+        ON 3 GO R
+    }
+
+    State Z {
+        ON 1 GO I
+        ON 2 GO T
+        ON 3 GO E
+    }
+}

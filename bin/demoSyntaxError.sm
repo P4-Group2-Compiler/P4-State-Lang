@@ -10,20 +10,20 @@ Statemachine SyntaxError {
     }
 
     State B {
-        ON 1 iF x < 4 GO C {
-            DO y = y + 1
+        ON 1 iF x < 4 GO C { (* <--- iF *)
+            DO age = age + 1
         }
     }
 
-    state C {
+    state C { (* <--- state *)
         ON 1 GO A
         ON 2 GO D
         ON 0 GO E
     }
 
-    State !D {
+    State !D { (* <--- !D *)
         AUTO GO C {
-            DO CountdownToSemesterEnds_Days = x
+            DO CountdownToSemesterEnd_Days = x
         }
     }
 
