@@ -67,11 +67,11 @@ let rec type_expr (env : type_env) = function
     let t1 = type_expr env e1 in
     let t2 = type_expr env e2 in
     begin match binop, t1, t2 with
+    | (Band | Bor), Tbool, Tbool ->
+        Tbool
     | (Badd | Bsub | Bmul), Tint, Tint ->
         Tint
     | (Beq | Bneq | Blt | Ble | Bgt | Bge), Tint, Tint ->
-        Tbool
-    | (Band | Bor), Tbool, Tbool ->
         Tbool
     | (Band | Bor), _, _ ->
         type_error "Boolean operators expect bool : bool"
@@ -80,7 +80,7 @@ let rec type_expr (env : type_env) = function
     | (Beq | Bneq | Blt | Ble | Bgt | Bge), _, _ ->
         type_error "Comparison operators expect int : int"
     end
-    
+
 (* Checking transition operations *)
 let type_operation env = function
   | Do (id, expr) ->

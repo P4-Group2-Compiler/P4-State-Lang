@@ -9,9 +9,11 @@ Statemachine Simple {
 
     Start State A {
         ON 1 GO B
+        ON 2 GO A
     }
 
     Final State B {
         ON 2 GO A
+        ON 1 GO B
     }
 }
