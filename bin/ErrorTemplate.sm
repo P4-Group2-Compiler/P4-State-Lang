@@ -1,32 +1,32 @@
 Statemachine SyntaxError {
     #VAR x = 3
-    #VAR age = 20
+    #VAR y = 20
     #VAR CountdownToSemesterEnd_Days = 2
 
     INPUT 0 0 1 1 0 2 1
 
-    StartFinal State A {
+    State A { (* No start state *)
         ON 0 GO B
     }
 
     State B {
-        ON 1 iF x < 4 GO C { (* <--- iF *)
+        ON 1 IF age > 4 AND x > 2 GO C { (* <--- iF *) (* C not declared *)
             DO age = age + 1
         }
     }
 
-    state C { (* <--- state *)
+    state B { (* <--- state *) (* B declared twice *)
         ON 1 GO A
-        ON 2 GO D
         ON 0 GO E
+        ON 2 GO F
     }
 
-    State !D { (* <--- !D *)
+    State !E { (* <--- !E *)
         AUTO GO C {
             DO CountdownToSemesterEnd_Days = x
         }
     }
 
-    Final State E {
+    Final State F {
     }
 }
