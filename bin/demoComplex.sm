@@ -1,0 +1,31 @@
+Statemachine TrainPassing{
+
+    #VAR station_1_is_free = 1
+    #VAR station_2_is_free = 1
+    #VAR fuelTank = 3
+
+    StartFinal State Terminal {
+        ON refuel IF fuelTank < 1 GO Terminal {
+            DO fuelTank = fuelTank + 3
+        }
+        ON run IF station_1_is_free > 0 AND fuelTank > 0 GO Station_1 {
+            DO station_1_is_free = 0
+            DO fuelTank = fuelTank - 1
+        }
+    }
+
+    State Station_1 {
+        ON run IF station_2_is_free > 0 AND fuelTank > 0 GO Station_2 {
+            DO station_1_is_free = 1
+            DO station_2_is_free = 0
+            DO fuelTank = fuelTank - 1
+        }
+    }
+
+    State Station_2 {
+        AUTO GO Terminal {
+            DO station_2_is_free = 1
+            DO fuelTank = fuelTank - 1
+        }
+    }
+}
